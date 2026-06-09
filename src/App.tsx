@@ -60,7 +60,6 @@ const getWhyIcon = (iconName: string) => {
 
 export default function App() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   const handleCTABookScroll = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -427,12 +426,12 @@ export default function App() {
             <div className="w-24 h-[2px] bg-gold mx-auto mb-8" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            
-            {/* Left coordinate card */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="bg-[#0b1424]/90 border border-white/5 p-8 rounded-sm space-y-8 shadow-xl text-left">
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-white border-b border-white/10 pb-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-[#0b1424]/90 border border-white/5 p-8 sm:p-12 rounded-sm shadow-xl flex flex-col md:flex-row items-stretch md:items-center gap-10 md:gap-16 text-left">
+              
+              {/* Left Column: Details */}
+              <div className="w-full md:w-3/5 space-y-8">
+                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white border-b border-white/10 pb-4">
                   Lahore Chambers (HQ)
                 </h3>
 
@@ -474,133 +473,33 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-
-                <div className="w-full h-[1px] bg-white/10" />
-
-                {/* Secure WhatsApp Action Link */}
-                <div className="space-y-3">
-                  <span className="block text-[10px] uppercase font-bold text-white/40 tracking-widest font-sans">
-                    Intake Whatsapp Registry
-                  </span>
-                  <a
-                    href="https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20want%20to%20engage%20your%20legal%20counsel%20for%20enterprise%20consultancy."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-3.5 py-3.5 bg-neutral-900 border border-[#2ecc71]/40 text-[#2ecc71] hover:bg-[#2ecc71]/10 hover:border-[#2ecc71] font-bold font-sans text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-lg"
-                  >
-                    <MessageCircle className="w-4.5 h-4.5 text-[#2ecc71]" />
-                    <span>Initiate WhatsApp Liaison</span>
-                  </a>
-                </div>
               </div>
-            </div>
 
-            {/* Right Map Placeholder container */}
-            <div className="lg:col-span-7 bg-[#0b1424]/90 border border-white/5 p-5 rounded-sm shadow-xl flex flex-col justify-between h-[450px]">
-              <div className="relative w-full h-full bg-[#070e1b] border border-white/5 rounded-xs overflow-hidden flex items-center justify-center">
-                
-                {/* Simulated high-quality interactive Dark satellite coordinate HUD */}
-                <div className="absolute inset-0 bg-[#050912] flex flex-col items-center justify-center p-8 text-center space-y-6">
-                  
-                  {/* Decorative radar pulses */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,188,87,0.02)_10%,transparent_70%)] pointer-events-none" />
-
-                  {/* Satellite line grids overlay */}
-                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
-
-                  {isMapLoaded ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="w-full h-full relative"
-                    >
-                      {/* Styled high-end SVG Dark map representation of Clifton/Secretariat Road Karachi */}
-                      <svg width="100%" height="100%" viewBox="0 0 200 120" className="opacity-40">
-                        {/* Street lines */}
-                        <line x1="0" y1="20" x2="200" y2="20" stroke="#ffbc57" strokeWidth="0.3" strokeDasharray="1 3" />
-                        <line x1="0" y1="45" x2="200" y2="45" stroke="white" strokeWidth="0.15" />
-                        <line x1="0" y1="70" x2="200" y2="70" stroke="white" strokeWidth="0.15" />
-                        <line x1="0" y1="95" x2="200" y2="95" stroke="white" strokeWidth="0.1" />
-
-                        <line x1="30" y1="0" x2="30" y2="120" stroke="white" strokeWidth="0.15" />
-                        <line x1="80" y1="0" x2="80" y2="120" stroke="#ffbc57" strokeWidth="0.4" strokeDasharray="1 4" />
-                        <line x1="130" y1="0" x2="130" y2="120" stroke="white" strokeWidth="0.15" />
-                        <line x1="170" y1="0" x2="170" y2="120" stroke="white" strokeWidth="0.1" />
-
-                        {/* Clifton coastal bay layout representation */}
-                        <path d="M0,110 Q50,90 120,115 T200,105" fill="none" stroke="#2196f3" strokeWidth="3" opacity="0.15" />
-                        
-                        {/* Harbour Sector */}
-                        <rect x="145" y="10" width="30" height="30" fill="#ffbc57" opacity="0.05" stroke="#ffbc57" strokeWidth="0.2" />
-
-                        {/* Animated radar circle */}
-                        <circle cx="80" cy="45" r="12" fill="none" stroke="#ffbc57" strokeWidth="0.4">
-                          <animate attributeName="r" values="5;20;5" dur="4s" repeatCount="indefinite" />
-                        </circle>
-                        {/* Static point */}
-                        <circle cx="80" cy="45" r="2.5" fill="#ffbc57" />
-                      </svg>
-
-                      {/* Info coordinates overlay */}
-                      <div className="absolute inset-0 flex flex-col justify-between p-6">
-                        <div className="flex justify-between items-start">
-                          <div className="text-left">
-                            <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold font-sans">
-                              Satellite Secretariat Feed
-                            </span>
-                            <span className="block text-white/50 text-[10px] font-mono mt-0.5">
-                              LAT 31.5204° N, LON 74.3587° E
-                            </span>
-                          </div>
-                          <span className="text-[10px] bg-gold/15 text-gold border border-gold/20 px-2 py-0.5 rounded-sm font-bold font-sans">
-                            HD REGIONAL MAP
-                          </span>
-                        </div>
-
-                        <div className="bg-[#0b1424]/95 border border-gold/30 p-4 rounded-xs text-left max-w-sm self-center">
-                          <span className="block text-[10px] font-bold text-gold uppercase tracking-wider font-sans mb-1">
-                            Lahore secretariat pin
-                          </span>
-                          <span className="block text-white/80 text-xs font-sans leading-relaxed">
-                            Suite No.1, 236-Riwaz Garden. Private meeting chambers and secure advisor coordinates inside Lahore's historic legal district.
-                          </span>
-                        </div>
-
-                        <div className="text-right">
-                          <button
-                            onClick={() => setIsMapLoaded(false)}
-                            className="text-[9px] text-[#ffdddd] hover:text-white underline bg-transparent border-none cursor-pointer focus:outline-none"
-                          >
-                            Reset Vector coordinates
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <>
-                      <div className="p-4 rounded-full border border-gold/25 bg-gold/5 flex items-center justify-center text-gold shadow-sm">
-                        <Globe className="w-8 h-8 animate-spin" style={{ animationDuration: "12s" }} />
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="font-serif text-lg font-bold text-white">
-                          Aesthetic Secretariat Vector Map
-                        </h4>
-                        <p className="text-white/50 text-xs font-sans max-w-sm leading-relaxed">
-                          For high confidentiality standards and to prevent unsecured tracking vectors, we utilize stylized offline coordinate vectors.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setIsMapLoaded(true)}
-                        className="px-6 py-2.5 bg-gold text-navy font-bold font-sans text-xs tracking-wider uppercase rounded-xs hover:bg-white hover:text-navy transition-all focus:outline-none cursor-pointer"
-                      >
-                        Mount Secretariat Feed
-                      </button>
-                    </>
-                  )}
+              {/* Right Column: WhatsApp Call to Action only */}
+              <div className="w-full md:w-2/5 p-6 sm:p-8 bg-[#070e1b]/90 border border-[#2ecc71]/20 hover:border-[#2ecc71]/40 rounded-xs space-y-6 text-center flex flex-col justify-center items-center shadow-lg transition-colors duration-300">
+                <div className="p-4 rounded-full border border-[#2ecc71]/20 bg-[#2ecc71]/5 flex items-center justify-center text-[#2ecc71] shadow-sm animate-pulse">
+                  <MessageCircle className="w-8 h-8" />
                 </div>
+                <div className="space-y-2">
+                  <h4 className="font-serif text-lg font-bold text-white">
+                    Direct Liaison Desk
+                  </h4>
+                  <p className="text-white/60 text-xs font-sans max-w-xs leading-relaxed">
+                    Connect directly to check caseworker assignment, request advisory briefs, or seek supreme legal protection.
+                  </p>
+                </div>
+                <a
+                  href="https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20want%20to%20engage%20your%20legal%20counsel%20for%20enterprise%20consultancy."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#2ecc71] hover:bg-[#27ae60] text-black font-extrabold font-sans text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-lg hover:shadow-[#2ecc71]/15 hover:scale-[1.01]"
+                >
+                  <MessageCircle className="w-4.5 h-4.5 fill-black stroke-none" />
+                  <span>WA Intake Desk</span>
+                </a>
               </div>
-            </div>
 
+            </div>
           </div>
 
         </div>

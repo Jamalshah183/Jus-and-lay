@@ -52,13 +52,13 @@ export default function CEOSection() {
 
       {/* CORE CONTAINER (Middle to Foreground Layer: z-10 / z-20) */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 xl:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative">
           
-          {/* LEFT COLUMN: Overlapping Executive Statement Card (z-20) - Compact 5-column layout to prevent expansion */}
-          <div className="lg:col-span-5 space-y-6 text-left order-2 lg:order-1 relative z-20">
+          {/* LEFT COLUMN: Executive Statement Card (z-20) - balanced 6-column layout to prevent expansion */}
+          <div className="lg:col-span-6 space-y-6 text-left order-2 lg:order-1 relative z-20">
             
-            {/* Elegant glassmorphic text card that overrides the right-side CEO image cutout with a direct overlap */}
-            <div className="bg-[#070e1b]/85 backdrop-blur-xl border border-white/10 p-8 sm:p-10 lg:p-12 rounded-xs shadow-[0_25px_60px_-15px_rgba(4,8,17,0.9)] lg:-mr-44 xl:-mr-64 relative group">
+            {/* Elegant glassmorphic text card with clean margins to prevent covering the CEO image cutout */}
+            <div className="bg-[#070e1b]/85 backdrop-blur-xl border border-white/10 p-8 sm:p-10 lg:p-12 rounded-xs shadow-[0_25px_60px_-15px_rgba(4,8,17,0.9)] lg:-mr-6 xl:-mr-10 relative group">
               
               {/* Luxury Accent Line representing supreme legal architecture */}
               <div className="absolute top-0 left-0 w-[4px] h-full bg-gradient-to-b from-gold via-[#ffbc57]/50 to-transparent" />
@@ -125,8 +125,8 @@ export default function CEOSection() {
             <div className="absolute -top-8 -left-8 w-24 h-24 border-t border-l border-white/5 pointer-events-none rounded-tl-sm" />
           </div>
 
-          {/* RIGHT COLUMN: Massive Cutout CEO Parallax Stage (z-10) - Enlarged to 7-columns */}
-          <div className="lg:col-span-7 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[450px] sm:h-[600px] lg:h-[850px] relative w-full">
+          {/* RIGHT COLUMN: Massive Cutout CEO Parallax Stage (z-10) - Balanced to 6-columns */}
+          <div className="lg:col-span-6 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[450px] sm:h-[600px] lg:h-[850px] relative w-full">
             
             {/* Deep geometric line art matching law firm theme - sits behind the CEO image */}
             <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-2 opacity-5 pointer-events-none">
@@ -173,21 +173,6 @@ export default function CEOSection() {
               </div>
               <p className="text-[10px] text-white/60 leading-relaxed font-sans font-light">
                 Secure enterprise routing with active litigation protection protocol. Cert. No: JL-A1.
-              </p>
-            </motion.div>
-
-            <motion.div
-              style={{ y: useTransform(scrollYProgress, [0, 1], ["-20px", "40px"]) }}
-              className="absolute bottom-16 left-4 sm:left-10 lg:left-12 bg-neutral-900/80 backdrop-blur-md border border-gold/30 p-4 rounded-sm z-20 shadow-2xl max-w-[220px] text-left pointer-events-auto hidden md:block"
-            >
-              <div className="flex items-center gap-1.5 mb-1.5 text-gold">
-                <Award className="w-3.5 h-3.5" />
-                <span className="text-[9px] uppercase tracking-widest font-bold font-sans">
-                  Sovereign Counsel
-                </span>
-              </div>
-              <p className="text-[10px] text-white/70 leading-normal font-sans">
-                Appellate stay-orders, SECP structural clearances, and state arbitrations.
               </p>
             </motion.div>
 
