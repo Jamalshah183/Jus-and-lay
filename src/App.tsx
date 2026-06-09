@@ -24,6 +24,7 @@ import ParallaxSection from "./components/ParallaxSection";
 import PracticeAreas from "./components/PracticeAreas";
 import Attorneys from "./components/Attorneys";
 import ConsultationForm from "./components/ConsultationForm";
+import CEOSection from "./components/CEOSection";
 
 // Helper to map dynamic Lucide icon strings to components for STATS
 const getStatIcon = (iconName: string) => {
@@ -233,6 +234,9 @@ export default function App() {
           </div>
         </div>
       </ParallaxSection>
+
+      {/* Leadership Directive & CEO Interactive 3D Parallax Scroll Screen */}
+      <CEOSection />
 
       {/* 4. SECTION 3: PRACTICE AREAS VIEW (Parallax Background) */}
       <ParallaxSection

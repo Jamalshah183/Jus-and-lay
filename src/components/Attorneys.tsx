@@ -220,7 +220,9 @@ export default function Attorneys() {
                     </button>
                     <a
                       href={
-                        activePartner.id === "marcus"
+                        activePartner.id === "ammar"
+                          ? "https://wa.me/923218520085?text=Hello%20Ammar%20Yasir%20CEO%20office%20Jus%20%26%20Lay%2C%20we%20require%20privileged%20executive%20counsel%20regarding%20a%20high-stakes%20corporate%20matter."
+                          : activePartner.id === "marcus"
                           ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Barrister%20Jamal%20M.%20Shah%20for%20an%20urgent%20appellate%20matter."
                           : activePartner.id === "serena"
                           ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Ayesha%20Khan%20Lodhi%20for%20an%20M%26A%20or%20corporate%20structuring%20matter."
