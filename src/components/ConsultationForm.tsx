@@ -1,310 +1,208 @@
-import React, { useState } from "react";
-import { ConsultationRequest } from "../types";
-import { Send, Check, ShieldCheck, Mail, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MessageCircle, ShieldCheck, Clock, CheckCircle, ArrowUpRight, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface ConsultationFormProps {
-  onSubmitSuccess: (request: ConsultationRequest) => void;
+  onSubmitSuccess?: (request: any) => void;
 }
 
 export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    matter: "Corporate & M&A Law",
-    message: "",
-  });
+  const [activeRouting, setActiveRouting] = useState<"general" | "mna" | "litigation" | "tax">("general");
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [pktTime, setPktTime] = useState("");
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
-  const legalMatters = [
-    "Corporate & M&A Law",
-    "Complex Civil Litigation",
-    "Matrimonial Trusts & Family",
-    "Commercial Property & Zoning",
-    "Tax & Business Advisory",
-    "Ironclad Contract Drafting",
-    "Other Specialized Matters",
-  ];
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors([]); // Clear errors on typing
-  };
-
-  const validateForm = () => {
-    const validationErrors = [];
-    if (!formData.name.trim()) validationErrors.push("Client Name is required");
-    
-    // Simple email regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim() || !emailRegex.test(formData.email)) {
-      validationErrors.push("A valid email is required for docket indexing");
-    }
-    
-    // Simple phone validator
-    if (!formData.phone.trim() || formData.phone.length < 7) {
-      validationErrors.push("A valid telephone number is required for direct partner callback");
-    }
-
-    if (!formData.message.trim() || formData.message.length < 10) {
-      validationErrors.push("Please provide a brief summary of the legal matter (minimum 10 characters)");
-    }
-
-    return validationErrors;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate high-end legal server encryption & docket validation
-    setTimeout(() => {
-      const newRequest: ConsultationRequest = {
-        id: "docket_" + Math.random().toString(36).substr(2, 9),
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        matter: formData.matter,
-        message: formData.message,
-        date: new Date().toISOString(),
-        status: "Pending",
-      };
-
-      onSubmitSuccess(newRequest);
-      setIsLoading(false);
-      setSuccess(true);
+  // Keep a live Pakistani Standard Time (UTC+5) ticking for premium accuracy
+  useEffect(() => {
+    const updatePktTime = () => {
+      const now = new Date();
+      // Calculate UTC+5 for Pakistan
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const pktDate = new Date(utc + 3600000 * 5);
       
-      // Reset form variables
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        matter: "Corporate & M&A Law",
-        message: "",
-      });
+      const hours = pktDate.getHours();
+      const minutes = pktDate.getMinutes();
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const formattedHours = hours % 12 || 12;
+      const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+      
+      setPktTime(`${formattedHours}:${formattedMinutes} ${ampm} PKT`);
+    };
 
-      // Clear success notification after delay
-      setTimeout(() => setSuccess(false), 8000);
-    }, 1800);
+    updatePktTime();
+    const interval = setInterval(updatePktTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const routingDetails = {
+    general: {
+      label: "General Counsel Liaison",
+      message: "Hello Jus %26 Lay, we are looking to establish a secure partnership dialogue for corporate advisory.",
+      desc: "Connect directly with our corporate intake desk for non-disclosure agreement (NDA) issuance and general retainer briefings.",
+    },
+    mna: {
+      label: "SECP, M&A & Board Structuring",
+      message: "Hello Jus %26 Lay, we require urgent corporate legal advise regarding SECP compliance or M%26A transactions.",
+      desc: "Immediate routing to senior merger counsel for corporate mergers, SECP clearances, or international joint-ventures.",
+    },
+    litigation: {
+      label: "Appellate & High-Court Litigation",
+      message: "Hello Jus %26 Lay, we require urgent Senior Partner litigation counsel for an upcoming commercial appeal.",
+      desc: "High-priority routing to Barrister Jamal M. Shah for emergency stay-orders, High Court filings and arbitrations.",
+    },
+    tax: {
+      label: "Tax, FBR, Energy & NEPRA Tariff Law",
+      message: "Hello Jus %26 Lay, our enterprise requires urgent counsel regarding a NEPRA tariff or FBR tax recovery appeal.",
+      desc: "Direct routing to Advocate Zane Malik for FBR tax appellate defense, NEPRA/OGRA regulatory tariffs, or IPP power-sector counsel.",
+    },
+  };
+
+  const currentRoute = routingDetails[activeRouting];
+  const whatsAppLink = `https://wa.me/923218520085?text=${encodeURIComponent(currentRoute.message.replace(/%26/g, "&"))}`;
+
+  const handleCopyChannel = () => {
+    navigator.clipboard.writeText("+92 321 852 0085");
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 3000);
   };
 
   return (
     <div className="w-full max-w-xl mx-auto bg-navy-dark/95 border border-gold/30 rounded-md p-8 md:p-10 shadow-2xl gold-shadow transition-all relative overflow-hidden">
-      
-      {/* Visual top bar of the form card indicating high-end cryptographic session */}
-      <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-gold/50 via-gold to-gold/50" />
+      {/* Visual luxury top border */}
+      <div className="absolute top-0 inset-x-0 h-[3.5px] bg-gradient-to-r from-gold/50 via-gold to-gold/50" />
 
-      {/* Decorative vector watermarks inside forms */}
-      <div className="absolute -bottom-8 -right-8 opacity-[0.03] text-white pointer-events-none">
-        <ShieldCheck className="w-48 h-48" />
+      {/* Background vector watermark */}
+      <div className="absolute -bottom-10 -right-10 opacity-[0.03] text-white pointer-events-none">
+        <MessageCircle className="w-52 h-52 text-[#2ecc71]" />
       </div>
 
       <div className="mb-8">
-        <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-2">
-          Secure Executive Uplink
-        </span>
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-sans font-bold block">
+            Direct Boardroom Connection
+          </span>
+          {/* Status badge */}
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2ecc71]/15 text-[#2ecc71] border border-[#2ecc71]/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2ecc71] animate-ping" />
+            <span className="text-[9px] uppercase tracking-wider font-extrabold font-sans">
+              On-Call Active
+            </span>
+          </div>
+        </div>
         <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-white mb-3">
-          Initiate Counsel Request
+          Direct Partner Counsel
         </h3>
-        <p className="text-white/60 text-xs font-sans leading-relaxed">
-          Brief Jus & Lay's board partners instantly. Your correspondence remains sealed under attorney-client privilege.
+        <p className="text-white/60 text-xs sm:text-sm font-sans leading-relaxed">
+          We maintain absolute discretion. To protect legal privilege and bypass unsecured servers, our chambers prioritize immediate encrypted communication via professional WhatsApp channels.
         </p>
       </div>
 
-      {/* Handlers of submit outcome */}
-      <AnimatePresence mode="wait">
-        {success ? (
-          <motion.div
-            key="success-card"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="py-10 px-4 text-center space-y-6 flex flex-col items-center"
-          >
-            {/* Stamp seal animate */}
-            <motion.div
-              initial={{ scale: 0.3, rotate: 45 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 120, damping: 10 }}
-              className="w-16 h-16 rounded-full border-2 border-gold/60 bg-gold/10 flex items-center justify-center text-gold shadow-[0_0_20px_rgba(255,188,87,0.2)]"
-            >
-              <Check className="w-8 h-8" strokeWidth={3} />
-            </motion.div>
+      {/* Pakistan Clock and Office Status Panel */}
+      <div className="grid grid-cols-2 gap-4 p-4 bg-navy/60 border border-white/5 rounded-xs mb-6 text-left">
+        <div>
+          <div className="text-[9px] uppercase font-bold text-white/40 tracking-widest flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-gold shrink-0" />
+            <span>Chambers Clock (PST)</span>
+          </div>
+          <span className="block font-mono text-xs font-semibold text-white mt-1">
+            {pktTime || "06:30 PM PKT"}
+          </span>
+        </div>
+        <div>
+          <div className="text-[9px] uppercase font-bold text-white/40 tracking-widest flex items-center gap-1">
+            <Zap className="w-3.5 h-3.5 text-[#2ecc71] shrink-0" />
+            <span>Intake Speed</span>
+          </div>
+          <span className="block text-xs font-semibold text-white mt-1 leading-tight">
+            Typical response &lt; 5 mins
+          </span>
+        </div>
+      </div>
 
-            <div className="space-y-2">
-              <h4 className="font-serif text-xl font-bold text-white uppercase tracking-wider">
-                Docket Briefing Sealed
-              </h4>
-              <p className="text-white/70 text-sm font-sans max-w-sm mx-auto leading-relaxed">
-                Your legal request is indexed. Founding partners will review cases and call within exactly 6 business hours.
-              </p>
-            </div>
-
-            <div className="w-full h-[1px] bg-white/10" />
-
-            <div className="text-white/50 text-[10px] font-mono flex items-center gap-2">
-              <ShieldCheck className="w-4.5 h-4.5 text-[#2ecc71]" />
-              <span>TLS 1.3 256-Bit Sandbox Security Registered</span>
-            </div>
-
+      {/* Selective Routing Buttons - Elite Corporate Aesthetic */}
+      <div className="space-y-3 mb-6">
+        <span className="block text-[10px] uppercase font-bold text-[#ffbc57]/80 tracking-widest text-left">
+          Select Corporate Routing Profile:
+        </span>
+        <div className="grid grid-cols-2 gap-2">
+          {(["general", "mna", "litigation", "tax"] as const).map((route) => (
             <button
-              onClick={() => setSuccess(false)}
-              className="px-6 py-2 text-xs font-sans font-bold tracking-widest text-[#ffbc57] border border-gold/25 hover:bg-gold/10 hover:text-white transition-colors uppercase rounded-xs focus:outline-none"
+              key={route}
+              onClick={() => setActiveRouting(route)}
+              className={`p-3 text-left rounded-xs border transition-all duration-300 focus:outline-none flex flex-col justify-between h-20 group relative cursor-pointer ${
+                activeRouting === route
+                  ? "bg-gold/15 border-gold text-gold"
+                  : "bg-navy/40 border-white/5 hover:border-white/20 text-white/60 hover:text-white"
+              }`}
             >
-              Brief Another Matter
+              <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider block leading-tight">
+                {route === "general" && "General Liaison"}
+                {route === "mna" && "SECP & M&A"}
+                {route === "litigation" && "High-Court Appeals"}
+                {route === "tax" && "FBR & NEPRA Tariffs"}
+              </span>
+              <div className="flex justify-between items-center w-full mt-auto">
+                <span className="text-[9px] text-white/40 font-mono">
+                  {route === "general" && "Liaison Desk"}
+                  {route === "mna" && "Ayesha Lodhi"}
+                  {route === "litigation" && "Barrister Shah"}
+                  {route === "tax" && "Zane Malik"}
+                </span>
+                <ArrowUpRight className={`w-3.5 h-3.5 transition-all duration-300 ${activeRouting === route ? "translate-x-0.5 -translate-y-0.5 opacity-100 text-gold" : "opacity-30 group-hover:opacity-60"}`} />
+              </div>
             </button>
-          </motion.div>
-        ) : (
-          <motion.form
-            key="consultation-form"
-            onSubmit={handleSubmit}
-            className="space-y-5 relative"
+          ))}
+        </div>
+      </div>
+
+      {/* Dynamic Route Info Box */}
+      <div className="p-4 bg-navy/60 border border-white/5 border-l-2 border-l-gold rounded-r-xs mb-8 text-left transition-all duration-300">
+        <span className="text-[9px] uppercase font-extrabold text-[#ffbc57]/80 tracking-widest block mb-1">
+          {currentRoute.label}
+        </span>
+        <p className="text-white/70 text-xs font-sans leading-relaxed font-light">
+          {currentRoute.desc}
+        </p>
+      </div>
+
+      {/* Big Action Connection Buttons */}
+      <div className="space-y-4">
+        {/* Prime WhatsApp link */}
+        <a
+          href={whatsAppLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center justify-center gap-3.5 py-4.5 bg-neutral-900 border-2 border-[#2ecc71]/60 text-[#2ecc71] hover:bg-[#2ecc71]/10 hover:border-[#2ecc71] font-bold font-sans text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-xl relative group focus:outline-none"
+        >
+          {/* Animated pulsing ripple */}
+          <span className="absolute inset-0 bg-[#2ecc71]/5 opacity-0 group-hover:opacity-100 rounded-xs transition-opacity duration-300 pointer-events-none" />
+          <MessageCircle className="w-5 h-5 text-[#2ecc71] shrink-0" />
+          <span>Launch WhatsApp Connection</span>
+        </a>
+
+        {/* Copy number backup */}
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5 text-xs text-white/40 font-sans">
+          <span className="truncate">Chambers Direct Mobile ID: +92 (321) 852-0085</span>
+          <button
+            onClick={handleCopyChannel}
+            className="text-gold hover:text-white underline cursor-pointer focus:outline-none shrink-0"
           >
-            {/* Display errors */}
-            {errors.length > 0 && (
-              <div className="p-4 bg-[#6b2121]/30 border border-[#ff5252]/40 rounded-xs flex gap-3 text-red-200">
-                <AlertTriangle className="w-5 h-5 text-[#ff5252] shrink-0 mt-0.5" />
-                <div className="text-xs space-y-1">
-                  <span className="font-bold block uppercase tracking-wider text-[9px] text-[#ffdddd]">
-                    Briefing Validation Errors
-                  </span>
-                  <ul className="list-disc pl-4 space-y-0.5 font-sans">
-                    {errors.map((error, idx) => (
-                      <li key={idx}>{error}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
+            {copiedLink ? "✓ Copied Desk Number" : "Copy Number"}
+          </button>
+        </div>
+      </div>
 
-            {/* Client Name */}
-            <div>
-              <label htmlFor="name-input" className="block text-[10px] uppercase tracking-widest text-white/50 font-bold mb-2 font-sans">
-                Full Client Name <span className="text-gold">*</span>
-              </label>
-              <input
-                id="name-input"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Marcus Aurelius, Esq."
-                className="w-full p-3 bg-navy/60 border border-white/10 hover:border-white/25 focus:border-gold focus:ring-1 focus:ring-gold text-white text-sm rounded-xs font-sans placeholder-white/20 transition-all duration-300 focus:outline-none"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Email & Phone side-by-side on MD */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label htmlFor="email-input" className="block text-[10px] uppercase tracking-widest text-white/50 font-bold mb-2 font-sans">
-                  Direct Email Address <span className="text-gold">*</span>
-                </label>
-                <input
-                  id="email-input"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="name@corporation.com"
-                  className="w-full p-3 bg-navy/60 border border-white/10 hover:border-white/25 focus:border-gold focus:ring-1 focus:ring-gold text-white text-sm rounded-xs font-sans placeholder-white/20 transition-all duration-300 focus:outline-none"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone-input" className="block text-[10px] uppercase tracking-widest text-white/50 font-bold mb-2 font-sans">
-                  Secure Call Number <span className="text-gold">*</span>
-                </label>
-                <input
-                  id="phone-input"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="+1 (555) 0192"
-                  className="w-full p-3 bg-navy/60 border border-white/10 hover:border-white/25 focus:border-gold focus:ring-1 focus:ring-gold text-white text-sm rounded-xs font-sans placeholder-white/20 transition-all duration-300 focus:outline-none"
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Practice Areas Select */}
-            <div>
-              <label htmlFor="legal-matter-select" className="block text-[10px] uppercase tracking-widest text-white/50 font-bold mb-2 font-sans">
-                Primary Legal Jurisdiction <span className="text-gold">*</span>
-              </label>
-              <select
-                id="legal-matter-select"
-                name="matter"
-                value={formData.matter}
-                onChange={handleInputChange}
-                className="w-full p-3 bg-navy/95 border border-white/10 hover:border-white/25 focus:border-gold focus:ring-1 focus:ring-gold text-white text-sm rounded-xs font-sans transition-all duration-300 focus:outline-none cursor-pointer"
-                disabled={isLoading}
-              >
-                {legalMatters.map((opt) => (
-                  <option key={opt} value={opt} className="bg-navy-dark">
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Brief Message */}
-            <div>
-              <label htmlFor="consultation-message" className="block text-[10px] uppercase tracking-widest text-white/50 font-bold mb-2 font-sans">
-                Legal Brief Statement / Objectives <span className="text-gold">*</span>
-              </label>
-              <textarea
-                id="consultation-message"
-                name="message"
-                rows={4}
-                value={formData.message}
-                onChange={handleInputChange}
-                placeholder="Briefly state structural disputes, liabilities, dates, or assets involved. All entries are encrypted..."
-                className="w-full p-3 bg-navy/60 border border-white/10 hover:border-white/25 focus:border-gold focus:ring-1 focus:ring-gold text-white text-sm rounded-xs font-sans placeholder-white/20 transition-all duration-300 focus:outline-none resize-none"
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-3 py-4 text-xs font-sans font-bold tracking-[0.2em] uppercase bg-gold text-navy rounded-xs hover:bg-white hover:text-navy hover:shadow-[0_0_20px_rgba(255,188,87,0.35)] active:translate-y-px transition-all duration-300 select-none cursor-pointer focus:outline-none"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-navy" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Encrypting Briefing...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 text-navy shrink-0" />
-                  <span>Submit Consultation Request</span>
-                </>
-              )}
-            </button>
-          </motion.form>
-        )}
-      </AnimatePresence>
+      {/* Solicitor Privileged Banner */}
+      <div className="mt-8 pt-6 border-t border-white/5 flex items-start gap-3 text-left">
+        <ShieldCheck className="w-5 h-5 text-gold shrink-0 mt-0.5" />
+        <div>
+          <span className="block text-[10px] text-white/80 font-bold uppercase tracking-wider mb-1">
+            Preserved Confidentiality Protection
+          </span>
+          <span className="block text-white/45 text-[10px] sm:text-xs font-sans leading-relaxed font-light">
+            All messages, materials, and briefs submitted under our WhatsApp system are permanently sealed under Solicitor-Client Privilege as legislated in the Qanun-e-Shahadat Order.
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

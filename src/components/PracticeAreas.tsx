@@ -157,18 +157,13 @@ export default function PracticeAreas() {
                   Close Brief
                 </button>
                 <a
-                  href="#consultation"
-                  onClick={() => {
-                    setSelectedPractice(null);
-                    // Standard scroll trigger
-                    const inputElement = document.querySelector("#legal-matter-select") as HTMLSelectElement;
-                    if (inputElement) {
-                      inputElement.value = selectedPractice.title;
-                    }
-                  }}
-                  className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-white transition-all rounded-xs shadow-[0_4px_10px_rgba(255,188,87,0.15)]"
+                  href={`https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20consult%20specifically%20regarding%20${encodeURIComponent(selectedPractice.title)}.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setSelectedPractice(null)}
+                  className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy transition-all rounded-xs shadow-md text-center"
                 >
-                  Consult Partner
+                  WhatsApp Advisory
                 </a>
               </div>
             </motion.div>
