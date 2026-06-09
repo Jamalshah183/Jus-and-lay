@@ -20,7 +20,10 @@ export default function CEOSection() {
   const ceoScale = useTransform(scrollYProgress, [0, 1], [0.95, 1.15]);
   const ceoRotate = useTransform(scrollYProgress, [0, 1], [-1.5, 1.5]);
 
-  // 3. Floating HUD panels: move independently to emphasize air-tight 3D layering
+  // 3. Parallax Background Image layer: drifts slowly for cinematic scale
+  const bgImageY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+
+  // 4. Floating HUD panels: move independently to emphasize air-tight 3D layering
   const hudY = useTransform(scrollYProgress, [0, 1], ["40px", "-40px"]);
   const lightY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
@@ -29,15 +32,29 @@ export default function CEOSection() {
       ref={containerRef}
       className="relative w-full min-h-screen overflow-hidden bg-gradient-to-b from-[#0b1324] via-[#050912] to-[#0b1324] py-20 lg:py-32 flex items-center justify-center border-t border-b border-gold/15"
     >
+      {/* 1. Behind the scenes: Parallax Background Image representing corporate luxury */}
+      <motion.div
+        style={{ y: bgImageY }}
+        className="absolute inset-0 w-full h-[130%] -top-[15%] pointer-events-none select-none z-0 overflow-hidden opacity-30"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1920"
+          alt="Courthouse Columns"
+          className="w-full h-full object-cover filter brightness-[0.35] contrast-[1.1] saturate-[0.6]"
+        />
+        {/* Deep blue color overlay to seamlessly blend with our custom dark workspace theme */}
+        <div className="absolute inset-0 bg-[#070e1b]/90 mix-blend-multiply" />
+      </motion.div>
+
       {/* BACKGROUND GRAPHICS & TEXT (Deepest Layer: z-0) */}
-      <div className="absolute inset-0 bg-[#050912]/80 opacity-70 pointer-events-none" />
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0b1324] to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0b1324] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[#050912]/70 opacity-60 pointer-events-none z-1" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0b1324] to-transparent pointer-events-none z-1" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0b1324] to-transparent pointer-events-none z-1" />
       
       {/* Animated Light Sphere */}
       <motion.div
         style={{ y: lightY }}
-        className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-gold/[0.03] rounded-full filter blur-[100px] pointer-events-none"
+        className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-gold/[0.03] rounded-full filter blur-[100px] pointer-events-none z-1"
       />
 
       {/* Extreme Layer: Huge 3D background watermark text that slides slowly behind the CEO */}
