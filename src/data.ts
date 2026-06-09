@@ -160,8 +160,8 @@ export const TESTIMONIALS: Testimonial[] = [
 ];
 
 export const IMAGES = {
-  heroBg: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1920", // courthouse pillars
+  heroBg: "https://images.pexels.com/photos/6077326/pexels-photo-6077326.jpeg", // courthouse pillars
   aboutBg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80&w=1920", // clean lawyer signature desk/library
   practiceBg: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=1920", // law library bookshelves
-  consultBg: "https://images.unsplash.com/photo-1505664194779-8bebcb95c539?auto=format&fit=crop&q=80&w=1920", // premium wood scales of justice & books
+  consultBg: "https://images.unsplash.com/photo-1505664194779-8bebcb3f3739?auto=format&fit=crop&q=80&w=1920", // premium wood scales of justice & books
 };

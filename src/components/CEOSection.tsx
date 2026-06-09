@@ -21,7 +21,7 @@ export default function CEOSection() {
   const ceoRotate = useTransform(scrollYProgress, [0, 1], [-1.5, 1.5]);
 
   // 3. Parallax Background Image layer: drifts slowly for cinematic scale
-  const bgImageY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const bgImageY = useTransform(scrollYProgress, [0, 1], [-180, 180]);
 
   // 4. Floating HUD panels: move independently to emphasize air-tight 3D layering
   const hudY = useTransform(scrollYProgress, [0, 1], ["40px", "-40px"]);
@@ -35,37 +35,23 @@ export default function CEOSection() {
       {/* 1. Behind the scenes: Parallax Background Image representing corporate luxury */}
       <motion.div
         style={{ y: bgImageY }}
-        className="absolute inset-0 w-full h-[130%] -top-[15%] pointer-events-none select-none z-0 overflow-hidden opacity-30"
+        className="absolute inset-x-0 -top-[25%] w-full h-[150%] pointer-events-none select-none z-0 overflow-hidden"
       >
         <img
-          src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=1920"
-          alt="Courthouse Columns"
-          className="w-full h-full object-cover filter brightness-[0.35] contrast-[1.1] saturate-[0.6]"
+          src="https://images.pexels.com/photos/6077091/pexels-photo-6077091.jpeg"
+          alt="Prestigious Law Chambers Backdrop"
+          className="w-full h-full object-cover filter brightness-[0.45] contrast-[1.15] opacity-[0.70]"
+          referrerPolicy="no-referrer"
         />
-        {/* Deep blue color overlay to seamlessly blend with our custom dark workspace theme */}
-        <div className="absolute inset-0 bg-[#070e1b]/90 mix-blend-multiply" />
       </motion.div>
 
-      {/* BACKGROUND GRAPHICS & TEXT (Deepest Layer: z-0) */}
-      <div className="absolute inset-0 bg-[#050912]/70 opacity-60 pointer-events-none z-1" />
+      {/* BACKGROUND GRADICS (Fades to blend and completely hide background image details below the CEO grid content) */}
       <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0b1324] to-transparent pointer-events-none z-1" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0b1324] to-transparent pointer-events-none z-1" />
       
-      {/* Animated Light Sphere */}
-      <motion.div
-        style={{ y: lightY }}
-        className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-gold/[0.03] rounded-full filter blur-[100px] pointer-events-none z-1"
-      />
-
-      {/* Extreme Layer: Huge 3D background watermark text that slides slowly behind the CEO */}
-      <motion.div
-        style={{ y: titleBgY }}
-        className="absolute inset-0 flex items-center justify-center select-none pointer-events-none opacity-[0.02] z-0 overflow-hidden"
-      >
-        <div className="font-serif font-black text-[15vw] leading-none uppercase tracking-[0.1em] text-white text-center whitespace-nowrap">
-          AMMAR YASIR
-        </div>
-      </motion.div>
+      {/* Solid blocker matching the container's bottom padding exactly to ensure no background image bleed-through below the grid */}
+      <div className="absolute inset-x-0 bottom-0 h-20 lg:h-32 bg-[#0b1324] pointer-events-none z-1" />
+      {/* High-reaching transition fog starting from the solid bottom block to dissolve the law-chamber graphic smoothly */}
+      <div className="absolute inset-x-0 bottom-20 lg:bottom-32 h-64 bg-gradient-to-t from-[#0b1324] to-transparent pointer-events-none z-1" />
 
       {/* CORE CONTAINER (Middle to Foreground Layer: z-10 / z-20) */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 xl:px-12">
@@ -110,7 +96,7 @@ export default function CEOSection() {
                 </div>
 
                 {/* CEO Signature / Details Block */}
-                <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="pt-8 border-t border-white/10">
                   <div>
                     <span className="block font-serif text-xl sm:text-2xl font-extrabold text-white tracking-wide">
                       Ammar Yasir
@@ -122,17 +108,6 @@ export default function CEOSection() {
                       Lahore HQ • Suite No.1, 236-Riwaz Garden
                     </span>
                   </div>
-
-                  {/* Secure Link directly to CEO Liaison desk */}
-                  <a
-                    href="https://wa.me/923218520085?text=Hello%20Ammar%20Yasir%20CEO%20office%20Jus%20%26%20Lay%2C%20we%20require%20privileged%20executive%20counsel%20on%20an%20urgent%20corporate%20dispute."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 px-6 py-3 border border-[#2ecc71]/40 hover:border-[#2ecc71] bg-navy/40 text-[#2ecc71] hover:bg-[#2ecc71]/10 rounded-xs text-xs font-bold font-sans tracking-wider uppercase transition-all duration-300 shadow-lg justify-center sm:justify-start"
-                  >
-                    <MessageCircle className="w-4 h-4 text-[#2ecc71]" />
-                    <span>CEO Liaison Desk</span>
-                  </a>
                 </div>
               </div>
             </div>
@@ -145,17 +120,6 @@ export default function CEOSection() {
           {/* RIGHT COLUMN: Massive Cutout CEO Parallax Stage (z-10) - Balanced to 6-columns */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[450px] sm:h-[600px] lg:h-[850px] relative w-full">
             
-            {/* Deep geometric line art matching law firm theme - sits behind the CEO image */}
-            <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-2 opacity-5 pointer-events-none">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <div key={i} className="border border-white/50" />
-              ))}
-            </div>
-
-            {/* Back Gold Ring Accent (Depth Layer: z-0 inside the Right Column) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 sm:w-[480px] aspect-square rounded-full border border-gold/10 opacity-40 pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 sm:w-[550px] aspect-square rounded-full border border-white/5 opacity-20 pointer-events-none" />
-
             {/* 3D PARALLAX CORE: Large Cutout CEO sitting in a chair details layout */}
             <motion.div
               style={{
@@ -171,27 +135,15 @@ export default function CEOSection() {
                 alt="Ammar Yasir, CEO Jus & Lay Law Conglomerate"
                 referrerPolicy="no-referrer"
                 className="w-auto h-[120%] sm:h-[130%] lg:h-[155%] max-h-none object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)]"
+                style={{
+                  WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
+                  maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)"
+                }}
               />
             </motion.div>
 
             {/* Bottom transition gradient to cleanly merge the chair cutout model into the bottom fold */}
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#050912] via-[#050912]/85 to-transparent z-15 pointer-events-none" />
-
-            {/* Floating Forefront Interactive HUD Panels (z-20 - layers over the CEO model) */}
-            <motion.div
-              style={{ y: hudY }}
-              className="absolute top-10 right-4 sm:right-10 lg:right-6 bg-neutral-900/80 backdrop-blur-md border border-white/10 p-5 rounded-sm z-20 shadow-2xl max-w-[210px] text-left pointer-events-auto hidden sm:block"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="w-4 h-4 text-gold" />
-                <span className="text-[10px] uppercase tracking-widest font-extrabold text-white font-sans">
-                  Firm Authority
-                </span>
-              </div>
-              <p className="text-[10px] text-white/60 leading-relaxed font-sans font-light">
-                Secure enterprise routing with active litigation protection protocol. Cert. No: JL-A1.
-              </p>
-            </motion.div>
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0b1324] via-[#0b1324]/85 to-transparent z-15 pointer-events-none" />
 
             {/* Managing Partner Floating Status Tag on absolute top (z-25) */}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-25">
