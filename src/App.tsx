@@ -354,31 +354,80 @@ export default function App() {
         </div>
       </section>
 
-      {/* 7. SECTION 6: CONSULTATION ENCRYPTION FORM (WhatsApp-only custom widget) */}
+      {/* 7. COMBINED SECTION: DIRECT CONTACT & METROPOLITAN COORDINATES */}
+      <span id="consultation" className="scroll-mt-24 pointer-events-none select-none h-0 w-0 block" />
       <ParallaxSection
-        id="consultation"
+        id="contact"
         backgroundImage={IMAGES.consultBg}
-        heightClass="min-h-screen py-24 animate-fade-in"
-        overlayOpacity="opacity-75"
+        heightClass="min-h-screen py-24"
+        overlayOpacity="opacity-80"
         overlayColor="bg-black"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start relative">
           
-          {/* Left info panel */}
-          <div className="lg:col-span-6 space-y-6 text-left">
-            <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block">
-              Direct Contact Framework
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6">
-              Establish Privileged Dialogue
-            </h2>
-            <div className="w-20 h-[1.5px] bg-gold mb-8" />
-            <p className="font-sans text-white/70 text-sm sm:text-base leading-relaxed font-light">
-              We process corporate intake files as high-priority briefs. To skip vulnerable online forms and secure attorney-client privilege instantly, we establish encrypted communication pathways directly on WhatsApp.
-            </p>
+          {/* Left info & coordinates panel */}
+          <div className="lg:col-span-6 space-y-10 text-left">
+            <div>
+              <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-4">
+                Direct Contact Framework
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6">
+                Connect Across Pakistan
+              </h2>
+              <div className="w-20 h-[1.5px] bg-gold mb-8" />
+              <p className="font-sans text-white/70 text-sm sm:text-base leading-relaxed font-light">
+                To preserve absolute solicitor-client privilege instantly and skip vulnerable online databases, our chambers utilize a direct encrypted liaison desk, bridging elite counsel directly onto senior partner devices.
+              </p>
+            </div>
+
+            {/* Lahore Chambers HQ Details */}
+            <div className="p-8 bg-[#0b1424]/95 border border-white/5 rounded-xs space-y-6 shadow-xl">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-white border-b border-white/10 pb-3">
+                Lahore Chambers (HQ)
+              </h3>
+
+              <div className="space-y-5 font-sans">
+                <div className="flex items-start gap-4">
+                  <MapPin className="w-5 h-5 text-gold shrink-0 mt-1" />
+                  <div>
+                    <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
+                      Central Secretariat Location
+                    </span>
+                    <span className="block text-white/95 text-xs sm:text-sm leading-relaxed mt-1 font-medium">
+                      Suite No.1, 236-Riwaz Garden<br />
+                      Lahore, Pakistan
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <Phone className="w-5 h-5 text-gold shrink-0 mt-1" />
+                  <div>
+                    <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
+                      Secure Corporate Voiceline
+                    </span>
+                    <a href="tel:03218520085" className="block text-white/95 text-xs sm:text-sm font-mono hover:text-gold transition-colors mt-1 font-medium">
+                      +92 (32) 1852-0085
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <Mail className="w-5 h-5 text-gold shrink-0 mt-1" />
+                  <div>
+                    <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
+                      General Brief Archive Registry
+                    </span>
+                    <a href="mailto:advisory@juslay.pk" className="block text-white/95 text-xs sm:text-sm font-mono hover:text-gold transition-colors truncate mt-1 font-medium">
+                      advisory@juslay.pk
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Trust Assurances */}
-            <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-white/5">
               <div className="flex items-start gap-3.5">
                 <ShieldCheck className="w-5 h-5 text-gold shrink-0 mt-0.5" />
                 <div>
@@ -386,7 +435,7 @@ export default function App() {
                     Constitutional Privilege Assured
                   </span>
                   <span className="block text-white/50 text-xs font-sans leading-relaxed">
-                    By contacting, our professional chambers apply strict local and federal solicitor privilege protocols over all communications.
+                    Strict professional solicitor privilege protocols apply immediately to safeguard communication confidentiality.
                   </span>
                 </div>
               </div>
@@ -395,115 +444,22 @@ export default function App() {
                 <CalendarCheck className="w-5 h-5 text-gold shrink-0 mt-0.5" />
                 <div>
                   <span className="block text-xs font-sans font-bold text-white uppercase tracking-wider mb-0.5">
-                    Direct Senior Partner Redirection
+                    Direct Partner Redirection
                   </span>
                   <span className="block text-white/50 text-xs font-sans leading-relaxed">
-                    Your transmission routes directly onto executive partner devices for rapid operational evaluation and immediate response.
+                    Your briefcase routes directly into active executive partner devices for high-priority evaluation.
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right form container holding custom interactive WhatsApp Liaison interface */}
-          <div className="lg:col-span-6 flex justify-center w-full">
+          {/* Right Column: Interaction Form widget */}
+          <div className="lg:col-span-6 flex justify-center w-full lg:sticky lg:top-28">
             <ConsultationForm />
           </div>
         </div>
       </ParallaxSection>
-
-      {/* 8. SECTION 7: CONTACT & SATELLITE AREA */}
-      <section id="contact" className="py-24 bg-gradient-to-t from-[#040811] to-[#070e1b] relative border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 xl:px-12">
-          
-          <div className="text-center mb-16 md:mb-20">
-            <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-4">
-              Metropolitan Chambers & Coordinates
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6">
-              Connect Across Pakistan
-            </h2>
-            <div className="w-24 h-[2px] bg-gold mx-auto mb-8" />
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-[#0b1424]/90 border border-white/5 p-8 sm:p-12 rounded-sm shadow-xl flex flex-col md:flex-row items-stretch md:items-center gap-10 md:gap-16 text-left">
-              
-              {/* Left Column: Details */}
-              <div className="w-full md:w-3/5 space-y-8">
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white border-b border-white/10 pb-4">
-                  Lahore Chambers (HQ)
-                </h3>
-
-                <div className="space-y-6 font-sans">
-                  <div className="flex items-start gap-4">
-                    <MapPin className="w-5 h-5 text-gold shrink-0 mt-1" />
-                    <div>
-                      <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
-                        Central Secretariat Location
-                      </span>
-                      <span className="block text-white/95 text-sm sm:text-base leading-relaxed mt-1 font-medium">
-                        Suite No.1, 236-Riwaz Garden<br />
-                        Lahore, Pakistan
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Phone className="w-5 h-5 text-gold shrink-0 mt-1" />
-                    <div>
-                      <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
-                        Secure Corporate Voiceline
-                      </span>
-                      <a href="tel:03218520085" className="block text-white/95 text-sm sm:text-base font-mono hover:text-gold transition-colors mt-1 font-medium">
-                        +92 (32) 1852-0085
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Mail className="w-5 h-5 text-gold shrink-0 mt-1" />
-                    <div>
-                      <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
-                        General Brief Archive Registry
-                      </span>
-                      <a href="mailto:advisory@juslay.pk" className="block text-white/95 text-sm sm:text-base font-mono hover:text-gold transition-colors truncate mt-1 font-medium">
-                        advisory@juslay.pk
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: WhatsApp Call to Action only */}
-              <div className="w-full md:w-2/5 p-6 sm:p-8 bg-[#070e1b]/90 border border-[#2ecc71]/20 hover:border-[#2ecc71]/40 rounded-xs space-y-6 text-center flex flex-col justify-center items-center shadow-lg transition-colors duration-300">
-                <div className="p-4 rounded-full border border-[#2ecc71]/20 bg-[#2ecc71]/5 flex items-center justify-center text-[#2ecc71] shadow-sm animate-pulse">
-                  <MessageCircle className="w-8 h-8" />
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-serif text-lg font-bold text-white">
-                    Direct Liaison Desk
-                  </h4>
-                  <p className="text-white/60 text-xs font-sans max-w-xs leading-relaxed">
-                    Connect directly to check caseworker assignment, request advisory briefs, or seek supreme legal protection.
-                  </p>
-                </div>
-                <a
-                  href="https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20want%20to%20engage%20your%20legal%20counsel%20for%20enterprise%20consultancy."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#2ecc71] hover:bg-[#27ae60] text-black font-extrabold font-sans text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-lg hover:shadow-[#2ecc71]/15 hover:scale-[1.01]"
-                >
-                  <MessageCircle className="w-4.5 h-4.5 fill-black stroke-none" />
-                  <span>WA Intake Desk</span>
-                </a>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </section>
 
       {/* 9. SECURE FOOTER */}
       <footer className="bg-[#040811] border-t border-white/10 py-12">

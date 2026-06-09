@@ -36,9 +36,9 @@ export default function ParallaxSection({
     offset: ["start end", "end start"],
   });
 
-  // Background shifts slowly to create depth (Parallax layer 1)
-  const bgY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.25]);
+  // Background shifts significantly to create deep depth (Parallax layer 1)
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-30%", "30%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.08, 1.3]);
 
   return (
     <div
@@ -53,7 +53,7 @@ export default function ParallaxSection({
           scale: bgScale,
           backgroundImage: `url(${backgroundImage})`,
         }}
-        className="absolute inset-x-0 -top-[20%] -bottom-[20%] bg-cover bg-center"
+        className="absolute inset-x-0 -top-[30%] -bottom-[30%] bg-cover bg-center"
       />
 
       {/* 2. Midground transparent dark overlay */}

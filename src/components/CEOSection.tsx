@@ -16,16 +16,16 @@ export default function CEOSection() {
   const titleBgY = useTransform(scrollYProgress, [0, 1], ["-50px", "50px"]);
 
   // 2. CEO cutout image: moves faster with zoom/scale to feel closer to the viewport
-  const ceoY = useTransform(scrollYProgress, [0, 1], ["80px", "-120px"]);
-  const ceoScale = useTransform(scrollYProgress, [0, 1], [0.95, 1.15]);
+  const ceoY = useTransform(scrollYProgress, [0, 1], ["150px", "-210px"]);
+  const ceoScale = useTransform(scrollYProgress, [0, 1], [0.9, 1.25]);
   const ceoRotate = useTransform(scrollYProgress, [0, 1], [-1.5, 1.5]);
 
-  // 3. Parallax Background Image layer: drifts slowly for cinematic scale
-  const bgImageY = useTransform(scrollYProgress, [0, 1], [-180, 180]);
+  // 3. Parallax Background Image layer: drifts faster for highly impactful depth
+  const bgImageY = useTransform(scrollYProgress, [0, 1], [-360, 360]);
 
   // 4. Floating HUD panels: move independently to emphasize air-tight 3D layering
-  const hudY = useTransform(scrollYProgress, [0, 1], ["40px", "-40px"]);
-  const lightY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+  const hudY = useTransform(scrollYProgress, [0, 1], ["60px", "-60px"]);
+  const lightY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
 
   return (
     <div
@@ -35,7 +35,7 @@ export default function CEOSection() {
       {/* 1. Behind the scenes: Parallax Background Image representing corporate luxury */}
       <motion.div
         style={{ y: bgImageY }}
-        className="absolute inset-x-0 -top-[25%] w-full h-[150%] pointer-events-none select-none z-0 overflow-hidden"
+        className="absolute inset-x-0 -top-[35%] w-full h-[170%] pointer-events-none select-none z-0 overflow-hidden"
       >
         <img
           src="https://images.pexels.com/photos/6077091/pexels-photo-6077091.jpeg"
