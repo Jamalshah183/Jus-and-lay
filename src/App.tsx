@@ -94,7 +94,7 @@ export default function App() {
       <ParallaxSection
         id="home"
         backgroundImage={IMAGES.heroBg}
-        heightClass="h-screen py-16"
+        heightClass="min-h-screen lg:h-screen pt-28 pb-32 lg:py-16"
         overlayOpacity="opacity-60"
         overlayColor="bg-black"
         showScrollIndicator={true}
@@ -135,12 +135,12 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center"
+              className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 items-stretch sm:items-center"
             >
               <a
                 href="#consultation"
                 onClick={(e) => handleCTABookScroll(e, "#consultation")}
-                className="px-8 py-4 bg-gold text-navy font-extrabold text-xs tracking-widest uppercase rounded-xs hover:bg-white hover:text-navy hover:shadow-[0_0_20px_rgba(255,188,87,0.45)] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
+                className="px-6 py-3.5 sm:px-8 sm:py-4 bg-gold text-navy font-extrabold text-[10px] sm:text-xs tracking-widest uppercase rounded-xs hover:bg-white hover:text-navy hover:shadow-[0_0_20px_rgba(255,188,87,0.45)] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-4 h-4 text-navy shrink-0" />
                 <span>WhatsApp Liaison</span>
@@ -148,7 +148,7 @@ export default function App() {
               
               <button
                 onClick={(e) => handleCTABookScroll(e, "#practices")}
-                className="px-8 py-4 border border-white/20 hover:border-gold hover:bg-white/5 text-white font-bold text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer"
+                className="px-6 py-3.5 sm:px-8 sm:py-4 border border-white/20 hover:border-gold hover:bg-white/5 text-white font-bold text-[10px] sm:text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer text-center"
               >
                 Explore Practices
               </button>

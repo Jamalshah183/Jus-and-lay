@@ -1,9 +1,19 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { MessageCircle, Sparkles, Shield, UserCheck, Briefcase, Award } from "lucide-react";
 
 export default function CEOSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Track scroll position across the active container
   const { scrollYProgress } = useScroll({
@@ -11,31 +21,33 @@ export default function CEOSection() {
     offset: ["start end", "end start"],
   });
 
-  // Multilayer Parallax Transforms for interactive 3D depth
+  // Multilayer Parallax Transforms for interactive 3D depth (speed increased on mobile per user request)
   // 1. Background Outline Title: moves slower in the opposite direction
-  const titleBgY = useTransform(scrollYProgress, [0, 1], ["-50px", "50px"]);
+  const titleBgY = useTransform(scrollYProgress, [0, 1], isMobile ? ["-35px", "35px"] : ["-50px", "50px"]);
 
   // 2. CEO cutout image: moves faster with zoom/scale to feel closer to the viewport
-  const ceoY = useTransform(scrollYProgress, [0, 1], ["150px", "-210px"]);
-  const ceoScale = useTransform(scrollYProgress, [0, 1], [0.9, 1.25]);
-  const ceoRotate = useTransform(scrollYProgress, [0, 1], [-1.5, 1.5]);
+  const ceoY = useTransform(scrollYProgress, [0, 1], isMobile ? ["100px", "-140px"] : ["150px", "-210px"]);
+  const ceoScale = useTransform(scrollYProgress, [0, 1], isMobile ? [0.95, 1.15] : [0.9, 1.25]);
+  const ceoRotate = useTransform(scrollYProgress, [0, 1], isMobile ? [-0.5, 0.5] : [-1.5, 1.5]);
 
   // 3. Parallax Background Image layer: drifts faster for highly impactful depth
-  const bgImageY = useTransform(scrollYProgress, [0, 1], [-360, 360]);
+  const bgImageY = useTransform(scrollYProgress, [0, 1], isMobile ? [-240, 240] : [-360, 360]);
 
   // 4. Floating HUD panels: move independently to emphasize air-tight 3D layering
-  const hudY = useTransform(scrollYProgress, [0, 1], ["60px", "-60px"]);
-  const lightY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+  const hudY = useTransform(scrollYProgress, [0, 1], isMobile ? ["40px", "-40px"] : ["60px", "-60px"]);
+  const lightY = useTransform(scrollYProgress, [0, 1], isMobile ? ["-15%", "15%"] : ["-20%", "20%"]);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full min-h-screen overflow-hidden bg-gradient-to-b from-[#0b1324] via-[#050912] to-[#0b1324] py-20 lg:py-32 flex items-center justify-center border-t border-b border-gold/15"
+      className="relative w-full min-h-screen overflow-hidden bg-gradient-to-b from-[#0b1324] via-[#050912] to-[#0b1324] py-16 lg:py-32 flex items-center justify-center border-t border-b border-gold/15"
     >
       {/* 1. Behind the scenes: Parallax Background Image representing corporate luxury */}
       <motion.div
         style={{ y: bgImageY }}
-        className="absolute inset-x-0 -top-[35%] w-full h-[170%] pointer-events-none select-none z-0 overflow-hidden"
+        className={`absolute inset-x-0 w-full pointer-events-none select-none z-0 overflow-hidden ${
+          isMobile ? "-top-[25%] h-[150%]" : "-top-[35%] h-[170%]"
+        }`}
       >
         <img
           src="https://images.pexels.com/photos/6077091/pexels-photo-6077091.jpeg"
@@ -118,7 +130,7 @@ export default function CEOSection() {
           </div>
 
           {/* RIGHT COLUMN: Massive Cutout CEO Parallax Stage (z-10) - Balanced to 6-columns */}
-          <div className="lg:col-span-6 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[450px] sm:h-[600px] lg:h-[850px] relative w-full">
+          <div className="lg:col-span-6 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[280px] sm:h-[380px] lg:h-[850px] relative w-full">
             
             {/* 3D PARALLAX CORE: Large Cutout CEO sitting in a chair details layout */}
             <motion.div
@@ -134,7 +146,9 @@ export default function CEOSection() {
                 src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
                 alt="Ammar Yasir, CEO Jus & Lay Law Conglomerate"
                 referrerPolicy="no-referrer"
-                className="w-auto h-[120%] sm:h-[130%] lg:h-[155%] max-h-none object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)]"
+                className={`w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
+                  isMobile ? "h-[105%]" : "h-[120%] sm:h-[130%] lg:h-[155%]"
+                }`}
                 style={{
                   WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
                   maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)"

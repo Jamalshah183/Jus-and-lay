@@ -211,10 +211,10 @@ export default function Attorneys() {
                     </a>
                   </div>
 
-                  <div className="flex justify-end gap-3">
+                  <div className="flex flex-col sm:flex-row justify-end gap-3">
                     <button
                       onClick={() => setActivePartner(null)}
-                      className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs focus:outline-none"
+                      className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs focus:outline-none w-full sm:w-auto order-2 sm:order-1"
                     >
                       Dismiss Bio
                     </button>
@@ -231,7 +231,7 @@ export default function Attorneys() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setActivePartner(null)}
-                      className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded-xs text-center"
+                      className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded-xs text-center w-full sm:w-auto order-1 sm:order-2"
                     >
                       WhatsApp Counsel
                     </a>

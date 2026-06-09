@@ -149,10 +149,10 @@ export default function PracticeAreas() {
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
                 <button
                   onClick={() => setSelectedPractice(null)}
-                  className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs"
+                  className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs w-full sm:w-auto order-2 sm:order-1"
                 >
                   Close Brief
                 </button>
@@ -161,7 +161,7 @@ export default function PracticeAreas() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setSelectedPractice(null)}
-                  className="px-6 py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy transition-all rounded-xs shadow-md text-center"
+                  className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy transition-all rounded-xs shadow-md text-center w-full sm:w-auto order-1 sm:order-2"
                 >
                   WhatsApp Advisory
                 </a>

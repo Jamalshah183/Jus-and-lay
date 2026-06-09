@@ -128,26 +128,26 @@ export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormPr
             <button
               key={route}
               onClick={() => setActiveRouting(route)}
-              className={`p-3 text-left rounded-xs border transition-all duration-300 focus:outline-none flex flex-col justify-between h-20 group relative cursor-pointer ${
+              className={`p-3 text-left rounded-xs border transition-all duration-300 focus:outline-none flex flex-col justify-between min-h-[76px] h-auto gap-2 group relative cursor-pointer ${
                 activeRouting === route
                   ? "bg-gold/15 border-gold text-gold"
                   : "bg-navy/40 border-white/5 hover:border-white/20 text-white/60 hover:text-white"
               }`}
             >
-              <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider block leading-tight">
+              <span className="text-[9px] sm:text-[10px] font-sans font-extrabold uppercase tracking-wider block leading-tight">
                 {route === "general" && "General Liaison"}
                 {route === "mna" && "SECP & M&A"}
                 {route === "litigation" && "High-Court Appeals"}
                 {route === "tax" && "FBR & NEPRA Tariffs"}
               </span>
               <div className="flex justify-between items-center w-full mt-auto">
-                <span className="text-[9px] text-white/40 font-mono">
+                <span className="text-[8px] sm:text-[9px] text-white/40 font-mono">
                   {route === "general" && "Liaison Desk"}
                   {route === "mna" && "Ayesha Lodhi"}
                   {route === "litigation" && "Barrister Shah"}
                   {route === "tax" && "Zane Malik"}
                 </span>
-                <ArrowUpRight className={`w-3.5 h-3.5 transition-all duration-300 ${activeRouting === route ? "translate-x-0.5 -translate-y-0.5 opacity-100 text-gold" : "opacity-30 group-hover:opacity-60"}`} />
+                <ArrowUpRight className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-all duration-300 ${activeRouting === route ? "translate-x-0.5 -translate-y-0.5 opacity-100 text-gold" : "opacity-30 group-hover:opacity-60"}`} />
               </div>
             </button>
           ))}
@@ -171,11 +171,11 @@ export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormPr
           href={whatsAppLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-3.5 py-4.5 bg-neutral-900 border-2 border-[#2ecc71]/60 text-[#2ecc71] hover:bg-[#2ecc71]/10 hover:border-[#2ecc71] font-bold font-sans text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-xl relative group focus:outline-none"
+          className="w-full flex items-center justify-center gap-3 py-3.5 sm:py-4 bg-neutral-900 border-2 border-[#2ecc71]/60 text-[#2ecc71] hover:bg-[#2ecc71]/10 hover:border-[#2ecc71] font-bold font-sans text-[10px] sm:text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-xl relative group focus:outline-none px-4"
         >
           {/* Animated pulsing ripple */}
           <span className="absolute inset-0 bg-[#2ecc71]/5 opacity-0 group-hover:opacity-100 rounded-xs transition-opacity duration-300 pointer-events-none" />
-          <MessageCircle className="w-5 h-5 text-[#2ecc71] shrink-0" />
+          <MessageCircle className="w-4.5 h-4.5 text-[#2ecc71] shrink-0" />
           <span>Launch WhatsApp Connection</span>
         </a>
 

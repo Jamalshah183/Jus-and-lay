@@ -1,4 +1,4 @@
-import { useRef, ReactNode } from "react";
+import { useRef, ReactNode, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 
 interface ParallaxSectionProps {
@@ -29,6 +29,16 @@ export default function ParallaxSection({
   children,
 }: ParallaxSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Track the scroll state of this container relative to the viewport
   const { scrollYProgress } = useScroll({
@@ -36,9 +46,9 @@ export default function ParallaxSection({
     offset: ["start end", "end start"],
   });
 
-  // Background shifts significantly to create deep depth (Parallax layer 1)
-  const bgY = useTransform(scrollYProgress, [0, 1], ["-30%", "30%"]);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.08, 1.3]);
+  // Background shifts significantly on both mobile and desktop (speed increased on mobile per user request)
+  const bgY = useTransform(scrollYProgress, [0, 1], isMobile ? ["-20%", "20%"] : ["-30%", "30%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], isMobile ? [1.12, 1.25] : [1.08, 1.3]);
 
   return (
     <div
@@ -53,7 +63,9 @@ export default function ParallaxSection({
           scale: bgScale,
           backgroundImage: `url(${backgroundImage})`,
         }}
-        className="absolute inset-x-0 -top-[30%] -bottom-[30%] bg-cover bg-center"
+        className={`absolute inset-x-0 bg-cover bg-center ${
+          isMobile ? "-top-[25%] -bottom-[25%]" : "-top-[30%] -bottom-[30%]"
+        }`}
       />
 
       {/* 2. Midground transparent dark overlay */}
