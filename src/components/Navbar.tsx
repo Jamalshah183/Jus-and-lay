@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Scale, Menu, X, Phone, MessageCircle } from "lucide-react";
+import { Menu, X, Phone, MessageCircle } from "lucide-react";
 
 interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
@@ -50,10 +50,10 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
 
   return (
     <nav
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 border-b ${
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 border-b shadow-sm ${
         isScrolled
-          ? "bg-navy/95 backdrop-blur-md border-navy-light py-4 shadow-lg"
-          : "bg-transparent border-transparent py-5"
+          ? "bg-[#faf8f4]/95 backdrop-blur-md border-gold/30 py-2 shadow-lg"
+          : "bg-[#fdfbf7] border-gold/20 py-3"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 xl:px-12 flex items-center justify-between">
@@ -61,19 +61,14 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
         <a
           href="#home"
           onClick={(e) => handleLinkClick(e, "#home")}
-          className="flex items-center gap-3 group focus:outline-none"
+          className="relative h-12 w-40 sm:w-48 md:w-56 flex items-center group focus:outline-none"
         >
-          <div className="p-2 border border-gold/40 rounded-sm bg-navy-dark/40 group-hover:border-gold group-hover:bg-navy-light/60 transition-all duration-300">
-            <Scale className="w-6 h-6 text-gold group-hover:scale-110 transition-transform" />
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="font-serif text-base sm:text-xl font-bold tracking-wider text-white uppercase group-hover:text-gold transition-colors leading-tight">
-              Jus & Lay
-            </span>
-            <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-gold/80 font-bold font-sans">
-              Law Conglomerate
-            </span>
-          </div>
+          <img
+            src="https://images.pexels.com/photos/38039527/pexels-photo-38039527.png"
+            alt="Jus & Lay Law Conglomerate Logo"
+            className="absolute left-0 top-1/2 -translate-y-1/2 mt-[2px] h-[120px] sm:h-[144px] md:h-[168px] max-w-none w-auto object-contain transition-transform group-hover:scale-[1.03]"
+            referrerPolicy="no-referrer"
+          />
         </a>
 
         {/* Desktop Links */}
@@ -84,23 +79,23 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleLinkClick(e, link.href)}
-                className="text-xs font-sans tracking-wider font-semibold text-white/80 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
               >
                 {link.label}
               </a>
             ))}
           </div>
 
-          <div className="h-6 w-[1px] bg-white/20" />
+          <div className="h-6 w-[1px] bg-navy-light/20" />
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
             <a
               href="#consultation"
               onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-white hover:text-navy hover:shadow-[0_0_15px_rgba(255,188,87,0.3)] transition-all duration-300 flex items-center gap-2"
+              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-navy-dark hover:text-white hover:shadow-[0_0_15px_rgba(255,188,87,0.3)] transition-all duration-300 flex items-center gap-2"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-navy shrink-0" />
+              <MessageCircle className="w-3.5 h-3.5 text-navy shrink-0 group-hover:text-white" />
               <span>WhatsApp Liaison</span>
             </a>
           </div>
@@ -110,7 +105,7 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
         <div className="flex lg:hidden items-center gap-3">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 border border-white/20 rounded-sm text-white hover:text-gold hover:border-gold/40 transition-colors"
+            className="p-2 border border-navy/20 rounded-sm text-navy hover:text-gold hover:border-gold/40 transition-colors"
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -120,14 +115,14 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-[100%] inset-x-0 bg-navy/98 backdrop-blur-lg border-b border-navy-light py-6 px-6 shadow-2xl flex flex-col gap-6 animate-fade-in">
+        <div className="lg:hidden absolute top-[100%] inset-x-0 bg-[#fdfbf7]/98 backdrop-blur-lg border-b border-gold/30 py-6 px-6 shadow-2xl flex flex-col gap-6 animate-fade-in">
           <div className="flex flex-col gap-4 text-left">
             {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleLinkClick(e, link.href)}
-                className="text-base font-sans tracking-wide font-medium text-white/95 hover:text-gold py-1 border-b border-navy-light/40"
+                className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-1 border-b border-gold/10"
               >
                 {link.label}
               </a>
@@ -138,14 +133,14 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             <a
               href="#consultation"
               onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-white hover:text-navy transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-navy-dark hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4 text-navy shrink-0" />
               <span>WhatsApp Liaison</span>
             </a>
             <a
               href="tel:03218520085"
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs tracking-widest uppercase font-medium font-sans border border-white/20 text-white rounded-xs hover:bg-white/5 transition-all duration-300"
+              className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs tracking-widest uppercase font-medium font-sans border border-navy/20 text-navy rounded-xs hover:bg-navy/5 transition-all duration-300"
             >
               <Phone className="w-4 h-4 text-gold" />
               Direct Chambers Dial

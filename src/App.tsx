@@ -468,18 +468,13 @@ export default function App() {
             
             {/* Left Brand block */}
             <div className="md:col-span-5 space-y-4 text-left">
-              <div className="flex items-center gap-3">
-                <div className="p-2 border border-gold/35 rounded-sm bg-navy-dark">
-                  <Scale className="w-5 h-5 text-gold" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-serif text-base sm:text-lg font-bold tracking-widest text-white uppercase">
-                    Jus & Lay
-                  </span>
-                  <span className="text-[8px] uppercase tracking-[0.35em] text-gold/80 font-bold font-sans">
-                    Law Conglomerate
-                  </span>
-                </div>
+              <div className="inline-block p-4 bg-[#fdfbf7] rounded-sm shadow-md border border-gold/20">
+                <img
+                  src="https://images.pexels.com/photos/38039527/pexels-photo-38039527.png"
+                  alt="Jus & Lay Law Conglomerate Logo"
+                  className="h-[288px] sm:h-[336px] w-auto object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <p className="text-white/40 text-xs font-sans leading-relaxed max-w-sm">
                 Strategic corporate advice, high-stakes FBR/regulatory litigation defense, and premier project transactions under absolute privilege.
