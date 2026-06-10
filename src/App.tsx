@@ -487,7 +487,7 @@ export default function App() {
             <div className="md:col-span-5 space-y-4 text-left">
               <div className="inline-block p-2 bg-[#fdfbf7] rounded-sm shadow-sm border border-gold/20">
                 <img
-                  src="https://images.pexels.com/photos/38039527/pexels-photo-38039527.png"
+                  src="https://images.pexels.com/photos/38052959/pexels-photo-38052959.png"
                   alt="Jus & Lay Law Conglomerate Logo"
                   className="h-[80px] sm:h-[96px] w-auto object-contain"
                   referrerPolicy="no-referrer"
