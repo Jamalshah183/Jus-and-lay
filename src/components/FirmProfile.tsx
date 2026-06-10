@@ -18,16 +18,40 @@ import {
   Fingerprint, 
   ChevronRight, 
   BookOpen, 
-  Users 
+  Users,
+  X,
+  HeartHandshake
 } from "lucide-react";
+import { PRACTICE_AREAS } from "../data";
+import { PracticeArea } from "../types";
+
+const getPracticeIcon = (iconName: string) => {
+  switch (iconName) {
+    case "Building":
+      return <Building className="w-5 h-5 text-gold" />;
+    case "Scale":
+      return <Scale className="w-5 h-5 text-gold" />;
+    case "HeartHandshake":
+      return <HeartHandshake className="w-5 h-5 text-gold" />;
+    case "Landmark":
+      return <Landmark className="w-5 h-5 text-gold" />;
+    case "TrendingUp":
+      return <TrendingUp className="w-5 h-5 text-gold" />;
+    case "FileText":
+      return <FileText className="w-5 h-5 text-gold" />;
+    default:
+      return <Scale className="w-5 h-5 text-gold" />;
+  }
+};
 
 export default function FirmProfile() {
   const [activeTab, setActiveTab] = useState<"overview" | "focus" | "services" | "banking" | "clients">("overview");
+  const [selectedPractice, setSelectedPractice] = useState<PracticeArea | null>(null);
 
   const tabs = [
     { id: "overview", label: "Overview & Heritage", icon: BookOpen },
     { id: "focus", label: "Focus & Approach", icon: Scale },
-    { id: "services", label: "Our Services", icon: Layers },
+    { id: "services", label: "Practice Focus", icon: Layers },
     { id: "banking", label: "Banking Advisory", icon: Coins },
     { id: "clients", label: "Client Registry", icon: Users },
   ] as const;
@@ -258,7 +282,7 @@ export default function FirmProfile() {
               </div>
             )}
 
-            {/* TAB 3: OUR SERVICES */}
+            {/* TAB 3: PRACTICE AREAS & JURISDICTIONS */}
             {activeTab === "services" && (
               <div className="space-y-8 text-left">
                 <div className="pb-6 border-b border-white/5">
@@ -266,68 +290,36 @@ export default function FirmProfile() {
                     Division III
                   </span>
                   <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">
-                    Primary Service Sectors & Legal Grid
+                    Corporate Practices & Areas of Counsel
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  {/* Two Main Divisions */}
-                  <div className="lg:col-span-6 space-y-6">
-                    <h4 className="font-serif text-lg font-bold text-white border-b border-white/5 pb-2">
-                      Structured Business Divisions
-                    </h4>
-
-                    {/* Division 1 Card */}
-                    <div className="p-5 border border-white/5 bg-[#070e1b] rounded-xs relative">
-                      <div className="absolute top-0 right-0 py-2 px-3 bg-gold/15 text-gold border-l border-b border-white/5 text-[9px] uppercase font-bold rounded-tr-xs">
-                        01
-                      </div>
-                      <span className="block font-serif text-base font-semibold text-gold mb-1">
-                        Corporate & Commercial Services
-                      </span>
-                      <p className="text-white/60 text-xs sm:text-sm leading-relaxed font-light">
-                        Our primary advisory domain, focusing specifically on transnational transactions, board advisory, regulatory SECP compliance, and corporate restructure planning.
-                      </p>
-                    </div>
-
-                    {/* Division 2 Card */}
-                    <div className="p-5 border border-white/5 bg-[#070e1b] rounded-xs relative">
-                      <div className="absolute top-0 right-0 py-2 px-3 bg-gold/15 text-gold border-l border-b border-white/5 text-[9px] uppercase font-bold rounded-tr-xs">
-                        02
-                      </div>
-                      <span className="block font-serif text-base font-semibold text-gold mb-1">
-                        Litigation & Alternate Dispute Resolution
-                      </span>
-                      <p className="text-white/60 text-xs sm:text-sm leading-relaxed font-light">
-                        Delivering advocacy across high courts and the Supreme Court of Pakistan, specializing in intensive trials, mediation, and arbitration representation.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Executive Summary List */}
-                  <div className="lg:col-span-6 bg-[#070e1b] border border-white/5 p-6 sm:p-8 rounded-xs space-y-6">
-                    <h4 className="font-serif text-lg font-bold text-white border-b border-white/5 pb-2">
-                      Strategic Corporate Practices
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {[
-                        "Civil Law",
-                        "Criminal Law",
-                        "Employment Law",
-                        "Environmental Law",
-                        "Litigation and Dispute Resolution",
-                        "Corporate and Commercial Litigation",
-                        "Income Tax and Sales Tax"
-                      ].map((service, index) => (
-                        <div key={index} className="flex gap-2.5 items-center">
-                          <CheckCircle2 className="w-4 h-4 text-gold shrink-0" />
-                          <span className="text-white/80 text-xs sm:text-sm font-sans tracking-wide">
-                            {service}
-                          </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {PRACTICE_AREAS.map((practice, index) => (
+                    <div
+                      key={practice.id}
+                      onClick={() => setSelectedPractice(practice)}
+                      className="group p-6 bg-[#070e1b] border border-white/5 rounded-xs hover:border-gold/30 hover:bg-[#070e1b]/45 transition-all duration-300 cursor-pointer text-left flex flex-col justify-between relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-tr from-gold/[0.03] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xs" />
+                      
+                      <div className="space-y-4">
+                        <div className="p-2.5 border border-gold/25 bg-gold/10 text-gold rounded-xs w-fit transition-all duration-300 group-hover:bg-gold group-hover:text-navy">
+                          {getPracticeIcon(practice.icon)}
                         </div>
-                      ))}
+                        <h4 className="font-serif text-lg font-bold text-white group-hover:text-gold transition-colors duration-300">
+                          {practice.title}
+                        </h4>
+                        <p className="text-white/60 text-xs sm:text-sm leading-relaxed font-light">
+                          {practice.description}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 text-[10px] font-sans font-bold tracking-widest text-gold/80 group-hover:text-gold group-hover:translate-x-1.5 transition-all duration-300 mt-6 border-t border-white/5 pt-3">
+                        EXPLORE LIMITS <ChevronRight className="w-3.5 h-3.5" />
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -458,6 +450,96 @@ export default function FirmProfile() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Practice Area Modal in Chambers Profile */}
+      <AnimatePresence>
+        {selectedPractice && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedPractice(null)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative w-full max-w-2xl bg-[#070e1b] border border-gold/25 rounded-md overflow-hidden shadow-2xl z-25 p-8 md:p-10"
+            >
+              <button
+                onClick={() => setSelectedPractice(null)}
+                className="absolute top-5 right-5 text-white/50 hover:text-gold transition-colors p-2 rounded-full border border-white/5 bg-white/[0.02] focus:outline-none"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3.5 border border-gold/30 rounded-xs bg-gold/10 text-gold shadow-sm">
+                  {getPracticeIcon(selectedPractice.icon)}
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold">
+                    Practice Briefing
+                  </span>
+                  <h4 className="font-serif text-2xl sm:text-3xl font-extrabold text-white">
+                    {selectedPractice.title}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="w-full h-[1px] bg-white/10 mb-6" />
+
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-[11px] uppercase tracking-widest text-gold font-bold mb-2">
+                    Scope of Jurisdiction
+                  </h5>
+                  <p className="text-white/80 text-sm sm:text-base leading-relaxed font-sans">
+                    {selectedPractice.longDesc}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-[#0b1324] rounded-xs border border-white/5 flex gap-3.5">
+                  <ShieldCheck className="w-5 h-5 text-gold shrink-0 mt-0.5" />
+                  <div>
+                    <h6 className="font-sans text-xs font-bold text-white uppercase tracking-wider mb-1">
+                      Certified Legal Guardrails
+                    </h6>
+                    <p className="text-white/50 text-xs font-sans leading-relaxed">
+                      All strategic protocols within this division strictly respect international compliance directives and national supreme court precedents.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  onClick={() => setSelectedPractice(null)}
+                  className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs w-full sm:w-auto order-2 sm:order-1"
+                >
+                  Close Brief
+                </button>
+                <a
+                  href={`https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20consult%20specifically%20regarding%20${encodeURIComponent(selectedPractice.title)}.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setSelectedPractice(null)}
+                  className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-[#070e1b] hover:bg-gold hover:text-[#070e1b] transition-all rounded-xs shadow-md text-center w-full sm:w-auto order-1 sm:order-2"
+                >
+                  WhatsApp Advisory
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

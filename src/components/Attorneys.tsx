@@ -1,103 +1,17 @@
 import { useState } from "react";
-import { LEGAL_TEAM } from "../data";
 import { TeamMember } from "../types";
-import { Mail, Phone, Linkedin, ArrowRight, X, Sparkles, Award } from "lucide-react";
+import { Mail, Phone, X, Award } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { LandingAccordionItem } from "./ui/interactive-image-accordion";
 
 export default function Attorneys() {
   const [activePartner, setActivePartner] = useState<TeamMember | null>(null);
 
   return (
     <div className="w-full text-white py-16 md:py-24">
-      {/* Section Header */}
-      <div className="text-center mb-16 md:mb-20">
-        <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-4">
-          Partners & Advocates
-        </span>
-        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6">
-          Elite Corporate Council
-        </h2>
-        <div className="w-24 h-[2px] bg-gold mx-auto mb-8" />
-        <p className="max-w-2xl mx-auto text-white/70 text-sm sm:text-base leading-relaxed font-sans">
-          Our senior partners are recognized globally for their academic pedigree, courtroom poise, and strategic litigation engineering.
-        </p>
-      </div>
+      {/* Modern Interactive Image Accordion displaying partners */}
+      <LandingAccordionItem onSelectPartner={setActivePartner} />
 
-      {/* Profile Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {LEGAL_TEAM.map((partner, index) => (
-          <motion.div
-            key={partner.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5, delay: index * 0.15 }}
-            className="group relative bg-[#0f1e38] border border-white/10 hover:border-gold/40 rounded-sm overflow-hidden transition-all duration-300 shadow-xl gold-shadow flex flex-col justify-between"
-          >
-            {/* Image section with premium zoom and overlay */}
-            <div className="relative aspect-[3/4] overflow-hidden bg-navy-dark">
-              <img
-                src={partner.image}
-                alt={partner.name}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover object-top filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-              />
-              {/* Gold light frame on top */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0f1e38] via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
-              
-              {/* Quick communication deck overlay */}
-              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center z-15 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <span className="text-[10px] tracking-widest text-[#ffbc57] uppercase font-bold font-sans">
-                  Active Senior Staff
-                </span>
-                <div className="flex gap-2">
-                  {partner.linkedin && (
-                    <a
-                      href={partner.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded-sm bg-navy/90 border border-white/10 text-white hover:text-gold hover:border-gold/30 transition-all"
-                      title="LinkedIn"
-                    >
-                      <Linkedin className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                  <a
-                    href={`mailto:${partner.email}`}
-                    className="p-1.5 rounded-sm bg-navy/90 border border-white/10 text-white hover:text-gold hover:border-gold/30 transition-all"
-                    title="Send Private Briefing"
-                  >
-                    <Mail className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Partner Details */}
-            <div className="p-6">
-              <span className="text-[10px] text-gold tracking-widest uppercase font-bold block mb-2 font-sans">
-                {partner.role.split(" & ")[0] /* Shortened for card density */}
-              </span>
-              <h3 className="font-serif text-lg font-bold text-white mb-3 group-hover:text-gold transition-colors duration-300">
-                {partner.name}
-              </h3>
-              
-              {/* Short tagline excerpt */}
-              <p className="text-white/50 text-xs leading-relaxed font-sans line-clamp-2 mb-6">
-                {partner.bio}
-              </p>
-
-              <button
-                onClick={() => setActivePartner(partner)}
-                className="w-full flex items-center justify-between text-left text-xs uppercase font-sans font-bold tracking-widest text-white/80 group-hover:text-gold border-t border-white/10 pt-4 hover:border-gold/20 transition-all focus:outline-none"
-              >
-                Review Full CV
-                <ArrowRight className="w-4 h-4 text-gold" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
 
       {/* CV / Profile Modal overlay */}
       <AnimatePresence>

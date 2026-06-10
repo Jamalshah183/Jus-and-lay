@@ -21,7 +21,6 @@ import {
 // Import custom components
 import Navbar from "./components/Navbar";
 import ParallaxSection from "./components/ParallaxSection";
-import PracticeAreas from "./components/PracticeAreas";
 import Attorneys from "./components/Attorneys";
 import ConsultationForm from "./components/ConsultationForm";
 import CEOSection from "./components/CEOSection";
@@ -149,10 +148,10 @@ export default function App() {
               </a>
               
               <button
-                onClick={(e) => handleCTABookScroll(e, "#practices")}
+                onClick={(e) => handleCTABookScroll(e, "#firm-profile")}
                 className="px-6 py-3.5 sm:px-8 sm:py-4 border border-white/20 hover:border-gold hover:bg-white/5 text-white font-bold text-[10px] sm:text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer text-center"
               >
-                Explore Practices
+                Chambers Profile
               </button>
             </motion.div>
           </div>
@@ -254,16 +253,6 @@ export default function App() {
       {/* Leadership Directive & CEO Interactive 3D Parallax Scroll Screen */}
       <CEOSection />
 
-      {/* 4. SECTION 3: PRACTICE AREAS VIEW (Parallax Background) */}
-      <ParallaxSection
-        id="practices"
-        backgroundImage={IMAGES.practiceBg}
-        heightClass="min-h-screen py-24"
-        overlayOpacity="opacity-75"
-        overlayColor="bg-black"
-      >
-        <PracticeAreas />
-      </ParallaxSection>
 
       {/* 5. SECTION 4: WHY CHOOSE US */}
       <section id="why-choose-us" className="py-24 bg-gradient-to-b from-[#070e1b] to-[#0b1324] relative overflow-hidden">
