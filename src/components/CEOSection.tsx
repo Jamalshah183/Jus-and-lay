@@ -141,27 +141,22 @@ export default function CEOSection() {
               }}
               className="absolute inset-0 w-full h-full flex items-end justify-center lg:justify-end z-10 select-none pointer-events-none origin-bottom"
             >
-              <div className="relative h-full w-full flex items-end justify-center lg:justify-end">
-                {/* Massive CEO Cutout image - breeding outside conventional bounding frames to tower over the layout with no background container */}
-                <img
-                  src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
-                  alt="Ammar Yasir Naqvi, CEO Jus & Lay Law Conglomerate"
-                  referrerPolicy="no-referrer"
-                  className={`w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
-                    isMobile ? "h-[105%]" : "h-[120%] sm:h-[130%] lg:h-[155%]"
-                  }`}
-                  style={{
-                    WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
-                    maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)"
-                  }}
-                />
-                {/* Floating gradient overlay at the lower end of the picture itself */}
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0b1324] via-[#0b1324]/85 to-transparent z-20 pointer-events-none" />
-              </div>
+              {/* Massive CEO Cutout image - breeding outside conventional bounding frames to tower over the layout with no background container */}
+              <img
+                src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
+                alt="Ammar Yasir Naqvi, CEO Jus & Lay Law Conglomerate"
+                referrerPolicy="no-referrer"
+                className={`max-w-none w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
+                  isMobile ? "h-[105%]" : "h-[120%] sm:h-[130%] lg:h-[155%]"
+                }`}
+                style={{
+                  WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
+                  maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)"
+                }}
+              />
+              {/* Floating gradient overlay at the lower end of the picture itself, moving in lockstep with the parallax transition */}
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0b1324] via-[#0b1324]/85 to-transparent z-20 pointer-events-none" />
             </motion.div>
-
-            {/* Bottom transition gradient to cleanly merge the chair cutout model into the bottom fold */}
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0b1324] via-[#0b1324]/85 to-transparent z-15 pointer-events-none" />
 
           </div>
 
