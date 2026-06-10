@@ -19,12 +19,6 @@ export const STATS: Stat[] = [
     value: "98.7%",
     icon: "ShieldCheck",
   },
-  {
-    id: "geography",
-    label: "Metropolitan Corporate Chambers",
-    value: "3 Offices",
-    icon: "Globe",
-  },
 ];
 
 export const PRACTICE_AREAS: PracticeArea[] = [
@@ -102,9 +96,9 @@ export const WHY_CHOOSE_US = [
 export const LEGAL_TEAM: TeamMember[] = [
   {
     id: "ammar",
-    name: "Ammar Yasir",
+    name: "Ammar Yasir Naqvi",
     role: "Chief Executive Officer & Managing Partner",
-    bio: "Ammar Yasir leads Jus & Lay Law Conglomerate as its Chief Executive Officer, specializing in sovereign strategic counsel, high-value transnational corporate mergers, and executive board advisory. Known for restructuring complex corporate syndicates and steering high-profile litigation shields, he advises Pakistan’s premier industrial and energy ventures.",
+    bio: "Ammar Yasir Naqvi leads Jus & Lay Law Conglomerate as its Chief Executive Officer, specializing in sovereign strategic counsel, high-value transnational corporate mergers, and executive board advisory. Known for restructuring complex corporate syndicates and steering high-profile litigation shields, he advises Pakistan’s premier industrial and energy ventures.",
     image: "https://images.pexels.com/photos/38037504/pexels-photo-38037504.png",
     email: "ceo@juslay.pk",
     phone: "+92 (321) 852-0085",
@@ -161,7 +155,7 @@ export const TESTIMONIALS: Testimonial[] = [
 
 export const IMAGES = {
   heroBg: "https://images.pexels.com/photos/6077326/pexels-photo-6077326.jpeg", // courthouse pillars
-  aboutBg: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80&w=1920", // clean lawyer signature desk/library
+  aboutBg: "https://images.pexels.com/photos/7781900/pexels-photo-7781900.jpeg", // clean lawyer signature desk/library
   practiceBg: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=1920", // law library bookshelves
   consultBg: "https://images.unsplash.com/photo-1505664194779-8bebcb3f3739?auto=format&fit=crop&q=80&w=1920", // premium wood scales of justice & books
 };

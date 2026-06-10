@@ -5,6 +5,7 @@ interface ParallaxSectionProps {
   id?: string;
   className?: string;
   backgroundImage: string;
+  mobileBackgroundImage?: string;
   overlayOpacity?: string; // e.g., 'opacity-90' or 'bg-opacity-80'
   overlayColor?: string; // e.g., 'bg-navy-dark'
   midgroundIcon?: "lady-justice" | "scales" | "emblem" | null;
@@ -19,6 +20,7 @@ export default function ParallaxSection({
   id,
   className = "",
   backgroundImage,
+  mobileBackgroundImage,
   overlayOpacity = "opacity-75",
   overlayColor = "bg-black",
   midgroundIcon = null,
@@ -50,6 +52,8 @@ export default function ParallaxSection({
   const bgY = useTransform(scrollYProgress, [0, 1], isMobile ? ["-20%", "20%"] : ["-30%", "30%"]);
   const bgScale = useTransform(scrollYProgress, [0, 1], isMobile ? [1.12, 1.25] : [1.08, 1.3]);
 
+  const activeBg = (isMobile && mobileBackgroundImage) ? mobileBackgroundImage : backgroundImage;
+
   return (
     <div
       id={id}
@@ -61,7 +65,7 @@ export default function ParallaxSection({
         style={{
           y: bgY,
           scale: bgScale,
-          backgroundImage: `url(${backgroundImage})`,
+          backgroundImage: `url(${activeBg})`,
         }}
         className={`absolute inset-x-0 bg-cover bg-center ${
           isMobile ? "-top-[25%] -bottom-[25%]" : "-top-[30%] -bottom-[30%]"

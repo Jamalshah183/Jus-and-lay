@@ -61,12 +61,12 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
         <a
           href="#home"
           onClick={(e) => handleLinkClick(e, "#home")}
-          className="relative h-12 w-40 sm:w-48 md:w-56 flex items-center group focus:outline-none"
+          className="relative h-12 w-52 sm:w-56 md:w-56 flex items-center group focus:outline-none"
         >
           <img
             src="https://images.pexels.com/photos/38039527/pexels-photo-38039527.png"
             alt="Jus & Lay Law Conglomerate Logo"
-            className="absolute left-0 top-1/2 -translate-y-1/2 mt-[2px] h-[120px] sm:h-[144px] md:h-[168px] max-w-none w-auto object-contain transition-transform group-hover:scale-[1.03]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 mt-[2px] h-[160px] sm:h-[175px] md:h-[168px] max-w-none w-auto object-contain transition-transform group-hover:scale-[1.03]"
             referrerPolicy="no-referrer"
           />
         </a>

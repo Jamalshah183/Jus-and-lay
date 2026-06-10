@@ -25,6 +25,7 @@ import PracticeAreas from "./components/PracticeAreas";
 import Attorneys from "./components/Attorneys";
 import ConsultationForm from "./components/ConsultationForm";
 import CEOSection from "./components/CEOSection";
+import FirmProfile from "./components/FirmProfile";
 
 // Helper to map dynamic Lucide icon strings to components for STATS
 const getStatIcon = (iconName: string) => {
@@ -94,6 +95,7 @@ export default function App() {
       <ParallaxSection
         id="home"
         backgroundImage={IMAGES.heroBg}
+        mobileBackgroundImage="https://images.pexels.com/photos/7876151/pexels-photo-7876151.jpeg"
         heightClass="min-h-screen lg:h-screen pt-28 pb-32 lg:py-16"
         overlayOpacity="opacity-60"
         overlayColor="bg-black"
@@ -167,70 +169,85 @@ export default function App() {
         overlayOpacity="opacity-70"
         overlayColor="bg-black"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Block: Floating content container with intro */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7 }}
-            className="lg:col-span-7 bg-[#0b1324]/95 border border-gold/25 p-8 sm:p-10 md:p-12 rounded-sm shadow-2xl gold-shadow relative"
-          >
-            {/* Visual gold corner brackets to depict luxury layout */}
-            <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-gold/45" />
-            <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-gold/45" />
+        <div className="w-full space-y-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Block: Floating content container with intro */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              className="lg:col-span-7 bg-[#0b1324]/95 border border-gold/25 p-8 sm:p-10 md:p-12 rounded-sm shadow-2xl gold-shadow relative"
+            >
+              {/* Visual gold corner brackets to depict luxury layout */}
+              <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-gold/45" />
+              <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-gold/45" />
 
-            <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-4">
-              Two Decades of Judicial Eminence
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 animate-pulse" style={{ animationDuration: "6s" }}>
-              Jus & Lay
-            </h2>
-            <div className="w-20 h-[1.5px] bg-gold mb-8" />
-            
-            <div className="space-y-6 font-sans text-sm sm:text-base text-white/70 leading-relaxed font-light text-left">
-              <p>
-                Jus & Lay Law Conglomerate stands as a premier corporate law syndicate in Pakistan, delivering legal architecture for blue-chip companies, independent power producers (IPPs), multi-jurisdictional financiers, and industrial conglomerates.
-              </p>
-              <p>
-                Operating with direct office structures in Lahore, Karachi, and Islamabad, we translate dense regulatory structures into actionable boardroom risk vectors. We avoid typical caseload volume, allowing our senior Supreme Court advocates to directly lead every transactional and appellate brief.
-              </p>
-            </div>
-
-            {/* Quote block */}
-            <div className="mt-8 p-5 rounded-xs border-l-2 border-gold bg-[#070e1b]/70 font-serif italic text-white/90 text-sm text-left">
-              "We provide strategic sovereign safeguards to navigate intricate local mandates with total client confidentiality."
-              <span className="block mt-2 text-[11px] uppercase tracking-wide text-gold font-sans font-bold not-italic">
-                — Barrister Jamal M. Shah
+              <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-4">
+                Two Decades of Judicial Eminence
               </span>
-            </div>
-          </motion.div>
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 animate-pulse" style={{ animationDuration: "6s" }}>
+                Jus & Lay
+              </h2>
+              <div className="w-20 h-[1.5px] bg-gold mb-8" />
+              
+              <div className="space-y-6 font-sans text-sm sm:text-base text-white/70 leading-relaxed font-light text-left">
+                <p>
+                  Jus & Lay Law Conglomerate stands as a premier corporate law syndicate in Pakistan, delivering legal architecture for blue-chip companies, independent power producers (IPPs), multi-jurisdictional financiers, and industrial conglomerates.
+                </p>
+                <p>
+                  Operating with direct office structures in Lahore, Karachi, and Islamabad, we translate dense regulatory structures into actionable boardroom risk vectors. We avoid typical caseload volume, allowing our senior Supreme Court advocates to directly lead every transactional and appellate brief.
+                </p>
+              </div>
 
-          {/* Right Block: Stats block */}
-          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {STATS.map((stat, idx) => (
-              <motion.div
-                key={stat.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="bg-[#0b1424]/90 border border-white/5 hover:border-gold/25 p-6 rounded-xs flex gap-4 hover:bg-[#0b1424]/40 transition-all duration-300 text-left"
-              >
-                <div className="p-2 border border-gold/20 rounded-xs bg-gold/10 text-gold h-fit">
-                  {getStatIcon(stat.icon)}
-                </div>
-                <div>
-                  <span className="block font-serif text-2xl sm:text-3xl font-extrabold text-gold tracking-tight mb-1">
-                    {stat.value}
-                  </span>
-                  <span className="block text-white/60 text-xs font-sans tracking-wide font-medium leading-snug">
-                    {stat.label}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+              {/* Quote block */}
+              <div className="mt-8 p-5 rounded-xs border-l-2 border-gold bg-[#070e1b]/70 font-serif italic text-white/90 text-sm text-left">
+                "We provide strategic sovereign safeguards to navigate intricate local mandates with total client confidentiality."
+                <span className="block mt-2 text-[11px] uppercase tracking-wide text-gold font-sans font-bold not-italic">
+                  — Barrister Jamal M. Shah
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Right Block: Stats block */}
+            <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {STATS.map((stat, idx) => (
+                <motion.div
+                  key={stat.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.5, delay: idx * 0.15 }}
+                  className="bg-[#0b1424]/90 border border-white/5 hover:border-gold/25 p-6 rounded-xs flex gap-4 hover:bg-[#0b1424]/40 transition-all duration-300 text-left"
+                >
+                  <div className="p-2 border border-gold/20 rounded-xs bg-gold/10 text-gold h-fit">
+                    {getStatIcon(stat.icon)}
+                  </div>
+                  <div>
+                    <span className="block font-serif text-2xl sm:text-3xl font-extrabold text-gold tracking-tight mb-1">
+                      {stat.value}
+                    </span>
+                    <span className="block text-white/60 text-xs font-sans tracking-wide font-medium leading-snug">
+                      {stat.label}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
+
+          {/* Premium Visual Divider */}
+          <div className="flex items-center justify-center gap-6 max-w-2xl mx-auto py-10">
+            <div className="h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent flex-grow" />
+            <div className="p-1 px-4 border border-gold/30 rounded-full bg-gold/5 text-gold text-[10px] tracking-widest uppercase font-sans font-extrabold flex items-center gap-2">
+              <Scale className="w-3.5 h-3.5" />
+              <span>Chambers Dossier</span>
+            </div>
+            <div className="h-[1px] bg-gradient-to-l from-transparent via-gold/30 to-transparent flex-grow" />
+          </div>
+
+          {/* Detailed Firm Profile Dossier Section */}
+          <FirmProfile />
         </div>
       </ParallaxSection>
 
