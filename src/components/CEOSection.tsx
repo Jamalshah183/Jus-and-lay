@@ -143,7 +143,7 @@ export default function CEOSection() {
             >
               {/* Massive CEO Cutout image - breeding outside conventional bounding frames to tower over the layout with no background container */}
               <img
-                src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
+                src="https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg"
                 alt="Ammar Yasir Naqvi, CEO Jus & Lay Law Conglomerate"
                 referrerPolicy="no-referrer"
                 className={`w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
