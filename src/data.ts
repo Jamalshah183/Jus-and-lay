@@ -99,7 +99,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     name: "Ammar Yasir Naqvi",
     role: "Chief Executive Officer & Managing Partner",
     bio: "Ammar Yasir Naqvi leads Jus & Lay Law Conglomerate as its Chief Executive Officer, specializing in sovereign strategic counsel, high-value transnational corporate mergers, and executive board advisory. Known for restructuring complex corporate syndicates and steering high-profile litigation shields, he advises Pakistan’s premier industrial and energy ventures.",
-    image: "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600&h=800",
     email: "ceo@juslay.pk",
     phone: "+92 (321) 852-0085",
     linkedin: "https://linkedin.com/in/ammar-yasir-law",

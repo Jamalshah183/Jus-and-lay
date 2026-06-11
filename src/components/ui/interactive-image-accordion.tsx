@@ -6,7 +6,9 @@ import { TeamMember } from '../../types';
 const accordionItems = LEGAL_TEAM.map((partner, index) => ({
   id: index + 1,
   title: partner.name,
-  imageUrl: partner.image,
+  imageUrl: partner.id === "ammar" 
+    ? "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg" 
+    : partner.image,
   rawPartner: partner
 }));
 
@@ -47,7 +49,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
         }}
       />
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Caption Text */}
       <span
@@ -83,20 +85,20 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
   return (
     <div className="bg-transparent font-sans text-left">
       <section className="container mx-auto px-4 py-12 md:py-24">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           
           {/* Left Side: Text Content */}
-          <div className="w-full md:w-1/2 text-center md:text-left">
+          <div className="w-full lg:w-[32%] text-center lg:text-left animate-fade-in">
             <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-bold block mb-3">
               Elite Corporate Council
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight tracking-tighter font-serif">
+            <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-tight tracking-tighter font-serif">
               Partners & Advocates
             </h1>
-            <p className="mt-6 text-lg text-white/70 max-w-xl mx-auto md:mx-0 font-light leading-relaxed">
+            <p className="mt-6 text-base lg:text-lg text-white/70 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
               Our senior partners are recognized globally for intellectual pedigree, tactical trial posture, and meticulous commercial guidance. Let our supreme counsel defend your sovereign assets.
             </p>
-            <div className="mt-8 flex justify-center md:justify-start gap-4">
+            <div className="mt-8 flex justify-center lg:justify-start gap-4">
               <a
                 href="#contact"
                 className="inline-block bg-gold text-[#070e1b] font-bold px-8 py-3 rounded-lg shadow-lg hover:bg-gold-light transition-all duration-300 text-sm tracking-wide"
@@ -113,9 +115,9 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
           </div>
 
           {/* Right Side: Image Accordion */}
-          <div className="w-full md:w-1/2 overflow-hidden">
+          <div className="w-full lg:w-[68%] overflow-hidden flex justify-center">
             {/* Changed flex-col to flex-row to keep the layout consistent */}
-            <div className="flex flex-row items-center justify-start md:justify-center gap-4 overflow-x-auto p-4 max-w-full scrollbar-none">
+            <div className="flex flex-row items-center justify-start lg:justify-center gap-4 overflow-x-auto p-4 max-w-full scrollbar-none">
               {accordionItems.map((item, index) => (
                 <AccordionItem
                   key={item.id}
