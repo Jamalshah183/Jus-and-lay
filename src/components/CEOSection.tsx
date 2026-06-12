@@ -107,20 +107,6 @@ export default function CEOSection() {
                   </p>
                 </div>
 
-                {/* CEO Signature / Details Block */}
-                <div className="pt-8 border-t border-white/10">
-                  <div>
-                    <span className="block font-serif text-xl sm:text-2xl font-extrabold text-white tracking-wide">
-                      Ammar Yasir Naqvi
-                    </span>
-                    <span className="block text-xs uppercase tracking-widest text-gold font-sans font-bold mt-1">
-                      Chief Executive Officer & Managing Partner
-                    </span>
-                    <span className="text-white/40 text-[10px] font-mono block mt-1">
-                      Lahore HQ • Suite No.1, 236-Riwaz Garden
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -130,7 +116,7 @@ export default function CEOSection() {
           </div>
 
           {/* RIGHT COLUMN: Massive Cutout CEO Parallax Stage (z-10) - Balanced to 6-columns */}
-          <div className="lg:col-span-6 flex justify-center lg:justify-end items-end order-1 lg:order-2 h-[280px] sm:h-[380px] lg:h-[850px] relative w-full">
+          <div className="lg:col-span-6 flex flex-col justify-end items-center lg:items-end order-1 lg:order-2 h-[340px] sm:h-[450px] lg:h-[850px] relative w-full">
             
             {/* 3D PARALLAX CORE: Large Cutout CEO sitting in a chair details layout */}
             <motion.div
@@ -141,21 +127,44 @@ export default function CEOSection() {
               }}
               className="absolute inset-0 w-full h-full flex items-end justify-center lg:justify-end z-10 select-none pointer-events-none origin-bottom"
             >
-              {/* Massive CEO Cutout image - breeding outside conventional bounding frames to tower over the layout with no background container */}
-              <img
-                src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
-                alt="Ammar Yasir Naqvi, CEO Jus & Lay Law Conglomerate"
-                referrerPolicy="no-referrer"
-                className={`w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
-                  isMobile ? "h-[105%]" : "h-[120%] sm:h-[130%] lg:h-[155%]"
-                }`}
-                style={{
-                  WebkitMaskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
-                  maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)"
-                }}
-              />
-              {/* Floating gradient overlay at the lower end of the picture itself, moving in lockstep with the parallax transition */}
-              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0b1324] via-[#0b1324]/85 to-transparent z-20 pointer-events-none" />
+              {/* Image & Badge Integrated Wrapper - sizes strictly by the image width, permitting pointer-events on the badge itself */}
+              <div className="relative h-full flex flex-col items-center justify-end shrink-0 max-w-full pointer-events-auto">
+                {/* Massive CEO Cutout image - breeding outside conventional bounding frames to tower over the layout with no background container */}
+                <img
+                  src="https://images.pexels.com/photos/38037504/pexels-photo-38037504.png"
+                  alt="Ammar Yasir Naqvi, CEO Jus & Lay Law Conglomerate"
+                  referrerPolicy="no-referrer"
+                  className={`w-auto object-contain object-bottom filter drop-shadow-[0_25px_50px_rgba(4,8,17,0.95)] drop-shadow-[0_0_80px_rgba(255,188,87,0.05)] ${
+                    isMobile ? "h-[105%]" : "h-[120%] sm:h-[130%] lg:h-[155%]"
+                  }`}
+                />
+
+                {/* Credential Badge - perfectly sized to peer/image boundary, fixed with the image at the exact bottom */}
+                <div 
+                  id="ceo-credential-badge" 
+                  className="absolute bottom-0 z-30 w-full bg-[#070e1b]/95 backdrop-blur-xl border border-gold/40 p-4 sm:p-5 rounded-t-lg rounded-b-none shadow-[0_20px_50px_rgba(4,8,17,0.98)] text-left group transition-all duration-300 hover:border-gold"
+                >
+                  <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-gold to-transparent" />
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 sm:p-2.5 bg-gold/10 rounded-xs border border-gold/30 shrink-0 mt-0.5">
+                      <Award className="w-5 h-5 text-gold" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-serif text-[15px] sm:text-xl font-bold text-white tracking-wide truncate">
+                        Ammar Yasir Naqvi
+                      </h4>
+                      <p className="text-[9px] sm:text-xs uppercase tracking-widest text-gold font-sans font-extrabold mt-0.5 truncate">
+                        Chief Executive Officer & Managing Partner
+                      </p>
+                      <p className="text-white/50 text-[8px] sm:text-[10px] font-mono mt-2 flex items-center gap-1.5 leading-relaxed truncate">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        Lahore HQ • Suite No.1, 236-Riwaz Garden
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </motion.div>
 
           </div>

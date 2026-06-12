@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IMAGES, WHY_CHOOSE_US, STATS, TESTIMONIALS } from "./data";
+import { IMAGES, WHY_CHOOSE_US, STATS } from "./data";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Scale, 
@@ -26,6 +26,7 @@ import ConsultationForm from "./components/ConsultationForm";
 import CEOSection from "./components/CEOSection";
 import FirmProfile from "./components/FirmProfile";
 import LoadingScreen from "./components/LoadingScreen";
+import DisplayCards from "./components/DisplayCards";
 
 // Helper to map dynamic Lucide icon strings to components for STATS
 const getStatIcon = (iconName: string) => {
@@ -60,7 +61,6 @@ const getWhyIcon = (iconName: string) => {
 };
 
 export default function App() {
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -99,13 +99,6 @@ export default function App() {
     }
   };
 
-  // Auto-scroll testimonials
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
-    }, 8500);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#070e1b] text-white selection:bg-gold selection:text-navy selection:font-bold overflow-x-hidden font-sans">
@@ -329,53 +322,17 @@ export default function App() {
             ))}
           </div>
 
-          {/* Testimonial slider / showcase inline */}
-          <div className="mt-20 max-w-4xl mx-auto bg-[#0b1424] p-8 md:p-12 border border-gold/20 rounded-sm shadow-xl relative overflow-hidden text-center">
-            <div className="absolute top-0 right-0 p-8 text-gold/5 pointer-events-none font-serif text-9xl">
-              ”
+          {/* Testimonial Area featuring the custom stacked DisplayCards component */}
+          <div className="mt-20 max-w-4xl mx-auto flex flex-col items-center justify-center relative overflow-visible w-full">
+            <div className="text-center mb-6">
+              <span className="text-xs uppercase tracking-[0.25em] text-gold font-sans font-extrabold block mb-2">
+                Executive Testimonials
+              </span>
+              <p className="text-white/50 text-xs font-mono">
+                Interact with the cards to scale, reorder & review legal protection results
+              </p>
             </div>
-            
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTestimonial}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-6 focus:outline-none"
-              >
-                <div className="flex justify-center gap-1.5 text-gold">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4.5 h-4.5 fill-gold stroke-none" />
-                  ))}
-                </div>
-                <p className="font-serif italic text-base sm:text-lg md:text-xl text-white/95 leading-relaxed">
-                  "{TESTIMONIALS[activeTestimonial].quote}"
-                </p>
-                <div>
-                  <h4 className="font-serif text-sm font-bold text-white uppercase tracking-wider">
-                    {TESTIMONIALS[activeTestimonial].author}
-                  </h4>
-                  <span className="text-xs text-gold font-sans">
-                    {TESTIMONIALS[activeTestimonial].role} at <span className="font-semibold">{TESTIMONIALS[activeTestimonial].company}</span>
-                  </span>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Testimonial Dot controls */}
-            <div className="flex justify-center gap-2.5 mt-8 border-t border-white/5 pt-6">
-              {TESTIMONIALS.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveTestimonial(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-none ${
-                    activeTestimonial === i ? "bg-gold w-6" : "bg-white/20 hover:bg-white/45"
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
-            </div>
+            <DisplayCards />
           </div>
         </div>
       </section>

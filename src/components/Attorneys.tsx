@@ -16,13 +16,13 @@ export default function Attorneys() {
       {/* CV / Profile Modal overlay */}
       <AnimatePresence>
         {activePartner && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 xs:p-4 md:p-6 overflow-y-auto">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              className="fixed inset-0 bg-black/90 backdrop-blur-md"
               onClick={() => setActivePartner(null)}
             />
 
@@ -32,78 +32,78 @@ export default function Attorneys() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
               transition={{ type: "spring", duration: 0.6 }}
-              className="relative w-full max-w-3xl bg-navy-dark border border-gold/30 rounded-md overflow-hidden shadow-2xl z-25 flex flex-col md:flex-row"
+              className="relative my-auto w-full max-w-3xl bg-[#0b1424] border border-gold/30 rounded-xl overflow-y-auto md:overflow-visible md:overflow-y-visible shadow-2xl z-25 flex flex-col md:flex-row max-h-[92vh] md:max-h-none"
             >
               <button
                 onClick={() => setActivePartner(null)}
-                className="absolute top-5 right-5 z-20 text-white/50 hover:text-gold transition-colors p-2 rounded-full border border-white/5 bg-navy-dark/70 focus:outline-none"
+                className="absolute top-4 right-4 z-30 text-white/70 hover:text-gold transition-colors p-2 rounded-full border border-white/10 bg-black/60 backdrop-blur-xs focus:outline-none"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Portrait Side (MD+) */}
-              <div className="w-full md:w-2/5 aspect-[3/4] md:aspect-auto relative bg-navy flex items-center justify-center">
+              {/* Portrait Side */}
+              <div className="w-full md:w-2/5 aspect-[4/3] md:aspect-auto md:min-h-[480px] relative bg-navy flex items-center justify-center shrink-0">
                 <img
-                  src={activePartner.image}
+                  src={activePartner.id === "ammar" ? "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg" : activePartner.image}
                   alt={activePartner.name}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-top"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-dark via-transparent to-transparent opacity-90 md:opacity-60" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Award className="w-4 h-4 text-gold animate-pulse" />
-                    <span className="text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0b1424] via-transparent to-transparent opacity-95 md:opacity-60" />
+                <div className="absolute bottom-4 left-4 xs:bottom-6 xs:left-6 right-6">
+                  <div className="flex items-center gap-2 mb-1 xs:mb-2">
+                    <Award className="w-3.5 h-3.5 text-gold animate-pulse" />
+                    <span className="text-[8px] xs:text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
                       Senior Executive Board
                     </span>
                   </div>
-                  <h4 className="font-serif text-xl font-bold text-white">
+                  <h4 className="font-serif text-lg xs:text-xl font-bold text-white">
                     {activePartner.name}
                   </h4>
                 </div>
               </div>
 
               {/* CV Body Side */}
-              <div className="w-full md:w-3/5 p-8 md:p-10 flex flex-col justify-between">
+              <div className="w-full md:w-3/5 p-5 xs:p-6 sm:p-10 flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold font-sans">
+                  <span className="text-[9px] xs:text-[10px] uppercase tracking-[0.25em] text-gold font-bold font-sans">
                     Academic & Trial Pedigree
                   </span>
-                  <h4 className="font-serif text-2xl font-extrabold text-white mt-1 mb-2">
+                  <h4 className="font-serif text-xl xs:text-2xl font-extrabold text-white mt-1 mb-1 xs:mb-2">
                     {activePartner.name}
                   </h4>
-                  <p className="text-gold/90 text-xs font-sans font-semibold mb-6 tracking-wide uppercase border-b border-white/10 pb-4">
+                  <p className="text-gold/90 text-[10px] xs:text-xs font-sans font-semibold mb-4 xs:mb-6 tracking-wide uppercase border-b border-white/10 pb-3 xs:pb-4">
                     {activePartner.role}
                   </p>
 
-                  <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2 text-white/70 text-sm leading-relaxed font-sans">
+                  <div className="space-y-3 xs:space-y-4 max-h-[140px] xs:max-h-[200px] sm:max-h-[220px] overflow-y-auto pr-2 text-white/70 text-xs xs:text-sm leading-relaxed font-sans scrollbar-thin">
                     <p>{activePartner.bio}</p>
-                    <p className="text-xs text-white/50 uppercase tracking-widest font-bold">
+                    <p className="text-[10px] xs:text-xs text-white/50 uppercase tracking-widest font-bold">
                       • Strategic Executive Mandate
                     </p>
-                    <p className="text-xs">
+                    <p className="text-[11px] xs:text-xs">
                       Engaged exclusively in counsel for sovereign funds, multi-state commercial operations, high-net equity distribution, and high-frequency litigation defense.
                     </p>
                   </div>
                 </div>
 
                 {/* Direct Contact options */}
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <h5 className="text-[10px] uppercase tracking-widest text-white/50 font-bold mb-3">
+                <div className="mt-6 md:mt-8 pt-4 xs:pt-6 border-t border-white/10">
+                  <h5 className="text-[9px] xs:text-[10px] uppercase tracking-widest text-white/50 font-bold mb-3">
                     Direct Secure Communication Channels
                   </h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3 mb-4 xs:mb-6">
                     <a
                       href={`mailto:${activePartner.email}`}
-                      className="flex items-center gap-3 p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
+                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
                     >
                       <Mail className="w-4 h-4 text-gold group-hover:scale-110 transition-transform" />
-                      <div className="overflow-hidden">
-                        <span className="block text-[9px] uppercase tracking-wider text-white/40">
+                      <div className="overflow-hidden text-left">
+                        <span className="block text-[8px] xs:text-[9px] uppercase tracking-wider text-white/40">
                           Direct Cryptographic Mail
                         </span>
-                        <span className="block text-xs font-mono text-white/85 truncate">
+                        <span className="block text-[11px] xs:text-xs font-mono text-white/85 truncate">
                           {activePartner.email}
                         </span>
                       </div>
@@ -111,24 +111,24 @@ export default function Attorneys() {
 
                     <a
                       href={`tel:${activePartner.phone.replace(/\s+/g, "")}`}
-                      className="flex items-center gap-3 p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
+                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
                     >
                       <Phone className="w-4 h-4 text-gold group-hover:scale-110 transition-transform" />
-                      <div>
-                        <span className="block text-[9px] uppercase tracking-wider text-white/40">
+                      <div className="text-left">
+                        <span className="block text-[8px] xs:text-[9px] uppercase tracking-wider text-white/40">
                           Partner Secure Voiceline
                         </span>
-                        <span className="block text-xs font-mono text-white/85">
+                        <span className="block text-[11px] xs:text-xs font-mono text-white/85 truncate">
                           {activePartner.phone}
                         </span>
                       </div>
                     </a>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row justify-end gap-3">
+                  <div className="flex flex-col sm:flex-row justify-end gap-2 xs:gap-3">
                     <button
                       onClick={() => setActivePartner(null)}
-                      className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs focus:outline-none w-full sm:w-auto order-2 sm:order-1"
+                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs focus:outline-none w-full sm:w-auto order-2 sm:order-1"
                     >
                       Dismiss Bio
                     </button>
@@ -145,7 +145,7 @@ export default function Attorneys() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setActivePartner(null)}
-                      className="px-6 py-3 sm:py-2.5 text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded-xs text-center w-full sm:w-auto order-1 sm:order-2"
+                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded-xs text-center w-full sm:w-auto order-1 sm:order-2"
                     >
                       WhatsApp Counsel
                     </a>
