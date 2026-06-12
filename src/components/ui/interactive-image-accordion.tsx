@@ -31,7 +31,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
       className={`
         relative h-[450px] rounded-2xl overflow-hidden cursor-pointer
         transition-all duration-700 ease-in-out shrink-0
-        ${isActive ? 'w-[280px] xs:w-[320px] sm:w-[360px] md:w-[400px]' : 'w-[60px]'}
+        ${isActive ? 'w-[150px] xs:w-[200px] sm:w-[320px] md:w-[400px]' : 'w-11 xs:w-12 sm:w-14 md:w-[60px]'}
       `}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
@@ -54,13 +54,13 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
       {/* Caption Text */}
       <span
         className={`
-          absolute text-white text-lg font-semibold whitespace-nowrap
+          absolute text-white font-semibold whitespace-nowrap
           transition-all duration-300 ease-in-out
           ${
             isActive
-              ? 'bottom-6 left-1/2 -translate-x-1/2 rotate-0' // Active state: horizontal, bottom-center
+              ? 'bottom-6 left-1/2 -translate-x-1/2 rotate-0 text-[11px] xs:text-sm md:text-lg' // Active state: horizontal, bottom-center
               // Inactive state: vertical, positioned at the bottom, for all screen sizes
-              : 'w-auto text-left bottom-24 left-1/2 -translate-x-1/2 rotate-90'
+              : 'w-auto text-left bottom-24 left-1/2 -translate-x-1/2 rotate-90 text-[9px] sm:text-xs md:text-lg tracking-wider hidden xs:block'
           }
         `}
       >
@@ -117,7 +117,7 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
           {/* Right Side: Image Accordion */}
           <div className="w-full lg:w-[68%] overflow-hidden flex justify-center">
             {/* Changed flex-col to flex-row to keep the layout consistent */}
-            <div className="flex flex-row items-center justify-start lg:justify-center gap-4 overflow-x-auto p-4 max-w-full scrollbar-none">
+            <div className="flex flex-row items-center justify-center gap-2 xs:gap-3 sm:gap-4 p-4 max-w-full scrollbar-none">
               {accordionItems.map((item, index) => (
                 <AccordionItem
                   key={item.id}

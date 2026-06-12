@@ -25,6 +25,7 @@ import Attorneys from "./components/Attorneys";
 import ConsultationForm from "./components/ConsultationForm";
 import CEOSection from "./components/CEOSection";
 import FirmProfile from "./components/FirmProfile";
+import LoadingScreen from "./components/LoadingScreen";
 
 // Helper to map dynamic Lucide icon strings to components for STATS
 const getStatIcon = (iconName: string) => {
@@ -60,6 +61,28 @@ const getWhyIcon = (iconName: string) => {
 
 export default function App() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const handleLoad = () => {
+      // Ensure smooth visual experience with a short deliberate minimum duration
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1800);
+    };
+
+    if (document.readyState === "complete") {
+      handleLoad();
+    } else {
+      window.addEventListener("load", handleLoad);
+      // Fallback to auto-clear in case of connection edge cases
+      const fallback = setTimeout(handleLoad, 4000);
+      return () => {
+        window.removeEventListener("load", handleLoad);
+        clearTimeout(fallback);
+      };
+    }
+  }, []);
 
   const handleCTABookScroll = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -87,6 +110,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#070e1b] text-white selection:bg-gold selection:text-navy selection:font-bold overflow-x-hidden font-sans">
       
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen key="loader" />}
+      </AnimatePresence>
+
       {/* 1. STICKY NAVBAR */}
       <Navbar />
 
