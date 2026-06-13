@@ -85,7 +85,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "CEO",
     bio: "B.com, LL.B Advocate High Court. Area of Practice: Banking, Corporate, Commercial, Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg",
-    email: "ceo@juslay.pk",
+    email: "ceo@juslay.com",
     phone: "+92 (321) 852-0085"
   },
   {
@@ -94,7 +94,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Advocate High Court",
     bio: "Advocate High Court.",
     image: "https://images.pexels.com/photos/38097665/pexels-photo-38097665.jpeg",
-    email: "ali.anwar@juslay.pk",
+    email: "ali.anwar@juslay.com",
     phone: "+92 (321) 852-0085"
   },
   {
@@ -103,7 +103,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Senior Associate",
     bio: "B.A, LL. B Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097667/pexels-photo-38097667.jpeg",
-    email: "abid.awan@juslay.pk",
+    email: "abid.awan@juslay.com",
     phone: "+92 (321) 852-0085"
   },
   {
@@ -112,7 +112,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Senior Associate",
     bio: "LL.M from University of Sunderland, UK Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097666/pexels-photo-38097666.jpeg",
-    email: "taqi.hassan@juslay.pk",
+    email: "taqi.hassan@juslay.com",
     phone: "+92 (321) 852-0085"
   }
 ];
