@@ -7,76 +7,158 @@ export interface LegalService {
 
 export const INTRODUCTION = {
   firmName: "JUS & LAY",
-  tagline: "Dedicated, Efficient & Well Reputed Law Firm",
-  sentence1: '"JUS & LAY" is a well-established, dedicated, efficient & well reputed law firm which is providing highest quality of legal representation to its clients.',
-  sentence2: "As an attorney, our record verdicts and unwavering dedication to represent our client, have earned as a national reputation for diligent, compassionate, and competent advocacy in our areas of law."
+  tagline: "Advocates, Legal Consultants & Corporate Advisors",
+  sentence1: "JUS & LAY is a distinguished full-service law firm committed to delivering exceptional legal solutions to corporate entities, financial institutions, businesses, and individual clients. Built upon a foundation of professional excellence, integrity, and client-focused service, the firm has established a reputation for providing practical, commercially sound, and result-oriented legal advice.",
+  sentence2: "Our lawyers combine extensive legal expertise with a deep understanding of commercial realities, enabling us to provide innovative solutions to complex legal and regulatory challenges. Through unwavering dedication to our clients’ interests, we have earned recognition for our professionalism, strategic insight, and effective representation."
 };
 
 export const ABOUT_FIRM = {
-  paragraph1: '"Jus & Lay" is a well-established, medium-size law firm with significant national capacity through a network of associates, giving us sizable influence in key financial centers throughout the country.',
-  paragraph2: "Since Several years, the firm provides the highest quality of legal representation to institutional and individual clients.",
-  paragraph3: "We offer a full range of corporate, commercial, civil & criminal legal services, particularly Corporate & Banking Laws litigation as well as an advisory side. Our services to the financial institutions covering corporate matters and transaction based legal opinions on Financial Agreements, documentations, mortgages, execution of documents, verification of documents etc., of the banking clients, including but not limited to, dispute resolution, litigation, arbitration, employment, finance, company registration, tax, trusts and estates."
+  paragraph1: "JUS & LAY is a well-established law firm with a strong presence across Pakistan through an extensive network of professional associates and legal practitioners. This nationwide reach enables us to provide seamless legal services across major commercial and financial centers of the country.",
+  paragraph2: "Over the years, the firm has successfully represented a diverse range of clients, including financial institutions, corporate entities, trusts, healthcare organizations, and private businesses. We provide comprehensive legal services encompassing corporate advisory, banking and finance, commercial transactions, dispute resolution, litigation, regulatory compliance, employment matters, taxation, and corporate governance.",
+  paragraph3: "Our expertise extends to advising financial institutions on transactional matters, financing arrangements, security documentation, mortgages, legal due diligence, verification of title and corporate records, enforcement proceedings, and regulatory compliance."
 };
 
-export const FOCUS_AND_APPROACH = {
-  paragraph1: "As a corporate and commercial law firm, we focus strongly on the needs of our clients and their respective businesses. Our client base requires a rapid response, appropriate advice and innovative legal solutions based on a full understanding of their individual business needs. The practice is built on its reputation of exceptional service delivery coupled with appropriate and outstanding skills and expertise.",
-  paragraph2: "We believe in following a holistic approach to ensure that our clients always receive the best advice.",
-  paragraph3: "Our firm is geared for efficiency and accessibility through the range of services we offer and how we interact with our clients. Through our effective network of associates, we can respond swiftly to address the needs of our clients locally and abroad. In search of excellence for the benefit of our clients, we continually seek to find a balance between appropriate legal services and cost-efficiency. We have a keen understanding of global economic and market trends and combined with our commitment to excellence, we have the ability to cut straight to the chase in any matter."
+export const OUR_PHILOSOPHY = {
+  paragraph1: "At JUS & LAY, we recognize that every client faces unique legal and commercial challenges. Accordingly, our approach is based on a thorough understanding of our clients’ business objectives, industry dynamics, and risk considerations.",
+  commitments: [
+    "Delivering practical and commercially viable legal solutions.",
+    "Providing timely and responsive legal services.",
+    "Maintaining the highest standards of professional integrity.",
+    "Building long-term relationships based on trust and reliability.",
+    "Ensuring cost-effective and value-driven legal representation."
+  ],
+  paragraph2: "Our commitment to excellence, combined with our understanding of evolving market and regulatory developments, enables us to provide strategic legal advice that supports our clients’ business growth and protects their interests."
 };
 
-export const MAIN_DIVISIONS = [
+export const PRACTICE_AREAS = [
   {
-    number: "1.",
-    title: "Corporate & Commercial Legal Services",
-    description: "Focusing on transactional and regulatory services."
+    title: "Corporate & Commercial Law",
+    items: [
+      "Corporate structuring and governance",
+      "Company incorporation and registration",
+      "Commercial contracts and agreements",
+      "Mergers, acquisitions, and restructuring",
+      "Regulatory and compliance advisory",
+      "Joint ventures and strategic alliances"
+    ]
   },
   {
-    number: "2.",
+    title: "Banking & Finance",
+    items: [
+      "Corporate and syndicated financing",
+      "Security documentation and perfection",
+      "Mortgage and charge creation",
+      "Banking litigation and recovery proceedings",
+      "Legal due diligence and verification",
+      "Financial and transactional advisory"
+    ]
+  },
+  {
     title: "Litigation & Dispute Resolution",
-    description: "Focusing on litigation and alternative dispute resolution in the form of mediation and arbitration."
+    items: [
+      "Civil litigation",
+      "Commercial and corporate disputes",
+      "Banking and financial litigation",
+      "Arbitration and mediation",
+      "Regulatory proceedings",
+      "Enforcement and recovery actions"
+    ]
+  },
+  {
+    title: "Employment & Labour Law",
+    items: [
+      "Employment contracts and policies",
+      "Workplace disputes",
+      "Disciplinary proceedings",
+      "Labour compliance advisory"
+    ]
+  },
+  {
+    title: "Taxation",
+    items: [
+      "Income Tax matters",
+      "Sales Tax matters",
+      "Tax litigation and advisory services"
+    ]
+  },
+  {
+    title: "Criminal Law",
+    items: [
+      "Criminal litigation",
+      "White-collar crime matters",
+      "Regulatory investigations"
+    ]
+  },
+  {
+    title: "Environmental & Regulatory Law",
+    items: [
+      "Regulatory compliance",
+      "Environmental advisory services",
+      "Administrative proceedings"
+    ]
   }
 ];
 
-export const EXECUTIVE_SERVICES = [
-  "Civil Law",
-  "Criminal Law",
-  "Employment Law",
-  "Environmental Law",
-  "Litigation & Dispute Resolution",
-  "Corporate & Commercial Litigation",
-  "Income Tax, Sale tax"
-];
-
 export const FINANCIAL_INSTITUTIONS_SERVICE = {
-  title: "Services to Financial Institutions (BOP & HBL)",
-  contentiousTitle: "In contentious matters we are dealing with",
+  title: "Services to Financial Institutions",
+  subtitle: "The firm regularly advises and represents leading financial institutions, including commercial banks and development finance institutions, in both contentious and non-contentious matters.",
+  contentiousTitle: "Contentious Matters",
   contentious: [
-    "Recovery Suit by and against the bank",
-    "HR matters",
-    "Civil matter",
-    "LEA matters"
+    "Recovery suits by and against financial institutions",
+    "Banking and finance disputes",
+    "Employment and human resource matters",
+    "Civil litigation",
+    "Matters involving law enforcement and regulatory authorities",
+    "Enforcement of securities and guarantees"
   ],
-  nonContentiousTitle: "In non-contentious matters, we are dealing with",
+  nonContentiousTitle: "Non-Contentious Matters",
   nonContentious: [
-    "Transaction matters which include syndicate, corporate and commercial financing agreements",
-    "Guarantee matters",
-    "Security perfection, genuineness veracity of documents",
-    "Any related matters assigned to our firm"
+    "Corporate, commercial, and syndicated financing transactions",
+    "Drafting and review of financing agreements",
+    "Guarantee and indemnity documentation",
+    "Security creation and perfection",
+    "Verification, authentication, and legal due diligence of documents",
+    "Regulatory and compliance advisory",
+    "Legal opinions relating to banking and commercial transactions"
+  ]
+};
+
+export const CLIENTS_BY_SECTOR = {
+  financial: [
+    "The Bank of Punjab",
+    "Habib Bank Limited (HBL)",
+    "Bank Alfalah Limited",
+    "Standard Chartered Bank Pakistan",
+    "Zarai Taraqiati Bank Limited (ZTBL)"
+  ],
+  corporate: [
+    "Noor LPG (Private) Limited",
+    "Ferozsons Trust",
+    "Fatima Memorial Hospital",
+    "Tabeer Travels & Tourism",
+    "Good Luck Tanneries",
+    "Jameela Tanneries"
   ]
 };
 
 export const OUR_CLIENTS = [
-  "The Bank Of Punjab",
-  "Habib Bank Limited",
-  "Bank Al-Falah Limited",
-  "Zarai Taraqiati Bank Ltd",
-  "M/S Noor LPG Private Limited",
-  "Feroz sons Trust",
+  "The Bank of Punjab",
+  "Habib Bank Limited (HBL)",
+  "Bank Alfalah Limited",
+  "Standard Chartered Bank Pakistan",
+  "Zarai Taraqiati Bank Limited (ZTBL)",
+  "Noor LPG (Private) Limited",
+  "Ferozsons Trust",
   "Fatima Memorial Hospital",
-  "M/S Tabeer Travels & Tourism",
-  "M/S Good Lucks Tanneries",
-  "M/S Jameela Tanneries"
+  "Tabeer Travels & Tourism",
+  "Good Luck Tanneries",
+  "Jameela Tanneries"
 ];
+
+export const COMMITMENT_TO_EXCELLENCE = {
+  paragraph: "At JUS & LAY, we strive to provide legal services that combine technical excellence, commercial awareness, and strategic thinking. Our objective is not merely to resolve legal issues but to become trusted advisors who contribute meaningfully to our clients’ long-term success.",
+  signoff: "JUS & LAY – Advocates, Legal Consultants & Corporate Advisors"
+};
 
 export const LEGAL_TEAM: TeamMember[] = [
   {
@@ -95,7 +177,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     bio: "Advocate High Court.",
     image: "https://images.pexels.com/photos/38097665/pexels-photo-38097665.jpeg",
     email: "ali.anwar@juslay.com",
-    phone: "+92 (321) 852-0085"
+    phone: "+92 (331) 442-2906"
   },
   {
     id: "malik",
@@ -104,7 +186,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     bio: "B.A, LL. B Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097667/pexels-photo-38097667.jpeg",
     email: "abid.awan@juslay.com",
-    phone: "+92 (321) 852-0085"
+    phone: "+92 (300) 777-7167"
   },
   {
     id: "taqi",
@@ -113,7 +195,25 @@ export const LEGAL_TEAM: TeamMember[] = [
     bio: "LL.M from University of Sunderland, UK Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097666/pexels-photo-38097666.jpeg",
     email: "taqi.hassan@juslay.com",
-    phone: "+92 (321) 852-0085"
+    phone: "+92 (323) 470-1617"
+  },
+  {
+    id: "qalb",
+    name: "Syed Qalb E Abbas",
+    role: "Advocate High Court",
+    bio: "LL.B Advocate High Court.",
+    image: "https://images.pexels.com/photos/38098637/pexels-photo-38098637.jpeg",
+    email: "qalb.abbas@juslay.com",
+    phone: "+92 (333) 472-6790"
+  },
+  {
+    id: "javed",
+    name: "Javed Hashmi",
+    role: "Advocate High Court",
+    bio: "Advocate High Court.",
+    image: "https://images.pexels.com/photos/38098705/pexels-photo-38098705.jpeg",
+    email: "javed.hashmi@juslay.com",
+    phone: "+92 (300) 445-2839"
   }
 ];
 

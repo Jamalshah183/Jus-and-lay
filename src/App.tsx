@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IMAGES, INTRODUCTION, ABOUT_FIRM, OUR_CLIENTS } from "./data";
+import { IMAGES, INTRODUCTION, ABOUT_FIRM, OUR_CLIENTS, CLIENTS_BY_SECTOR } from "./data";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Scale, 
@@ -231,7 +231,7 @@ export default function App() {
             </div>
 
             {/* Infinite Horizontal Marquee */}
-            <div className="relative w-full overflow-hidden py-8 bg-[#0b1324]/80 border-y border-gold/15 rounded-lg max-w-6xl mx-auto shadow-xl">
+            <div className="relative w-full overflow-hidden py-8 bg-[#0b1324]/85 border-y border-gold/15 rounded-lg max-w-6xl mx-auto shadow-xl mb-12">
               {/* Luxury Ambient Masking Gradients */}
               <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-black via-transparent to-transparent z-10 pointer-events-none" />
               <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-black via-transparent to-transparent z-10 pointer-events-none" />
@@ -243,7 +243,7 @@ export default function App() {
                   transition={{
                     repeat: Infinity,
                     repeatType: "loop",
-                    duration: 25,
+                    duration: 30, // Slightly slower, more elegant rotation
                     ease: "linear",
                   }}
                 >
@@ -259,6 +259,39 @@ export default function App() {
                     </div>
                   ))}
                 </motion.div>
+              </div>
+            </div>
+
+            {/* Sector-specific Client lists */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto px-4 mb-8">
+              {/* Financial Institutions */}
+              <div className="bg-[#0b1324]/60 border border-gold/15 p-6 sm:p-8 rounded-lg flex flex-col hover:border-gold/30 transition-all duration-300">
+                <h4 className="font-serif text-sm sm:text-base font-bold text-gold uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                  Financial Institutions
+                </h4>
+                <div className="flex-grow space-y-3">
+                  {CLIENTS_BY_SECTOR.financial.map((client, index) => (
+                    <div key={index} className="flex items-center gap-3 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="w-1.5 h-1.5 bg-gold rounded-full shrink-0" />
+                      <span className="text-white/85 text-xs sm:text-sm font-sans tracking-wide leading-relaxed">{client}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Corporate & Institutional Clients */}
+              <div className="bg-[#0b1324]/60 border border-gold/15 p-6 sm:p-8 rounded-lg flex flex-col hover:border-gold/30 transition-all duration-300">
+                <h4 className="font-serif text-sm sm:text-base font-bold text-gold uppercase tracking-wider mb-4 border-b border-white/5 pb-2">
+                  Corporate & Institutional Clients
+                </h4>
+                <div className="flex-grow space-y-3">
+                  {CLIENTS_BY_SECTOR.corporate.map((client, index) => (
+                    <div key={index} className="flex items-center gap-3 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="w-1.5 h-1.5 bg-gold rounded-full shrink-0" />
+                      <span className="text-white/85 text-xs sm:text-sm font-sans tracking-wide leading-relaxed">{client}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             

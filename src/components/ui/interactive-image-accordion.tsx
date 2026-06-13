@@ -29,9 +29,13 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
   return (
     <div
       className={`
-        relative h-[320px] xs:h-[380px] sm:h-[450px] rounded-2xl overflow-hidden cursor-pointer
-        transition-all duration-700 ease-in-out shrink-0
-        ${isActive ? 'w-[140px] xs:w-[200px] sm:w-[320px] md:w-[400px]' : 'w-10 xs:w-12 sm:w-14 md:w-[60px]'}
+        relative h-[300px] xs:h-[360px] sm:h-[420px] md:h-[460px] rounded-2xl overflow-hidden cursor-pointer
+        transition-all duration-500 ease-in-out
+        ${
+          isActive 
+            ? 'flex-[5_5_0%] min-w-[124px] xs:min-w-[150px] sm:min-w-[240px] md:min-w-[300px] lg:min-w-[360px]' 
+            : 'flex-1 min-w-[24px] xs:min-w-[32px] sm:min-w-[42px] md:min-w-[50px] max-w-[36px] xs:max-w-[48px] sm:max-w-[65px] md:max-w-[80px]'
+        }
       `}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
@@ -56,8 +60,8 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
       <div 
         className={`absolute inset-0 transition-all duration-500 ease-in-out ${
           isActive 
-            ? 'bg-gradient-to-t from-black/80 via-black/20 to-transparent' 
-            : 'bg-black/55'
+            ? 'bg-gradient-to-t from-black/85 via-black/20 to-transparent' 
+            : 'bg-black/60'
         }`}
       />
 
@@ -65,13 +69,13 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
       <span
         style={!isActive ? { writingMode: 'vertical-rl' } : undefined}
         className={`
-          absolute text-white font-semibold whitespace-nowrap
+          absolute text-white font-semibold whitespace-nowrap select-none
           transition-all duration-300 ease-in-out backdrop-blur-xs
           ${
             isActive
-              ? 'bottom-4 xs:bottom-6 left-1/2 -translate-x-1/2 rotate-0 text-[10px] xs:text-sm md:text-lg bg-black/60 px-2.5 py-1 rounded-sm' // Active state: horizontal, bottom-center
+              ? 'bottom-4 xs:bottom-6 left-1/2 -translate-x-1/2 rotate-0 text-[9px] xs:text-xs sm:text-sm md:text-base bg-black/75 px-1.5 xs:px-2.5 py-1 rounded-md border border-white/10 shadow-lg' // Active state: horizontal, bottom-center
               // Inactive state: vertical-rl, rotated 180deg so it reads bottom-to-top, perfectly centered in card
-              : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180 text-[10px] sm:text-xs md:text-sm lg:text-base tracking-widest font-sans uppercase text-white/95 block font-bold text-center'
+              : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180 text-[7px] xs:text-[9px] sm:text-[10px] md:text-xs lg:text-sm tracking-normal xs:tracking-wider sm:tracking-widest font-sans uppercase text-white/90 block font-bold text-center'
           }
         `}
       >
@@ -133,10 +137,9 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
             </div>
           </div>
 
-          {/* Right Side: Image Accordion */}
-          <div className="w-full lg:w-[68%] overflow-hidden flex justify-center">
-            {/* Changed flex-col to flex-row to keep the layout consistent */}
-            <div className="flex flex-row items-center justify-center gap-1.5 xs:gap-3 sm:gap-4 p-2 md:p-4 max-w-full scrollbar-none">
+          {/* Right Side: Image Accordion (Unified fluid design for all devices - No Horizontal Scroll!) */}
+          <div className="w-full lg:w-[68%] flex flex-col justify-center items-center">
+            <div className="flex flex-row items-center justify-center gap-1 xs:gap-1.5 sm:gap-3 p-1 xs:p-2 sm:p-4 w-full overflow-hidden select-none">
               {accordionItems.map((item, index) => (
                 <AccordionItem
                   key={item.id}

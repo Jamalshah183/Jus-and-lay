@@ -15,20 +15,18 @@ import {
 } from "lucide-react";
 import { 
   ABOUT_FIRM, 
-  FOCUS_AND_APPROACH, 
-  MAIN_DIVISIONS, 
-  EXECUTIVE_SERVICES, 
-  FINANCIAL_INSTITUTIONS_SERVICE, 
-  OUR_CLIENTS 
+  OUR_PHILOSOPHY, 
+  PRACTICE_AREAS, 
+  FINANCIAL_INSTITUTIONS_SERVICE
 } from "../data";
 
 export default function FirmProfile() {
-  const [activeTab, setActiveTab] = useState<"about" | "focus" | "services" | "banking">("about");
+  const [activeTab, setActiveTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
 
   const tabs = [
     { id: "about", label: "About Firm", icon: BookOpen },
-    { id: "focus", label: "Focus & Approach", icon: Scale },
-    { id: "services", label: "Our Services", icon: Layers },
+    { id: "philosophy", label: "Our Philosophy", icon: Scale },
+    { id: "practices", label: "Practice Areas", icon: Layers },
     { id: "banking", label: "Financial Institutions", icon: Landmark },
   ] as const;
 
@@ -56,7 +54,7 @@ export default function FirmProfile() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-3 sm:px-5 py-3 text-[10px] sm:text-xs tracking-wider uppercase font-sans font-extrabold border-b-2 transition-all duration-300 ${
                 isActive 
                   ? "border-gold text-gold bg-gold/5" 
@@ -105,108 +103,88 @@ export default function FirmProfile() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  <div className="lg:col-span-8 space-y-6 text-white/80 text-sm sm:text-base leading-relaxed font-light">
-                    <p className="font-serif text-lg sm:text-xl italic text-white leading-relaxed border-l-2 border-gold pl-6 py-1">
-                      {ABOUT_FIRM.paragraph1}
-                    </p>
-                    <p>
-                      {ABOUT_FIRM.paragraph2}
-                    </p>
-                    <div className="bg-[#070e1b] border border-white/5 p-5 rounded-md text-white/70 text-xs sm:text-sm">
-                      <strong className="text-gold block mb-2 font-serif text-[13px] uppercase tracking-wider">Comprehensive Practice Spectrum:</strong>
-                      {ABOUT_FIRM.paragraph3}
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-4 bg-[#070e1b]/80 border border-white/5 p-6 rounded-md space-y-4">
-                    <h4 className="font-serif text-xs uppercase tracking-widest text-[#ffbc57] font-bold border-b border-white/5 pb-2">
-                      Practice Divisions
-                    </h4>
-                    <div className="space-y-3.5">
-                      {MAIN_DIVISIONS.map((division) => (
-                        <div key={division.number} className="text-left">
-                          <span className="text-gold font-bold font-serif text-sm block mb-1">{division.number} {division.title}</span>
-                          <p className="text-white/60 text-xs leading-relaxed">{division.description}</p>
-                        </div>
-                      ))}
-                    </div>
+                <div className="space-y-6 text-white/80 text-sm sm:text-base leading-relaxed font-light">
+                  <p className="font-serif text-lg sm:text-xl italic text-white leading-relaxed border-l-2 border-gold pl-6 py-1">
+                    {ABOUT_FIRM.paragraph1}
+                  </p>
+                  <p>
+                    {ABOUT_FIRM.paragraph2}
+                  </p>
+                  <div className="bg-[#070e1b] border border-gold/15 p-6 rounded-md text-white/80 text-xs sm:text-sm">
+                    <strong className="text-gold block mb-3 font-serif text-sm uppercase tracking-wider">Expertise & Capacity:</strong>
+                    {ABOUT_FIRM.paragraph3}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: FOCUS & APPROACH */}
-            {activeTab === "focus" && (
+            {/* TAB 2: OUR PHILOSOPHY */}
+            {activeTab === "philosophy" && (
               <div className="space-y-8 text-left">
                 <div className="pb-6 border-b border-white/5">
                   <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold block mb-1">
                     LEGAL PHILOSOPHY
                   </span>
                   <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">
-                    Focus and Approach
+                    Our Philosophy
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                  <div className="lg:col-span-6 space-y-6 text-white/80 text-sm sm:text-base leading-relaxed font-light">
-                    <p>
-                      {FOCUS_AND_APPROACH.paragraph1}
-                    </p>
-                    <blockquote className="border-l border-gold pl-5 italic text-gold text-sm sm:text-base font-serif py-1">
-                      "{FOCUS_AND_APPROACH.paragraph2}"
-                    </blockquote>
+                <div className="space-y-6 text-white/80 text-sm sm:text-base leading-relaxed font-light">
+                  <p className="font-sans text-white/95 leading-relaxed text-sm sm:text-base">
+                    {OUR_PHILOSOPHY.paragraph1}
+                  </p>
+                  
+                  <div className="bg-[#070e1b] border border-gold/15 p-6 sm:p-8 rounded-md">
+                    <h4 className="font-serif text-xs uppercase tracking-widest text-[#ffbc57] font-bold border-b border-white/5 pb-2 mb-4">
+                      We are committed to:
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {OUR_PHILOSOPHY.commitments.map((commitment, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 bg-gold rotate-45 shrink-0 mt-1.5" />
+                          <span className="text-white/85 text-xs sm:text-sm">{commitment}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="lg:col-span-6 bg-[#070e1b] border border-gold/15 p-6 sm:p-8 rounded-md flex flex-col justify-center">
-                    <h4 className="font-serif text-sm font-bold text-white mb-4 uppercase tracking-wider text-gold">Efficiency & Client Integration</h4>
-                    <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light font-sans">
-                      {FOCUS_AND_APPROACH.paragraph3}
-                    </p>
-                  </div>
+                  <p className="border-l border-gold pl-5 italic text-gold text-sm sm:text-base font-serif py-1">
+                    {OUR_PHILOSOPHY.paragraph2}
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* TAB 3: OUR SERVICES */}
-            {activeTab === "services" && (
+            {/* TAB 3: PRACTICE AREAS */}
+            {activeTab === "practices" && (
               <div className="space-y-8 text-left">
                 <div className="pb-6 border-b border-white/5">
                   <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold block mb-1">
                     PRACTICE CORE
                   </span>
                   <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">
-                    Our Services
+                    Practice Areas
                   </h3>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="p-5 bg-[#070e1b] border border-white/5 rounded-md">
-                    <h4 className="font-serif text-lg font-bold text-white mb-2 uppercase text-gold tracking-wide">Client Services</h4>
-                    <p className="text-white/70 text-xs sm:text-sm font-light">
-                      As a corporate and commercial law firm, we offer a full spectrum of legal services. These services are structured into two main business divisions:
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/5">
-                      {MAIN_DIVISIONS.map((division) => (
-                        <div key={division.number} className="p-4 bg-[#0b1324]/60 border border-white/5 hover:border-gold/30 rounded transition-all">
-                          <span className="text-gold font-serif font-bold text-base block mb-1">{division.number} {division.title}</span>
-                          <p className="text-white/60 text-xs leading-relaxed">{division.description}</p>
-                        </div>
-                      ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {PRACTICE_AREAS.map((area, index) => (
+                    <div key={index} className="p-5 bg-[#070e1b] border border-white/5 hover:border-gold/30 rounded-lg transition-all duration-300">
+                      <h4 className="font-serif text-sm sm:text-base font-bold text-gold mb-3 uppercase tracking-wide border-b border-white/5 pb-2 flex items-center justify-between">
+                        <span>{area.title}</span>
+                        <div className="w-1.5 h-1.5 bg-gold rounded-full" />
+                      </h4>
+                      <ul className="space-y-2">
+                        {area.items.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <span className="text-gold/60 text-xs mt-0.5">•</span>
+                            <span className="text-white/75 text-xs sm:text-sm font-sans font-light leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-serif text-xs uppercase tracking-widest text-[#ffbc57] font-semibold mb-4 pl-1">Executive Summary of Our Legal Services</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {EXECUTIVE_SERVICES.map((service, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3.5 bg-[#070e1b]/85 border border-white/5 rounded transition-all hover:border-gold/20">
-                          <div className="w-1.5 h-1.5 bg-gold rounded-full shrink-0" />
-                          <span className="text-white/95 text-xs sm:text-sm font-sans tracking-wide">{service}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -227,6 +205,10 @@ export default function FirmProfile() {
                     Corporate & Banking Litigators
                   </div>
                 </div>
+
+                <p className="text-white/80 text-xs sm:text-sm leading-relaxed font-light font-sans italic border-l-2 border-gold/50 pl-4 py-1">
+                  {FINANCIAL_INSTITUTIONS_SERVICE.subtitle}
+                </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                   {/* Contentious Matters */}
