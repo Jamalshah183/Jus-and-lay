@@ -12,7 +12,6 @@ export default function Attorneys() {
       {/* Modern Interactive Image Accordion displaying partners */}
       <LandingAccordionItem onSelectPartner={setActivePartner} />
 
-
       {/* CV / Profile Modal overlay */}
       <AnimatePresence>
         {activePartner && (
@@ -55,7 +54,7 @@ export default function Attorneys() {
                   <div className="flex items-center gap-2 mb-1 xs:mb-2">
                     <Award className="w-3.5 h-3.5 text-gold animate-pulse" />
                     <span className="text-[8px] xs:text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
-                      Senior Executive Board
+                      Of Counsel
                     </span>
                   </div>
                   <h4 className="font-serif text-lg xs:text-xl font-bold text-white">
@@ -67,8 +66,8 @@ export default function Attorneys() {
               {/* CV Body Side */}
               <div className="w-full md:w-3/5 p-5 xs:p-6 sm:p-10 flex flex-col justify-between">
                 <div>
-                  <span className="text-[9px] xs:text-[10px] uppercase tracking-[0.25em] text-gold font-bold font-sans">
-                    Academic & Trial Pedigree
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-gold font-bold font-sans">
+                    Advocate profile & Credentials
                   </span>
                   <h4 className="font-serif text-xl xs:text-2xl font-extrabold text-white mt-1 mb-1 xs:mb-2">
                     {activePartner.name}
@@ -78,12 +77,12 @@ export default function Attorneys() {
                   </p>
 
                   <div className="space-y-3 xs:space-y-4 max-h-[140px] xs:max-h-[200px] sm:max-h-[220px] overflow-y-auto pr-2 text-white/70 text-xs xs:text-sm leading-relaxed font-sans scrollbar-thin">
-                    <p>{activePartner.bio}</p>
+                    <p className="font-light">{activePartner.bio}</p>
                     <p className="text-[10px] xs:text-xs text-white/50 uppercase tracking-widest font-bold">
-                      • Strategic Executive Mandate
+                      • Strategic Legal Mission
                     </p>
-                    <p className="text-[11px] xs:text-xs">
-                      Engaged exclusively in counsel for sovereign funds, multi-state commercial operations, high-net equity distribution, and high-frequency litigation defense.
+                    <p className="text-[11px] xs:text-xs font-light">
+                      Providing top-tier representation, record verdicts, and unwavering client advocacy under strict procedural privacy guidelines.
                     </p>
                   </div>
                 </div>
@@ -91,17 +90,17 @@ export default function Attorneys() {
                 {/* Direct Contact options */}
                 <div className="mt-6 md:mt-8 pt-4 xs:pt-6 border-t border-white/10">
                   <h5 className="text-[9px] xs:text-[10px] uppercase tracking-widest text-white/50 font-bold mb-3">
-                    Direct Secure Communication Channels
+                    Secure Contact Details
                   </h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3 mb-4 xs:mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3 mb-4 xs:mb-6 font-sans">
                     <a
                       href={`mailto:${activePartner.email}`}
-                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
+                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded group transition-all duration-300"
                     >
                       <Mail className="w-4 h-4 text-gold group-hover:scale-110 transition-transform" />
                       <div className="overflow-hidden text-left">
                         <span className="block text-[8px] xs:text-[9px] uppercase tracking-wider text-white/40">
-                          Direct Cryptographic Mail
+                          Direct Chambers Email
                         </span>
                         <span className="block text-[11px] xs:text-xs font-mono text-white/85 truncate">
                           {activePartner.email}
@@ -111,12 +110,12 @@ export default function Attorneys() {
 
                     <a
                       href={`tel:${activePartner.phone.replace(/\s+/g, "")}`}
-                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded-xs group transition-all duration-300"
+                      className="flex items-center gap-3 p-2.5 xs:p-3 bg-white/[0.02] hover:bg-gold/10 border border-white/5 hover:border-gold/20 rounded group transition-all duration-300"
                     >
                       <Phone className="w-4 h-4 text-gold group-hover:scale-110 transition-transform" />
                       <div className="text-left">
                         <span className="block text-[8px] xs:text-[9px] uppercase tracking-wider text-white/40">
-                          Partner Secure Voiceline
+                          Secure Voiceline
                         </span>
                         <span className="block text-[11px] xs:text-xs font-mono text-white/85 truncate">
                           {activePartner.phone}
@@ -128,7 +127,7 @@ export default function Attorneys() {
                   <div className="flex flex-col sm:flex-row justify-end gap-2 xs:gap-3">
                     <button
                       onClick={() => setActivePartner(null)}
-                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded-xs focus:outline-none w-full sm:w-auto order-2 sm:order-1"
+                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase text-white/70 hover:text-white transition-colors border border-white/10 hover:bg-white/5 rounded focus:outline-none w-full sm:w-auto order-2 sm:order-1"
                     >
                       Dismiss Bio
                     </button>
@@ -136,16 +135,16 @@ export default function Attorneys() {
                       href={
                         activePartner.id === "ammar"
                           ? "https://wa.me/923218520085?text=Hello%20Ammar%20Yasir%20CEO%20office%20Jus%20%26%20Lay%2C%20we%20require%20privileged%20executive%20counsel%20regarding%20a%20high-stakes%20corporate%20matter."
-                          : activePartner.id === "marcus"
-                          ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Barrister%20Jamal%20M.%20Shah%20for%20an%20urgent%20appellate%20matter."
-                          : activePartner.id === "serena"
-                          ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Ayesha%20Khan%20Lodhi%20for%20an%20M%26A%20or%20corporate%20structuring%20matter."
-                          : "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Advocate%20Zane%20Malik%20regarding%20tax%2C%20FBR%20or%20power-grid%20counsel."
+                          : activePartner.id === "malik"
+                          ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Malik%20Abid%20Hussain%20Awan%20for%20an%20urgent%20legal%20matter."
+                          : activePartner.id === "taqi"
+                          ? "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Syed%20Taqi%20Ul%20Hassan%20for%20an%20urgent%20legal%20matter."
+                          : "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Muhammad%20Ali%20Anwar%20regarding%20high-court%20counsel."
                       }
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setActivePartner(null)}
-                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded-xs text-center w-full sm:w-auto order-1 sm:order-2"
+                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded text-center w-full sm:w-auto order-1 sm:order-2"
                     >
                       WhatsApp Counsel
                     </a>

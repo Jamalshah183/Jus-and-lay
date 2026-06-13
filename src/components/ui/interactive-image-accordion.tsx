@@ -41,26 +41,37 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
         src={item.imageUrl}
         alt={item.title}
         referrerPolicy="no-referrer"
-        className="absolute inset-0 w-full h-full object-cover object-top"
+        className={`absolute inset-0 w-full h-full object-cover object-top transition-all duration-700 ease-in-out ${
+          isActive 
+            ? 'scale-[1.06] filter brightness-[1.10] saturate-[1.05] contrast-[1.05]' 
+            : 'scale-100 filter grayscale-[15%] brightness-[0.85]'
+        }`}
         onError={(e) => { 
           const target = e.target as HTMLImageElement;
           target.onerror = null; 
           target.src = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600&h=800'; 
         }}
       />
-      {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/40"></div>
+      {/* Conditional overlay: Subtle gradient on active card, dim overlay on inactive ones */}
+      <div 
+        className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+          isActive 
+            ? 'bg-gradient-to-t from-black/80 via-black/20 to-transparent' 
+            : 'bg-black/55'
+        }`}
+      />
 
       {/* Caption Text */}
       <span
+        style={!isActive ? { writingMode: 'vertical-rl' } : undefined}
         className={`
           absolute text-white font-semibold whitespace-nowrap
           transition-all duration-300 ease-in-out backdrop-blur-xs
           ${
             isActive
-              ? 'bottom-4 xs:bottom-6 left-1/2 -translate-x-1/2 rotate-0 text-[10px] xs:text-sm md:text-lg bg-black/60 px-2 py-0.5 rounded-sm' // Active state: horizontal, bottom-center
-              // Inactive state: vertical, label visible on all screens with adjusted positioning
-              : 'w-auto text-left bottom-14 xs:bottom-24 left-1/2 -translate-x-1/2 rotate-90 text-[8px] xs:text-[10px] md:text-lg tracking-widest font-sans uppercase text-white/80 block'
+              ? 'bottom-4 xs:bottom-6 left-1/2 -translate-x-1/2 rotate-0 text-[10px] xs:text-sm md:text-lg bg-black/60 px-2.5 py-1 rounded-sm' // Active state: horizontal, bottom-center
+              // Inactive state: vertical-rl, rotated 180deg so it reads bottom-to-top, perfectly centered in card
+              : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180 text-[10px] sm:text-xs md:text-sm lg:text-base tracking-widest font-sans uppercase text-white/95 block font-bold text-center'
           }
         `}
       >

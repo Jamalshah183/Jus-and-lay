@@ -26,8 +26,8 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
   const navLinks = [
     { label: "Home", href: "#home" },
     { label: "About Chambers", href: "#about" },
-    { label: "Why Jus & Lay", href: "#why-choose-us" },
-    { label: "Partners", href: "#team" },
+    { label: "Our Services", href: "#firm-profile" },
+    { label: "Of Counsel", href: "#team" },
     { label: "Contact", href: "#contact" },
   ];
 
