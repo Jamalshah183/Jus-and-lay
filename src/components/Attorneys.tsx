@@ -150,9 +150,9 @@ export default function Attorneys() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setActivePartner(null)}
-                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase bg-gold text-navy hover:bg-gold-light hover:text-navy shadow-md block transition-all rounded text-center w-full sm:w-auto order-1 sm:order-2"
+                      className="px-4 xs:px-6 py-2.5 text-[10px] xs:text-xs font-bold tracking-widest uppercase bg-[#25D366] text-white hover:bg-[#20ba5a] shadow-md block transition-all rounded text-center w-full sm:w-auto order-1 sm:order-2"
                     >
-                      WhatsApp Counsel
+                      WhatsApp Counsel (Direct)
                     </a>
                   </div>
                 </div>

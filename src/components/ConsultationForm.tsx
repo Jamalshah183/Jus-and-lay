@@ -171,17 +171,22 @@ export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormPr
           href={whatsAppLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-3 py-3.5 sm:py-4 bg-neutral-900 border-2 border-[#2ecc71]/60 text-[#2ecc71] hover:bg-[#2ecc71]/10 hover:border-[#2ecc71] font-bold font-sans text-[10px] sm:text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-xl relative group focus:outline-none px-4"
+          className="w-full flex flex-col items-center justify-center gap-1 py-3.5 sm:py-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold font-sans text-[10px] sm:text-xs tracking-widest uppercase rounded-xs transition-all duration-300 cursor-pointer shadow-xl relative group focus:outline-none px-4"
         >
           {/* Animated pulsing ripple */}
-          <span className="absolute inset-0 bg-[#2ecc71]/5 opacity-0 group-hover:opacity-100 rounded-xs transition-opacity duration-300 pointer-events-none" />
-          <MessageCircle className="w-4.5 h-4.5 text-[#2ecc71] shrink-0" />
-          <span>Launch WhatsApp Connection</span>
+          <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-xs transition-opacity duration-300 pointer-events-none" />
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-4.5 h-4.5 text-white shrink-0" />
+            <span>Launch WhatsApp Connection</span>
+          </div>
+          <span className="text-[8px] sm:text-[9px] font-sans tracking-wider font-medium normal-case opacity-95 text-white/90">
+            Response Time: under 2 mins (usually instantly)
+          </span>
         </a>
 
         {/* Copy number backup */}
         <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/5 text-xs text-white/40 font-sans">
-          <span className="truncate">Chambers Direct Mobile ID: +92 (321) 852-0085</span>
+          <span className="truncate">Chambers Landline Desk: +92 (321) 852-0085</span>
           <button
             onClick={handleCopyChannel}
             className="text-gold hover:text-white underline cursor-pointer focus:outline-none shrink-0"

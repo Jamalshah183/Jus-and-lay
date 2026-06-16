@@ -129,10 +129,13 @@ export default function App() {
               <a
                 href="#consultation"
                 onClick={(e) => handleCTABookScroll(e, "#consultation")}
-                className="px-6 py-3.5 sm:px-8 sm:py-4 bg-gold text-[#070e1b] font-extrabold text-[10px] sm:text-xs tracking-widest uppercase rounded-xs hover:bg-white hover:text-navy hover:shadow-[0_0_20px_rgba(255,188,87,0.45)] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
+                className="px-6 py-3 sm:px-8 sm:py-3.5 bg-[#25D366] hover:bg-[#20ba5a] text-white font-extrabold text-[10px] sm:text-xs tracking-widest uppercase rounded-xs hover:shadow-[0_0_20px_rgba(37,211,102,0.45)] transition-all duration-300 cursor-pointer flex flex-col items-center justify-center gap-0.5"
               >
-                <MessageCircle className="w-4 h-4 text-[#070e1b] shrink-0" />
-                <span>WhatsApp Liaison</span>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-white shrink-0" />
+                  <span>WhatsApp Liaison</span>
+                </div>
+                <span className="text-[8px] font-sans tracking-wide font-medium lowercase opacity-90">replies in &lt; 2 mins</span>
               </a>
               
               <button
@@ -365,7 +368,7 @@ export default function App() {
                   <Phone className="w-5 h-5 text-gold shrink-0 mt-1" />
                   <div>
                     <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
-                      Direct Voiceline
+                      Chambers Landline Desk
                     </span>
                     <a href="tel:03218520085" className="block text-white/95 text-xs sm:text-sm font-mono hover:text-gold transition-colors mt-1 font-medium">
                       +92 (321) 852-0085

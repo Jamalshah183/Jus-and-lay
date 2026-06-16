@@ -92,9 +92,9 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             <a
               href="#consultation"
               onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-navy-dark hover:text-white hover:shadow-[0_0_15px_rgba(255,188,87,0.3)] transition-all duration-300 flex items-center gap-2"
+              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.35)] transition-all duration-300 flex items-center gap-2"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-navy shrink-0 group-hover:text-white" />
+              <MessageCircle className="w-3.5 h-3.5 text-white shrink-0" />
               <span>WhatsApp Liaison</span>
             </a>
           </div>
@@ -132,9 +132,9 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             <a
               href="#consultation"
               onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-gold text-navy rounded-xs hover:bg-navy-dark hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <MessageCircle className="w-4 h-4 text-navy shrink-0" />
+              <MessageCircle className="w-4 h-4 text-white shrink-0" />
               <span>WhatsApp Liaison</span>
             </a>
             <a
@@ -142,7 +142,7 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
               className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs tracking-widest uppercase font-medium font-sans border border-navy/20 text-navy rounded-xs hover:bg-navy/5 transition-all duration-300"
             >
               <Phone className="w-4 h-4 text-gold" />
-              Direct Chambers Dial
+              Chambers Landline Desk
             </a>
           </div>
         </div>
