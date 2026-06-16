@@ -436,10 +436,10 @@ export default function App() {
       {/* 6. SECURE FOOTER */}
       <footer className="bg-[#040811] border-t border-white/10 py-16">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 xl:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 border-b border-white/5 pb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-10 border-b border-white/5 pb-12">
             
             {/* Column 1: Brand block */}
-            <div className="md:col-span-4 space-y-4 text-left">
+            <div className="col-span-1 sm:col-span-2 md:col-span-4 space-y-4 text-left">
               <div className="inline-block p-2 bg-[#fdfbf7] rounded-sm shadow-sm border border-gold/20">
                 <img
                   src="https://images.pexels.com/photos/38052959/pexels-photo-38052959.png"
@@ -454,7 +454,7 @@ export default function App() {
             </div>
 
             {/* Column 2: Quick Links */}
-            <div className="md:col-span-2.5 text-left space-y-4">
+            <div className="col-span-1 sm:col-span-1 md:col-span-2 text-left space-y-4">
               <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
                 Chambers Navigation
               </h4>
@@ -483,7 +483,7 @@ export default function App() {
             </div>
 
             {/* Column 3: Practices & Desks */}
-            <div className="md:col-span-2.5 text-left space-y-4">
+            <div className="col-span-1 sm:col-span-1 md:col-span-3 text-left space-y-4">
               <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
                 Practice Core
               </h4>
@@ -512,7 +512,7 @@ export default function App() {
             </div>
 
             {/* Column 4: Contact & Certification block */}
-            <div className="md:col-span-3 text-left space-y-4">
+            <div className="col-span-1 sm:col-span-2 md:col-span-3 text-left space-y-4">
               <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
                 Enforcement & Integrity
               </h4>
