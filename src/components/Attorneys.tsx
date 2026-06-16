@@ -145,6 +145,10 @@ export default function Attorneys() {
                           ? "https://wa.me/923334726790?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Syed%20Qalb%20E%20Abbas%20regarding%20high-court%20counsel."
                           : activePartner.id === "javed"
                           ? "https://wa.me/923004452839?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Javed%20Hashmi%20regarding%20high-court%20counsel."
+                          : activePartner.id === "mansoor"
+                          ? "https://wa.me/923224576588?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Muhammad%20Mansoor%20regarding%20customs%20and%20taxation%20counsel."
+                          : activePartner.id === "palwasha"
+                          ? "https://wa.me/923009128667?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20wish%20to%20engage%20Palwasha%20Tariq%20regarding%20family%20and%20corporate%20counsel."
                           : "https://wa.me/923218520085?text=Hello%20Jus%20%26%20Lay%20Law%20Conglomerate%2C%20we%20require%20privileged%20counsel."
                       }
                       target="_blank"

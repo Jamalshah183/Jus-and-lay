@@ -135,6 +135,7 @@ export const CLIENTS_BY_SECTOR = {
     "Noor LPG (Private) Limited",
     "Ferozsons Trust",
     "Fatima Memorial Hospital",
+    "NUR Foundation",
     "Tabeer Travels & Tourism",
     "Good Luck Tanneries",
     "Jameela Tanneries"
@@ -150,6 +151,7 @@ export const OUR_CLIENTS = [
   "Noor LPG (Private) Limited",
   "Ferozsons Trust",
   "Fatima Memorial Hospital",
+  "NUR Foundation",
   "Tabeer Travels & Tourism",
   "Good Luck Tanneries",
   "Jameela Tanneries"
@@ -167,7 +169,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "CEO",
     bio: "B.com, LL.B Advocate High Court. Area of Practice: Banking, Corporate, Commercial, Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg",
-    email: "ceo@juslay.com",
+    email: "ceo@jusandlay.com",
     phone: "+92 (321) 852-0085"
   },
   {
@@ -176,7 +178,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Advocate High Court",
     bio: "Advocate High Court.",
     image: "https://images.pexels.com/photos/38097665/pexels-photo-38097665.jpeg",
-    email: "ali.anwar@juslay.com",
+    email: "ali.anwar@jusandlay.com",
     phone: "+92 (331) 442-2906"
   },
   {
@@ -185,7 +187,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Senior Associate",
     bio: "B.A, LL. B Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097667/pexels-photo-38097667.jpeg",
-    email: "abid.awan@juslay.com",
+    email: "abid.awan@jusandlay.com",
     phone: "+92 (300) 777-7167"
   },
   {
@@ -194,7 +196,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Senior Associate",
     bio: "LL.M from University of Sunderland, UK Advocate High Court. Area of Practice: Criminal, Civil, Constitutional Laws.",
     image: "https://images.pexels.com/photos/38097666/pexels-photo-38097666.jpeg",
-    email: "taqi.hassan@juslay.com",
+    email: "taqi.hassan@jusandlay.com",
     phone: "+92 (323) 470-1617"
   },
   {
@@ -203,7 +205,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Advocate High Court",
     bio: "LL.B Advocate High Court.",
     image: "https://images.pexels.com/photos/38098637/pexels-photo-38098637.jpeg",
-    email: "qalb.abbas@juslay.com",
+    email: "qalb.abbas@jusandlay.com",
     phone: "+92 (333) 472-6790"
   },
   {
@@ -212,8 +214,26 @@ export const LEGAL_TEAM: TeamMember[] = [
     role: "Advocate High Court",
     bio: "Advocate High Court.",
     image: "https://images.pexels.com/photos/38098705/pexels-photo-38098705.jpeg",
-    email: "javed.hashmi@juslay.com",
+    email: "javed.hashmi@jusandlay.com",
     phone: "+92 (300) 445-2839"
+  },
+  {
+    id: "mansoor",
+    name: "Muhammad Mansoor",
+    role: "Advocate High Court",
+    bio: "BA LLB. Area of Practice: Customs and Taxation Laws.",
+    image: "https://images.pexels.com/photos/38145957/pexels-photo-38145957.jpeg",
+    email: "muhammad.mansoor@jusandlay.com",
+    phone: "+92 (322) 457-6588"
+  },
+  {
+    id: "palwasha",
+    name: "Palwasha Tariq",
+    role: "Advocate High Court",
+    bio: "B.A, LLB. Area of Practice: Family, Civil, Criminal, and Corporate Laws.",
+    image: "https://images.pexels.com/photos/38145958/pexels-photo-38145958.jpeg",
+    email: "palwasha.tariq@jusandlay.com",
+    phone: "+92 (300) 912-8667"
   }
 ];
 

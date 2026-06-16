@@ -3,14 +3,37 @@ import { LEGAL_TEAM } from '../../data';
 import { TeamMember } from '../../types';
 
 // --- Data for the image accordion mapping our existing partners ---
-const accordionItems = LEGAL_TEAM.map((partner, index) => ({
-  id: index + 1,
-  title: partner.name,
-  imageUrl: partner.id === "ammar" 
-    ? "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg" 
-    : partner.image,
-  rawPartner: partner
-}));
+const accordionItems = LEGAL_TEAM.map((partner, index) => {
+  let objectPosition = 'center top'; // default
+  
+  if (partner.id === 'ali') {
+    objectPosition = 'center 22%';
+  } else if (partner.id === 'palwasha') {
+    objectPosition = 'center 25%';
+  } else if (partner.id === 'mansoor') {
+    objectPosition = 'center 25%';
+  } else if (partner.id === 'ammar') {
+    objectPosition = 'center 20%';
+  } else if (partner.id === 'taqi') {
+    objectPosition = 'center 20%';
+  } else if (partner.id === 'malik') {
+    objectPosition = 'center 20%';
+  } else if (partner.id === 'qalb') {
+    objectPosition = 'center 20%';
+  } else if (partner.id === 'javed') {
+    objectPosition = 'center 20%';
+  }
+
+  return {
+    id: index + 1,
+    title: partner.name,
+    imageUrl: partner.id === "ammar" 
+      ? "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg" 
+      : partner.image,
+    rawPartner: partner,
+    objectPosition
+  };
+});
 
 interface AccordionItemProps {
   item: {
@@ -18,6 +41,7 @@ interface AccordionItemProps {
     title: string;
     imageUrl: string;
     rawPartner: TeamMember;
+    objectPosition?: string;
   };
   isActive: boolean;
   onMouseEnter: () => void;
@@ -30,11 +54,11 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
     <div
       className={`
         relative h-[300px] xs:h-[360px] sm:h-[420px] md:h-[460px] rounded-2xl overflow-hidden cursor-pointer
-        transition-all duration-500 ease-in-out
+        transition-all duration-500 ease-in-out min-w-0
         ${
           isActive 
-            ? 'flex-[5_5_0%] min-w-[124px] xs:min-w-[150px] sm:min-w-[240px] md:min-w-[300px] lg:min-w-[360px]' 
-            : 'flex-1 min-w-[24px] xs:min-w-[32px] sm:min-w-[42px] md:min-w-[50px] max-w-[36px] xs:max-w-[48px] sm:max-w-[65px] md:max-w-[80px]'
+            ? 'flex-[10_10_0%]' 
+            : 'flex-[1_1_0%]'
         }
       `}
       onMouseEnter={onMouseEnter}
@@ -45,9 +69,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isActive, onMouseEn
         src={item.imageUrl}
         alt={item.title}
         referrerPolicy="no-referrer"
-        className={`absolute inset-0 w-full h-full object-cover object-top transition-all duration-700 ease-in-out ${
+        style={{ objectPosition: item.objectPosition }}
+        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${
           isActive 
-            ? 'scale-[1.06] filter brightness-[1.10] saturate-[1.05] contrast-[1.05]' 
+            ? 'scale-100 filter brightness-[1.10] saturate-[1.05] contrast-[1.05]' 
             : 'scale-100 filter grayscale-[15%] brightness-[0.85]'
         }`}
         onError={(e) => { 
@@ -138,8 +163,10 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
           </div>
 
           {/* Right Side: Image Accordion (Unified fluid design for all devices - No Horizontal Scroll!) */}
-          <div className="w-full lg:w-[68%] flex flex-col justify-center items-center">
-            <div className="flex flex-row items-center justify-center gap-1 xs:gap-1.5 sm:gap-3 p-1 xs:p-2 sm:p-4 w-full overflow-hidden select-none">
+          <div className="w-full lg:w-[68%] flex flex-col justify-center items-center gap-3">
+            
+            {/* Desktop & Tablet Display: Single row of all 8 members (No scrolling, beautiful layout) */}
+            <div className="hidden sm:flex flex-row items-center justify-center gap-1.5 md:gap-3 p-1 sm:p-4 w-full overflow-hidden select-none">
               {accordionItems.map((item, index) => (
                 <AccordionItem
                   key={item.id}
@@ -150,6 +177,46 @@ export function LandingAccordionItem({ onSelectPartner }: LandingAccordionItemPr
                 />
               ))}
             </div>
+
+            {/* Mobile Display: Dual rows of 5 and 3 members (Prevents squeezing, beautiful proportion) */}
+            <div className="flex sm:hidden flex-col gap-2.5 w-full">
+              {/* Row 1 (Members 1-5) */}
+              <div className="flex flex-row items-center justify-center gap-1 p-0.5 w-full overflow-hidden select-none">
+                {accordionItems.slice(0, 5).map((item, index) => {
+                  const realIndex = index;
+                  return (
+                    <AccordionItem
+                      key={item.id}
+                      item={item}
+                      isActive={realIndex === activeIndex}
+                      onMouseEnter={() => handleItemHover(realIndex)}
+                      onClick={() => handleItemClick(realIndex, item.rawPartner)}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Row 2 (Members 6-8) */}
+              <div 
+                className={`flex flex-row items-center justify-center gap-1 p-0.5 transition-all duration-500 ease-in-out overflow-hidden select-none ${
+                  activeIndex >= 5 ? 'w-full' : 'w-[60%] mx-auto'
+                }`}
+              >
+                {accordionItems.slice(5).map((item, index) => {
+                  const realIndex = index + 5;
+                  return (
+                    <AccordionItem
+                      key={item.id}
+                      item={item}
+                      isActive={realIndex === activeIndex}
+                      onMouseEnter={() => handleItemHover(realIndex)}
+                      onClick={() => handleItemClick(realIndex, item.rawPartner)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

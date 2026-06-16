@@ -382,8 +382,8 @@ export default function App() {
                     <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
                       General Brief Archive
                     </span>
-                    <a href="mailto:advisory@juslay.com" className="block text-white/95 text-xs sm:text-sm font-mono hover:text-gold transition-colors truncate mt-1 font-medium">
-                      advisory@juslay.com
+                    <a href="mailto:advisory@jusandlay.com" className="block text-white/95 text-xs sm:text-sm font-mono hover:text-gold transition-colors truncate mt-1 font-medium">
+                      advisory@jusandlay.com
                     </a>
                   </div>
                 </div>
