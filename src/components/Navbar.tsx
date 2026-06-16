@@ -4,9 +4,10 @@ import { Menu, X, Phone, MessageCircle } from "lucide-react";
 interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
   consultationCount?: number;
+  onServicesClick?: () => void;
 }
 
-export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0 }: NavbarProps) {
+export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -33,6 +34,9 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    if (href === "#firm-profile" && onServicesClick) {
+      onServicesClick();
+    }
     const element = document.querySelector(href);
     if (element) {
       const offset = 80; // height of navbar

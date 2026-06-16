@@ -23,6 +23,7 @@ import LoadingScreen from "./components/LoadingScreen";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [profileTab, setProfileTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
 
   useEffect(() => {
     const handleLoad = () => {
@@ -43,8 +44,15 @@ export default function App() {
     }
   }, []);
 
-  const handleCTABookScroll = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>, targetId: string) => {
+  const handleCTABookScroll = (
+    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>, 
+    targetId: string,
+    defaultTab?: "about" | "philosophy" | "practices" | "banking"
+  ) => {
     e.preventDefault();
+    if (defaultTab) {
+      setProfileTab(defaultTab);
+    }
     const element = document.querySelector(targetId);
     if (element) {
       const offset = 80;
@@ -66,7 +74,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* 1. STICKY NAVBAR */}
-      <Navbar />
+      <Navbar onServicesClick={() => setProfileTab("practices")} />
 
       {/* 2. HERO VIEW using the client's specified Introduction text */}
       <ParallaxSection
@@ -219,7 +227,7 @@ export default function App() {
           </div>
 
           {/* Firm Profile Dossier containing all interactive specifications */}
-          <FirmProfile />
+          <FirmProfile activeTab={profileTab} onTabChange={setProfileTab} />
 
           {/* Separate Clients Section below Chambers Firm Profile */}
           <div className="w-full pt-16 mt-16 border-t border-white/5 overflow-hidden">
@@ -426,35 +434,96 @@ export default function App() {
       </ParallaxSection>
 
       {/* 6. SECURE FOOTER */}
-      <footer className="bg-[#040811] border-t border-white/10 py-12">
+      <footer className="bg-[#040811] border-t border-white/10 py-16">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 xl:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-b border-white/5 pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 border-b border-white/5 pb-12">
             
-            {/* Left Brand block */}
-            <div className="md:col-span-6 space-y-4 text-left">
+            {/* Column 1: Brand block */}
+            <div className="md:col-span-4 space-y-4 text-left">
               <div className="inline-block p-2 bg-[#fdfbf7] rounded-sm shadow-sm border border-gold/20">
                 <img
                   src="https://images.pexels.com/photos/38052959/pexels-photo-38052959.png"
                   alt="Jus & Lay Logo"
-                  className="h-[80px] sm:h-[96px] w-auto object-contain"
+                  className="h-[76px] w-auto object-contain"
                   referrerPolicy="no-referrer"
                 />
               </div>
               <p className="text-white/40 text-xs font-sans leading-relaxed max-w-sm">
-                Corporate commercial counseling, civil & criminal advocacy, and services to financial institutions BOP & HBL under strict privilege.
+                Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.
               </p>
             </div>
 
-            {/* Right certifications block */}
-            <div className="md:col-span-6 flex justify-end text-left md:text-right">
-              <div className="p-4 border border-white/5 bg-white/[0.01] rounded flex gap-3.5 max-w-md items-start">
+            {/* Column 2: Quick Links */}
+            <div className="md:col-span-2.5 text-left space-y-4">
+              <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
+                Chambers Navigation
+              </h4>
+              <ul className="space-y-2.5 text-xs font-sans text-white/50">
+                <li>
+                  <a href="#home" onClick={(e) => handleCTABookScroll(e, "#home")} className="hover:text-gold transition-colors block">
+                    Home Gateway
+                  </a>
+                </li>
+                <li>
+                  <a href="#about" onClick={(e) => handleCTABookScroll(e, "#about")} className="hover:text-gold transition-colors block">
+                    About Chambers
+                  </a>
+                </li>
+                <li>
+                  <a href="#team" onClick={(e) => handleCTABookScroll(e, "#team")} className="hover:text-gold transition-colors block">
+                    Of Counsel & Partners
+                  </a>
+                </li>
+                <li>
+                  <a href="#contact" onClick={(e) => handleCTABookScroll(e, "#contact")} className="hover:text-gold transition-colors block">
+                    Liaison & Location
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Practices & Desks */}
+            <div className="md:col-span-2.5 text-left space-y-4">
+              <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
+                Practice Core
+              </h4>
+              <ul className="space-y-2.5 text-xs font-sans text-white/50">
+                <li>
+                  <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "practices")} className="hover:text-gold transition-colors block font-semibold text-white/60">
+                    Practice Areas Core
+                  </a>
+                </li>
+                <li>
+                  <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "banking")} className="hover:text-gold transition-colors block">
+                    Banking & Finance Desk
+                  </a>
+                </li>
+                <li>
+                  <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "about")} className="hover:text-gold transition-colors block">
+                    Chambers History
+                  </a>
+                </li>
+                <li>
+                  <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "philosophy")} className="hover:text-gold transition-colors block">
+                    Our Philosophy
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Contact & Certification block */}
+            <div className="md:col-span-3 text-left space-y-4">
+              <h4 className="font-serif text-[11px] uppercase font-extrabold text-gold tracking-widest">
+                Enforcement & Integrity
+              </h4>
+              <div className="p-3.5 border border-white/5 bg-white/[0.01] rounded flex gap-2.5 items-start">
                 <ShieldCheck className="w-5 h-5 text-gold shrink-0 mt-0.5" />
-                <div className="space-y-1 text-left">
-                  <span className="block text-[9px] uppercase font-bold text-gold tracking-wider">
-                    Chambers Certifications
+                <div className="space-y-1">
+                  <span className="block text-[8px] uppercase font-extrabold text-gold tracking-wider">
+                    High Court Advocates
                   </span>
                   <span className="block text-[10px] text-white/45 font-sans leading-relaxed">
-                    Advocates of the High Courts & Supreme Court of Pakistan. Certified representation across major financial and corporate sectors nationwide.
+                    Certified litigation defense across major public & private financial institutions BOP & HBL under strict privilege.
                   </span>
                 </div>
               </div>
@@ -470,7 +539,7 @@ export default function App() {
             <div className="flex items-center gap-4 text-[10px] font-sans font-semibold text-white/30">
               <a href="#about" onClick={(e) => handleCTABookScroll(e, "#about")} className="hover:text-gold hover:underline">Privilege Standard</a>
               <span>•</span>
-              <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile")} className="hover:text-gold hover:underline">Regulatory ComplianceDesk</a>
+              <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "practices")} className="hover:text-gold hover:underline">Regulatory ComplianceDesk</a>
             </div>
           </div>
         </div>

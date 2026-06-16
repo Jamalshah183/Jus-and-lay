@@ -20,8 +20,22 @@ import {
   FINANCIAL_INSTITUTIONS_SERVICE
 } from "../data";
 
-export default function FirmProfile() {
-  const [activeTab, setActiveTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
+interface FirmProfileProps {
+  activeTab?: "about" | "philosophy" | "practices" | "banking";
+  onTabChange?: (tab: "about" | "philosophy" | "practices" | "banking") => void;
+}
+
+export default function FirmProfile({ activeTab: propActiveTab, onTabChange }: FirmProfileProps = {}) {
+  const [localActiveTab, setLocalActiveTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
+
+  const activeTab = propActiveTab !== undefined ? propActiveTab : localActiveTab;
+  const setActiveTab = (tab: "about" | "philosophy" | "practices" | "banking") => {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setLocalActiveTab(tab);
+    }
+  };
 
   const tabs = [
     { id: "about", label: "About Firm", icon: BookOpen },
