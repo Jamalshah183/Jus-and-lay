@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, MessageCircle } from "lucide-react";
+import { Menu, X, Phone, Shield } from "lucide-react";
 
 interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
   consultationCount?: number;
   onServicesClick?: () => void;
+  onOpenPortal?: () => void;
 }
 
-export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick }: NavbarProps) {
+export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick, onOpenPortal }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -93,14 +94,13 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
-            <a
-              href="#consultation"
-              onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.35)] transition-all duration-300 flex items-center gap-2"
+            <button
+              onClick={onOpenPortal}
+              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-xs hover:bg-gold hover:text-navy hover:shadow-[0_0_15px_rgba(215,160,82,0.35)] transition-all duration-300 flex items-center gap-2 cursor-pointer"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-white shrink-0" />
-              <span>WhatsApp Liaison</span>
-            </a>
+              <Shield className="w-3.5 h-3.5 text-gold shrink-0" />
+              <span>Client Portal</span>
+            </button>
           </div>
         </div>
 
@@ -133,14 +133,16 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
           </div>
 
           <div className="flex flex-col gap-3 pt-2">
-            <a
-              href="#consultation"
-              onClick={(e) => handleLinkClick(e, "#consultation")}
-              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] transition-all duration-300 flex items-center justify-center gap-2"
+            <button
+              onClick={() => {
+                if (onOpenPortal) onOpenPortal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-xs hover:bg-gold hover:text-navy transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 text-white shrink-0" />
-              <span>WhatsApp Liaison</span>
-            </a>
+              <Shield className="w-4 h-4 text-gold shrink-0" />
+              <span>Client Portal</span>
+            </button>
             <a
               href="tel:03218520085"
               className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs tracking-widest uppercase font-medium font-sans border border-navy/20 text-navy rounded-xs hover:bg-navy/5 transition-all duration-300"
