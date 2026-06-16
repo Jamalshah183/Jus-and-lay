@@ -7,7 +7,6 @@ interface ConsultationFormProps {
 }
 
 export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormProps) {
-  const [activeRouting, setActiveRouting] = useState<"general" | "mna" | "litigation" | "tax">("general");
   const [copiedLink, setCopiedLink] = useState(false);
   const [pktTime, setPktTime] = useState("");
 
@@ -33,30 +32,12 @@ export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormPr
     return () => clearInterval(interval);
   }, []);
 
-  const routingDetails = {
-    general: {
-      label: "General Counsel Liaison",
-      message: "Hello Jus %26 Lay, we are looking to establish a secure partnership dialogue for corporate advisory.",
-      desc: "Connect directly with our corporate intake desk for non-disclosure agreement (NDA) issuance and general retainer briefings.",
-    },
-    mna: {
-      label: "SECP, M&A & Board Structuring",
-      message: "Hello Jus %26 Lay, we require urgent corporate legal advise regarding SECP compliance or M%26A transactions.",
-      desc: "Immediate routing to senior merger counsel for corporate mergers, SECP clearances, or international joint-ventures.",
-    },
-    litigation: {
-      label: "Appellate & High-Court Litigation",
-      message: "Hello Jus %26 Lay, we require urgent Senior Partner litigation counsel for an upcoming commercial appeal.",
-      desc: "High-priority routing to Barrister Jamal M. Shah for emergency stay-orders, High Court filings and arbitrations.",
-    },
-    tax: {
-      label: "Tax, FBR, Energy & NEPRA Tariff Law",
-      message: "Hello Jus %26 Lay, our enterprise requires urgent counsel regarding a NEPRA tariff or FBR tax recovery appeal.",
-      desc: "Direct routing to Advocate Zane Malik for FBR tax appellate defense, NEPRA/OGRA regulatory tariffs, or IPP power-sector counsel.",
-    },
+  const currentRoute = {
+    label: "General Counsel Liaison",
+    message: "Hello Jus %26 Lay, we are looking to establish a secure partnership dialogue for corporate advisory.",
+    desc: "Connect directly with our corporate intake desk for non-disclosure agreement (NDA) issuance and general retainer briefings.",
   };
 
-  const currentRoute = routingDetails[activeRouting];
   const whatsAppLink = `https://wa.me/923218520085?text=${encodeURIComponent(currentRoute.message.replace(/%26/g, "&"))}`;
 
   const handleCopyChannel = () => {
@@ -115,42 +96,6 @@ export default function ConsultationForm({ onSubmitSuccess }: ConsultationFormPr
           <span className="block text-xs font-semibold text-white mt-1 leading-tight">
             Typical response &lt; 5 mins
           </span>
-        </div>
-      </div>
-
-      {/* Selective Routing Buttons - Elite Corporate Aesthetic */}
-      <div className="space-y-3 mb-6">
-        <span className="block text-[10px] uppercase font-bold text-[#ffbc57]/80 tracking-widest text-left">
-          Select Corporate Routing Profile:
-        </span>
-        <div className="grid grid-cols-2 gap-2">
-          {(["general", "mna", "litigation", "tax"] as const).map((route) => (
-            <button
-              key={route}
-              onClick={() => setActiveRouting(route)}
-              className={`p-3 text-left rounded-xs border transition-all duration-300 focus:outline-none flex flex-col justify-between min-h-[76px] h-auto gap-2 group relative cursor-pointer ${
-                activeRouting === route
-                  ? "bg-gold/15 border-gold text-gold"
-                  : "bg-navy/40 border-white/5 hover:border-white/20 text-white/60 hover:text-white"
-              }`}
-            >
-              <span className="text-[9px] sm:text-[10px] font-sans font-extrabold uppercase tracking-wider block leading-tight">
-                {route === "general" && "General Liaison"}
-                {route === "mna" && "SECP & M&A"}
-                {route === "litigation" && "High-Court Appeals"}
-                {route === "tax" && "FBR & NEPRA Tariffs"}
-              </span>
-              <div className="flex justify-between items-center w-full mt-auto">
-                <span className="text-[8px] sm:text-[9px] text-white/40 font-mono">
-                  {route === "general" && "Liaison Desk"}
-                  {route === "mna" && "Ayesha Lodhi"}
-                  {route === "litigation" && "Barrister Shah"}
-                  {route === "tax" && "Zane Malik"}
-                </span>
-                <ArrowUpRight className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-all duration-300 ${activeRouting === route ? "translate-x-0.5 -translate-y-0.5 opacity-100 text-gold" : "opacity-30 group-hover:opacity-60"}`} />
-              </div>
-            </button>
-          ))}
         </div>
       </div>
 
