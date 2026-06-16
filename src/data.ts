@@ -231,7 +231,7 @@ export const LEGAL_TEAM: TeamMember[] = [
     name: "Palwasha Tariq",
     role: "Advocate High Court",
     bio: "B.A, LLB. Area of Practice: Family, Civil, Criminal, and Corporate Laws.",
-    image: "https://images.pexels.com/photos/38145958/pexels-photo-38145958.jpeg",
+    image: "https://images.pexels.com/photos/38146781/pexels-photo-38146781.jpeg",
     email: "palwasha.tariq@jusandlay.com",
     phone: "+92 (300) 912-8667"
   }
