@@ -5,15 +5,12 @@ import {
   Shield, 
   User, 
   FileText, 
-  Send, 
   Upload, 
   Check, 
   Clock, 
-  Edit, 
   Plus, 
   Calendar, 
   AlertCircle, 
-  DollarSign, 
   Activity, 
   LogOut, 
   MessageSquare,
@@ -22,332 +19,476 @@ import {
   Loader2,
   FileCheck,
   CheckCircle,
-  Briefcase
+  Briefcase,
+  Users,
+  Gavel,
+  Search,
+  ChevronLeft,
+  LayoutGrid,
+  CalendarDays,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Save
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  isConfigured as isFirebaseConfigured, 
+  db, 
+  auth, 
+  storage, 
+  handleFirestoreError, 
+  OperationType 
+} from "../lib/firebase";
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  query, 
+  orderBy, 
+  serverTimestamp, 
+  doc, 
+  updateDoc, 
+  setDoc,
+  where,
+  onSnapshot
+} from "firebase/firestore";
+import { 
+  signInWithEmailAndPassword, 
+  signOut as firebaseSignOut, 
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider
+} from "firebase/auth";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface PortalModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Interfaces
-interface Milestone {
+// Interfaces matching raw files exactly
+interface Hearing {
   date: string;
-  title: string;
-  description: string;
-  completed: boolean;
+  nextHearingDate?: string;
+  proceedings: string;
+  orderSheetUrl?: string;
+  caseTitle?: string;
+  caseNo?: string;
+  purpose?: string;
+  judgeName?: string;
+  courtName?: string;
+  caseId?: string;
 }
 
-interface Message {
+interface CaseData {
+  id?: string;
+  caseTitle: string;
+  caseNo: string;
+  srNo: string;
+  judgeName: string;
+  courtName: string;
+  counselName: string;
+  lastHearingDate: string;
+  nextHearingDate: string;
+  clientId: string;
+  clientPassword?: string;
+  proceedings: string;
+  orderSheetUrl?: string;
+  hearings: Hearing[];
+  status?: string;
+}
+
+interface UserProfile {
   id: string;
-  sender: "client" | "chambers";
-  text: string;
-  timestamp: string;
+  email: string;
+  password?: string;
+  role: string;
 }
 
-interface CaseDocument {
-  name: string;
-  size: string;
-  uploadedAt: string;
-}
-
-interface CaseInvoice {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-  status: "Paid" | "Pending" | "Chambers Hold" | "Escrow Escaped";
-}
-
-interface CaseFile {
-  id: string;
-  clientEmail: string;
-  clientName: string;
-  caseNumber: string;
-  title: string;
-  partnerInCharge: string;
-  status: string;
-  nextHearing: string;
-  description: string;
-  milestones: Milestone[];
-  documents: CaseDocument[];
-  messages: Message[];
-  invoices: CaseInvoice[];
-}
-
-const DEFAULT_CASES: CaseFile[] = [
+// Fallback/Mock cases to run offline in preview if Firebase keys are absent
+const DEFAULT_MOCK_CASES: CaseData[] = [
   {
-    id: "hbl-case",
-    clientEmail: "client@hbl.com",
-    clientName: "Habib Bank Limited (HBL)",
-    caseNumber: "HBL/LC-4890/2026",
-    title: "Habib Bank Limited v. National Enterprises Inc. (Commercial Recovery)",
-    partnerInCharge: "Barrister Jamal M. Shah",
-    status: "Under Appellate Stage (High Court)",
-    nextHearing: "2026-06-28",
-    description: "Supreme commercial recovery suit representing HBL for recovery of defaulted credit facilities under corporate mortgage security pledges.",
-    milestones: [
-      { date: "2026-06-05", title: "Chamber Replication Filed", description: "Replication and response to defendant’s written statement filed in the High Court.", completed: true },
-      { date: "2026-06-12", title: "Injunction Sustained", description: "Stay order against corporate asset sell-off successfully sustained after arguments.", completed: true },
-      { date: "2026-06-28", title: "Appellate Merits Arguments", description: "Final oral arguments regarding recovery execution orders scheduled before the Double Bench.", completed: false }
-    ],
-    documents: [
-      { name: "High_Court_Stay_Order_Sustained.pdf", size: "2.4 MB", uploadedAt: "2026-06-12" },
-      { name: "Calamity_Grounds_Appeal_Brief.pdf", size: "4.8 MB", uploadedAt: "2026-06-05" },
-      { name: "HBL_Mortgage_Security_Pledge.pdf", size: "12.1 MB", uploadedAt: "2026-05-18" }
-    ],
-    messages: [
-      { id: "1", sender: "chambers", text: "Welcome to your secure chambers liaison channel. Barrister Jamal M. Shah has reviewed your instruction.", timestamp: "2026-06-05 10:15" },
-      { id: "2", sender: "client", text: "Thank you chambers. We need to ensure the recovery order execution stays active.", timestamp: "2026-06-05 11:30" },
-      { id: "3", sender: "chambers", text: "Rest assured, our double bench application has preserved the status quo with absolute priority.", timestamp: "2026-06-12 16:45" }
-    ],
-    invoices: [
-      { id: "INV-9021", description: "High Court Injunction Arguments & Retainer Second Tranche", date: "2026-06-10", amount: 450000, status: "Paid" },
-      { id: "INV-8932", description: "Initial Filing & Power of Attorney Registry", date: "2026-05-15", amount: 350000, status: "Paid" },
-      { id: "INV-9140", description: "Final Double Bench Merit Arguments Liaison Charge", date: "2026-06-15", amount: 500000, status: "Pending" }
+    id: "hbl-case-1",
+    caseTitle: "Habib Bank Limited v. National Enterprises Inc. (Commercial Recovery)",
+    caseNo: "HBL/LC-4890/2026",
+    srNo: "12 / 2026",
+    judgeName: "Mr. Justice Babar Sattar",
+    courtName: "Islamabad High Court, Islamabad",
+    counselName: "Advocate Wajid Awan",
+    lastHearingDate: "2026-06-12",
+    nextHearingDate: "2026-06-28",
+    clientId: "client@hbl.com",
+    clientPassword: "client123",
+    proceedings: "Injunction stay order against corporate asset sell-off successfully sustained after lengthy arguments.",
+    orderSheetUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    status: "Ongoing",
+    hearings: [
+      {
+        date: "2026-06-12",
+        nextHearingDate: "2026-06-28",
+        proceedings: "Stay order sustained. Defendant’s application for discharge dismissed. Main appeal fixed for final parameters.",
+        orderSheetUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        purpose: "Stay Argument",
+        judgeName: "Mr. Justice Babar Sattar",
+        courtName: "Islamabad High Court"
+      },
+      {
+        date: "2026-06-05",
+        nextHearingDate: "2026-06-12",
+        proceedings: "High replication and board answer submitted before the double bench. Reply filed.",
+        purpose: "Replication Filing",
+        judgeName: "Mr. Justice Babar Sattar",
+        courtName: "Islamabad High Court"
+      }
     ]
   },
   {
-    id: "secp-case",
-    clientEmail: "mna.director@secp-enterprise.com",
-    clientName: "SECP Mergers Desk",
-    caseNumber: "SECP/REST-023/2026",
-    title: "In Re: Board Restructuring & SECP Regulatory Clearances",
-    partnerInCharge: "Ms. Ayesha Lodhi",
-    status: "Filing Draft Finalized",
-    nextHearing: "2026-07-04",
-    description: "Legal advisory and compliance registry regarding structural restructuring and merger of cross-border telecom entities under SECP Rules.",
-    milestones: [
-      { date: "2026-06-10", title: "SECP Restructuring Application Drafted", description: "Comprehensive corporate articles of restructuring prepared by Ms. Lodhi.", completed: true },
-      { date: "2026-07-04", title: "SECP Hearing on Merger clearances", description: "Registrar board meeting and hearing for structural clearance sanction.", completed: false }
-    ],
-    documents: [
-      { name: "SECP_Submission_Draft_V3_Signed.pdf", size: "6.1 MB", uploadedAt: "2026-06-11" },
-      { name: "Restructuring_Board_Minutes_ChamberSeal.pdf", size: "1.9 MB", uploadedAt: "2026-06-10" }
-    ],
-    messages: [
-      { id: "1", sender: "chambers", text: "Sovereign merger clearances have been drafted and are awaiting your digital signature.", timestamp: "2026-06-10 14:00" },
-      { id: "2", sender: "client", text: "Excellent, we have signed the authorization. Let’s prepare for the SECP Registrar desk review.", timestamp: "2026-06-11 09:20" }
-    ],
-    invoices: [
-      { id: "INV-9014", description: "SECP Restructuring Clearance Fee", date: "2026-06-10", amount: 600000, status: "Paid" }
-    ]
-  },
-  {
-    id: "wapda-case",
-    clientEmail: "energy.advisory@wapda.gov.pk",
-    clientName: "WAPDA Regulatory Unit",
-    caseNumber: "WAPDA/NEPRA-891/2026",
-    title: "NEPRA Tariff Appellate appeal (Interim Stay Petition)",
-    partnerInCharge: "Advocate Zane Malik",
-    status: "Interim Stay Retained",
-    nextHearing: "2026-06-18",
-    description: "Appellate regulatory appeal against NEPRA tariff surcharge determination representing the public interest energy grid distribution setup.",
-    milestones: [
-      { date: "2026-06-14", title: "Appellate Brief Submission", description: "Appellate briefing and emergency stays submitted against arbitrary FBR recovery levies.", completed: true },
-      { date: "2026-06-18", title: "Tariff Stay Hearing", description: "Arguments before the single bench on sustaining the recovery stay.", completed: false }
-    ],
-    documents: [
-      { name: "NEPRA_Appeals_Brief_Verified.pdf", size: "8.5 MB", uploadedAt: "2026-06-14" },
-      { name: "FBR_Arbitrary_Assessment_Chorography.pdf", size: "3.2 MB", uploadedAt: "2026-06-12" }
-    ],
-    messages: [
-      { id: "1", sender: "chambers", text: "Advocate Zane Malik is on brief for WAPDA tariff issue. Emergency stay application listed for June 18.", timestamp: "2026-06-14 11:00" }
-    ],
-    invoices: [
-      { id: "INV-8991", description: "WAPDA Tariffs Appellate Challenge Prep Retainer", date: "2026-06-11", amount: 750000, status: "Paid" }
+    id: "secp-case-1",
+    caseTitle: "In Re: Board Restructuring & SECP Regulatory Clearances v. Mergers Desk",
+    caseNo: "SECP/REST-023/2026",
+    srNo: "45",
+    judgeName: "Registrar SECP Desk",
+    courtName: "Securities & Exchange Commission of Pakistan",
+    counselName: "Advocate Wajid Awan",
+    lastHearingDate: "2026-06-10",
+    nextHearingDate: "2026-07-04",
+    clientId: "mna.director@secp-enterprise.com",
+    clientPassword: "client123",
+    proceedings: "SECP Merger compliance clearances under final reviews. Surcharge stay registered under legal seal.",
+    orderSheetUrl: "",
+    status: "Ongoing",
+    hearings: [
+      {
+        date: "2026-06-10",
+        nextHearingDate: "2026-07-04",
+        proceedings: "Articles of merger restructure filed. Bench was satisfied of initial securities board parameters.",
+        purpose: "Desk Review",
+        judgeName: "Registrar SECP Desk",
+        courtName: "Securities & Exchange Commission of Pakistan"
+      }
     ]
   }
 ];
 
 export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
-  const [currentUser, setCurrentUser] = useState<"none" | "client" | "admin">("none");
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientPassword, setClientPassword] = useState("");
-  const [currentClientCase, setCurrentClientCase] = useState<CaseFile | null>(null);
-  const [activePortalTab, setActivePortalTab] = useState<"overview" | "documents" | "messages" | "billing">("overview");
+  // Views navigation state: "choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard"
+  const [view, setView] = useState<"choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard">("choice");
+  
+  // Real or Mock mode flag
+  const isDemo = !isFirebaseConfigured;
 
-  // Admin states
-  const [allCases, setAllCases] = useState<CaseFile[]>([]);
-  const [selectedCaseIdForAdmin, setSelectedCaseIdForAdmin] = useState<string>("");
-  const [adminSection, setAdminSection] = useState<"cases" | "invoices" | "create">("cases");
-  const [adminReplyText, setAdminReplyText] = useState("");
-  const [clientReplyText, setClientReplyText] = useState("");
+  // Session user profile
+  const [sessionUser, setSessionUser] = useState<{ email: string; uid: string; role: "client" | "admin" } | null>(null);
 
-  // Create Case states
-  const [newCaseClientEmail, setNewCaseClientEmail] = useState("");
-  const [newCaseClientName, setNewCaseClientName] = useState("");
-  const [newCaseNumber, setNewCaseNumber] = useState("");
-  const [newCaseTitle, setNewCaseTitle] = useState("");
-  const [newCasePartner, setNewCasePartner] = useState("Barrister Jamal M. Shah");
-  const [newCaseStatus, setNewCaseStatus] = useState("Filing Stage");
-  const [newCaseNextHearing, setNewCaseNextHearing] = useState("");
-  const [newCaseDescription, setNewCaseDescription] = useState("");
+  // Authentication Fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
-  // Document upload state
+  // Cases state
+  const [cases, setCases] = useState<CaseData[]>([]);
+  const [casesLoading, setCasesLoading] = useState(true);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+
+  // Admin section: "list" | "calendar" | "add-case"
+  const [adminMode, setAdminMode] = useState<"list" | "calendar">("list");
+  const [isAddingCase, setIsAddingCase] = useState(false);
+  const [isSavingCase, setIsSavingCase] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Create Case Form Data
+  const [formData, setFormData] = useState({
+    caseTitle: "",
+    caseNo: "",
+    srNo: "",
+    judgeName: "",
+    courtName: "",
+    counselName: "Advocate Wajid Awan",
+    lastHearingDate: "",
+    nextHearingDate: "",
+    clientId: "",
+    clientPassword: "",
+    proceedings: "",
+    orderSheetUrl: ""
+  });
+
+  // Adding Hearing State
+  const [newHearing, setNewHearing] = useState({
+    date: "",
+    nextHearingDate: "",
+    proceedings: "",
+    orderSheetUrl: "",
+    purpose: "",
+    judgeName: "",
+    courtName: ""
+  });
+
+  // Upload progress simulation
+  const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // Drag and drop mock
   const [dragActive, setDragActive] = useState(false);
 
-  // Fee state
-  const [newInvoiceDesc, setNewInvoiceDesc] = useState("");
-  const [newInvoiceAmount, setNewInvoiceAmount] = useState("");
-
-  // Load and sync local storage
+  // Initialize cases from Firestore or local storage fallback
   useEffect(() => {
-    const saved = localStorage.getItem("jus_lay_cases");
-    if (saved) {
-      try {
-        setAllCases(JSON.parse(saved));
-      } catch (e) {
-        setAllCases(DEFAULT_CASES);
+    if (!isOpen) return;
+
+    if (isDemo) {
+      // LocalStorage mode
+      const saved = localStorage.getItem("awan_cases_data");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setCases(parsed);
+          setCasesLoading(false);
+        } catch {
+          localStorage.setItem("awan_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
+          setCases(DEFAULT_MOCK_CASES);
+          setCasesLoading(false);
+        }
+      } else {
+        localStorage.setItem("awan_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
+        setCases(DEFAULT_MOCK_CASES);
+        setCasesLoading(false);
       }
     } else {
-      localStorage.setItem("jus_lay_cases", JSON.stringify(DEFAULT_CASES));
-      setAllCases(DEFAULT_CASES);
+      // Real Firebase database
+      fetchFirestoreCases();
     }
-  }, []);
+  }, [isOpen, isDemo]);
 
-  const saveCasesToStorage = (casesToSave: CaseFile[]) => {
-    localStorage.setItem("jus_lay_cases", JSON.stringify(casesToSave));
-    setAllCases(casesToSave);
-    
-    // Update active client case too if logged in
-    if (currentClientCase) {
-      const updated = casesToSave.find((c) => c.clientEmail === currentClientCase.clientEmail);
-      if (updated) {
-        setCurrentClientCase(updated);
-      }
-    }
-    
-    // Update admin selected case
-    if (selectedCaseIdForAdmin) {
-      const updated = casesToSave.find((c) => c.id === selectedCaseIdForAdmin);
-      if (updated === undefined) {
-        setSelectedCaseIdForAdmin("");
-      }
+  // Firestore fetch callback
+  const fetchFirestoreCases = async () => {
+    setCasesLoading(true);
+    try {
+      const snapshot = await getDocs(collection(db, 'cases'));
+      const fetched = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      } as CaseData));
+      setCases(fetched);
+    } catch (err) {
+      console.error("Firestore loading error:", err);
+    } finally {
+      setCasesLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
-  // Login handler
-  const handleLogin = (e: React.FormEvent, role: "client" | "admin") => {
-    e.preventDefault();
-    if (role === "admin") {
-      if (clientEmail === "admin@jusandlay.com" && clientPassword === "admin123") {
-        setCurrentUser("admin");
-        setErrorMsg("");
-        // Select first case on admin screen by default
-        if (allCases.length > 0) {
-          setSelectedCaseIdForAdmin(allCases[0].id);
-        }
-      } else {
-        setErrorMsg("Invalid credentials. Enter admin@jusandlay.com and admin123.");
+  // Sign out triggers
+  const handleSignOut = async () => {
+    setAuthLoading(true);
+    try {
+      if (!isDemo && auth) {
+        await firebaseSignOut(auth);
       }
+    } catch (err) {
+      console.error("Firebase Signout error:", err);
+    } finally {
+      setSessionUser(null);
+      setEmail("");
+      setPassword("");
+      setAuthError("");
+      setSelectedCaseId(null);
+      setAuthLoading(false);
+      setIsAddingCase(false);
+      setView("choice");
+    }
+  };
+
+  // Login Logic
+  const handleLoginSubmit = async (e: React.FormEvent, role: "client" | "admin") => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError("");
+
+    if (isDemo) {
+      // Simulation logins
+      setTimeout(() => {
+        const userEmail = email.trim().toLowerCase();
+        
+        if (role === "admin") {
+          const admins = ['jamalshah183@gmail.com', 'wajid112211@gmail.com', 'admin@awan.com'];
+          if (admins.includes(userEmail) && password === "admin123") {
+            setSessionUser({
+              email: email.trim(),
+              uid: "dev-admin-uid-123",
+              role: "admin"
+            });
+            setView("admin-dashboard");
+          } else {
+            setAuthError("Unauthorized credentials. Type 'admin@awan.com' or 'jamalshah183@gmail.com' and password 'admin123' to bypass.");
+          }
+        } else {
+          // Client login helper
+          const matched = cases.find(c => c.clientId.toLowerCase() === userEmail);
+          if (matched && password === "client123") {
+            setSessionUser({
+              email: email.trim(),
+              uid: userEmail,
+              role: "client"
+            });
+            setSelectedCaseId(matched.id || null);
+            setView("client-dashboard");
+          } else {
+            setAuthError("No registered client found. Type 'client@hbl.com' and password 'client123' to bypass.");
+          }
+        }
+        setAuthLoading(false);
+      }, 700);
     } else {
-      // Find case with this client email
-      const matchedCase = allCases.find((c) => c.clientEmail.toLowerCase() === clientEmail.trim().toLowerCase());
-      if (matchedCase && clientPassword === "client123") {
-        setCurrentUser("client");
-        setCurrentClientCase(matchedCase);
-        setErrorMsg("");
-      } else {
-        setErrorMsg("Unauthenticated credentials. Enter a valid registered client email (e.g. client@hbl.com) and password client123.");
+      // Real firebase authentication
+      try {
+        if (role === "admin") {
+          // Google provider authentication is usually used for admins on raw admin_login,
+          // but we can support both popup Google and email password if requested
+          setAuthError("To log in as a real admin, please perform authorized Google sign-in configuration.");
+        } else {
+          const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
+          // Query if cases contain this user's email
+          setSessionUser({
+            email: userCred.user.email || "",
+            uid: userCred.user.uid,
+            role: "client"
+          });
+          setView("client-dashboard");
+        }
+      } catch (err: any) {
+        setAuthError(err.message || "Failed to sign in. Please verify your internet and credentials.");
+      } finally {
+        setAuthLoading(false);
       }
     }
   };
 
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const bypassLogin = (email: string, role: "client" | "admin") => {
-    setClientEmail(email);
-    setClientPassword(role === "admin" ? "admin123" : "client123");
-    setErrorMsg("");
-  };
-
-  const handleLogout = () => {
-    setCurrentUser("none");
-    setClientEmail("");
-    setClientPassword("");
-    setCurrentClientCase(null);
-    setSelectedCaseIdForAdmin("");
-    setErrorMsg("");
-  };
-
-  // Client messages handler
-  const sendClientMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clientReplyText.trim() || !currentClientCase) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      sender: "client",
-      text: clientReplyText.trim(),
-      timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-    };
-
-    const updatedCases = allCases.map((c) => {
-      if (c.id === currentClientCase.id) {
-        return {
-          ...c,
-          messages: [...c.messages, newMessage]
-        };
-      }
-      return c;
-    });
-
-    saveCasesToStorage(updatedCases);
-    setClientReplyText("");
-
-    // Setup an automated quick liaison clerk acknowledgment to demonstrate interaction
-    setTimeout(() => {
-      const deskAck: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "chambers",
-        text: `Secure liaison alert: Chambers is processing your query. Barrister's Desk will finalize response shortly.`,
-        timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-      };
-      
-      const casesWithAck = updatedCases.map((c) => {
-        if (c.id === currentClientCase.id) {
-          return {
-            ...c,
-            messages: [...c.messages, deskAck]
-          };
-        }
-        return c;
+  // Google SSO authentication for Admins in real Firebase mode
+  const handleGoogleAdminLogin = async () => {
+    if (isDemo) {
+      // Demo Bypass
+      setEmail("jamalshah183@gmail.com");
+      setPassword("admin123");
+      setSessionUser({
+        email: "jamalshah183@gmail.com",
+        uid: "google-demo-admin",
+        role: "admin"
       });
-      saveCasesToStorage(casesWithAck);
-    }, 1500);
-  };
+      setView("admin-dashboard");
+      return;
+    }
 
-  // Admin reply handler
-  const sendAdminReply = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminReplyText.trim() || !selectedCaseIdForAdmin) return;
+    setAuthLoading(true);
+    setAuthError("");
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const admins = ['jamalshah183@gmail.com', 'wajid112211@gmail.com'];
+      const userEmail = user.email?.toLowerCase();
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      sender: "chambers",
-      text: adminReplyText.trim(),
-      timestamp: new Date().toISOString().replace("T", " ").substring(0, 16)
-    };
-
-    const updatedCases = allCases.map((c) => {
-      if (c.id === selectedCaseIdForAdmin) {
-        return {
-          ...c,
-          messages: [...c.messages, newMessage]
-        };
+      if (userEmail && admins.includes(userEmail) && user.providerData.some(p => p.providerId === 'google.com')) {
+        setSessionUser({
+          email: userEmail,
+          uid: user.uid,
+          role: "admin"
+        });
+        setView("admin-dashboard");
+      } else {
+        await firebaseSignOut(auth);
+        setAuthError("Unauthorized access. Only authorized admin accounts are allowed.");
       }
-      return c;
-    });
-
-    saveCasesToStorage(updatedCases);
-    setAdminReplyText("");
+    } catch (err: any) {
+      setAuthError(err.message || "Sign-in was cancelled or domain unauthorized.");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  // Drag and drop event handling
+  // Fast Test Bypass Credentials
+  const bypassLogin = (emailStr: string, passStr: string, r: "client" | "admin") => {
+    setEmail(emailStr);
+    setPassword(passStr);
+    setAuthError("");
+    
+    // Quick auto log in
+    if (isDemo) {
+      setSessionUser({
+        email: emailStr,
+        uid: r === "admin" ? "dev-admin-uid-123" : emailStr,
+        role: r
+      });
+      if (r === "client") {
+        const mat = cases.find(c => c.clientId.toLowerCase() === emailStr.toLowerCase());
+        setSelectedCaseId(mat ? (mat.id || null) : null);
+        setView("client-dashboard");
+      } else {
+        setView("admin-dashboard");
+      }
+    }
+  };
+
+  // File Upload Logic (Mock or Real)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: "orderSheetUrl" | "hearingOrderSheet") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("File is too large. Please upload files smaller than 15MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    if (isDemo) {
+      // Simulate progress bar beautifully!
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev === null) return 0;
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setUploadProgress(null);
+              setIsUploading(false);
+              const dummyUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+              if (fieldName === "orderSheetUrl") {
+                setFormData(prev => ({ ...prev, orderSheetUrl: dummyUrl }));
+                alert(`File "${file.name}" uploaded to mock storage directory.`);
+              } else {
+                setNewHearing(prev => ({ ...prev, orderSheetUrl: dummyUrl }));
+                alert(`Hearing order sheet uploaded to mock storage directory.`);
+              }
+            }, 600);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 80);
+    } else {
+      // Real Firebase Storage Upload
+      try {
+        const storageRef = ref(storage, `cases/${Date.now()}_${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        if (fieldName === "orderSheetUrl") {
+          setFormData(prev => ({ ...prev, orderSheetUrl: url }));
+        } else {
+          setNewHearing(prev => ({ ...prev, orderSheetUrl: url }));
+        }
+        alert("File successfully saved to Google Cloud Storage!");
+      } catch (err: any) {
+        alert(`Storage Upload Fail: ${err.message}`);
+      } finally {
+        setUploadProgress(null);
+        setIsUploading(false);
+      }
+    }
+  };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -362,924 +503,1144 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files);
-    }
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files);
-    }
-  };
-
-  const handleFiles = (files: FileList) => {
-    const file = files[0];
-    if (!file) return;
-
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev === null) return 0;
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setUploadProgress(null);
-            // File simulation upload succeeded
-            const newDoc: CaseDocument = {
-              name: file.name,
-              size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-              uploadedAt: new Date().toISOString().split("T")[0]
-            };
-
-            const targetCaseId = currentUser === "client" ? currentClientCase?.id : selectedCaseIdForAdmin;
-            if (targetCaseId) {
-              const updatedCases = allCases.map((c) => {
-                if (c.id === targetCaseId) {
-                  return {
-                    ...c,
-                    documents: [newDoc, ...c.documents]
-                  };
-                }
-                return c;
-              });
-              saveCasesToStorage(updatedCases);
-            }
-          }, 600);
-          return 100;
+      const mockFileEvent = {
+        target: {
+          files: e.dataTransfer.files
         }
-        return prev + 15;
-      });
-    }, 100);
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleFileUpload(mockFileEvent, "orderSheetUrl");
+    }
   };
 
-  // Create new Case file
-  const handleCreateCase = (e: React.FormEvent) => {
+  // Add Case Form Submit (Mock or Real)
+  const handleCreateCaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCaseClientEmail || !newCaseClientName || !newCaseNumber || !newCaseTitle) return;
+    if (!formData.caseTitle || !formData.caseNo || !formData.clientId) {
+      alert("Please fill in crucial fields: Case Title, Case No, and Client Email");
+      return;
+    }
 
-    const newCase: CaseFile = {
-      id: `case-${Date.now()}`,
-      clientEmail: newCaseClientEmail.trim(),
-      clientName: newCaseClientName.trim(),
-      caseNumber: newCaseNumber.trim(),
-      title: newCaseTitle.trim(),
-      partnerInCharge: newCasePartner,
-      status: newCaseStatus,
-      nextHearing: newCaseNextHearing || "TBD",
-      description: newCaseDescription.trim() || "Regulatory litigation dossier administered by Jus & Lay.",
-      milestones: [
-        { date: new Date().toISOString().split("T")[0], title: "Chamber Lodge Initiated", description: "Case file securely generated on the liaison index.", completed: true }
-      ],
-      documents: [],
-      messages: [
-        { id: "1", sender: "chambers", text: `Chambers docket generated. File: ${newCaseNumber}. Secure channel active under strict privilege.`, timestamp: new Date().toISOString().replace("T", " ").substring(0, 16) }
-      ],
-      invoices: []
+    setIsSavingCase(true);
+    const dateStr = new Date().toISOString().split("T")[0];
+
+    const casePayload: CaseData = {
+      caseTitle: formData.caseTitle,
+      caseNo: formData.caseNo,
+      srNo: formData.srNo || "TBD",
+      judgeName: formData.judgeName || "District Judge",
+      courtName: formData.courtName || "High Court Central Bench",
+      counselName: formData.counselName,
+      lastHearingDate: formData.lastHearingDate || dateStr,
+      nextHearingDate: formData.nextHearingDate || "None Sched",
+      clientId: formData.clientId.trim().toLowerCase(),
+      clientPassword: formData.clientPassword || "client123",
+      proceedings: formData.proceedings || "Case file initialized on Awan digital docket index.",
+      orderSheetUrl: formData.orderSheetUrl,
+      hearings: [],
+      status: "Ongoing"
     };
 
-    saveCasesToStorage([newCase, ...allCases]);
-    setNewCaseClientEmail("");
-    setNewCaseClientName("");
-    setNewCaseNumber("");
-    setNewCaseTitle("");
-    setNewCaseDescription("");
-    setNewCaseNextHearing("");
-    setAdminSection("cases");
-    setSelectedCaseIdForAdmin(newCase.id);
-  };
-
-  // Admin delete case
-  const handleDeleteCase = (id: string) => {
-    if (confirm("Are you sure you want to archived/delete this case file under privilege?")) {
-      const filtered = allCases.filter((c) => c.id !== id);
-      saveCasesToStorage(filtered);
-      if (filtered.length > 0) {
-        setSelectedCaseIdForAdmin(filtered[0].id);
-      } else {
-        setSelectedCaseIdForAdmin("");
+    if (isDemo) {
+      // LocalStorage persist
+      setTimeout(() => {
+        const withId = { ...casePayload, id: `case-${Date.now()}` };
+        const updated = [withId, ...cases];
+        setCases(updated);
+        localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+        alert("Case docket successfully created locally!");
+        setIsAddingCase(false);
+        setFormData({
+          caseTitle: "",
+          caseNo: "",
+          srNo: "",
+          judgeName: "",
+          courtName: "",
+          counselName: "Advocate Wajid Awan",
+          lastHearingDate: "",
+          nextHearingDate: "",
+          clientId: "",
+          clientPassword: "",
+          proceedings: "",
+          orderSheetUrl: ""
+        });
+        setIsSavingCase(false);
+      }, 600);
+    } else {
+      // Firestore database creation
+      try {
+        await addDoc(collection(db, 'cases'), {
+          ...casePayload,
+          createdAt: serverTimestamp()
+        });
+        alert("New case record synchronized successfully to Firestore!");
+        setIsAddingCase(false);
+        setFormData({
+          caseTitle: "",
+          caseNo: "",
+          srNo: "",
+          judgeName: "",
+          courtName: "",
+          counselName: "Advocate Wajid Awan",
+          lastHearingDate: "",
+          nextHearingDate: "",
+          clientId: "",
+          clientPassword: "",
+          proceedings: "",
+          orderSheetUrl: ""
+        });
+        fetchFirestoreCases();
+      } catch (err: any) {
+        alert(`Firestore Error: ${err.message}`);
+      } finally {
+        setIsSavingCase(false);
       }
     }
   };
 
-  // Update case status
-  const updateCaseStatus = (status: string) => {
-    if (!selectedCaseIdForAdmin) return;
-    const updated = allCases.map((c) => {
-      if (c.id === selectedCaseIdForAdmin) {
-        const newMilestone: Milestone = {
-          date: new Date().toISOString().split("T")[0],
-          title: `Status Changed: ${status}`,
-          description: `Docket priority adjusted by liaison control officer.`,
-          completed: true
-        };
-        return {
-          ...c,
-          status: status,
-          milestones: [...c.milestones, newMilestone]
-        };
-      }
-      return c;
-    });
-    saveCasesToStorage(updated);
-  };
-
-  // Add invoice
-  const handleAddInvoice = (e: React.FormEvent) => {
+  // Add Hearing to Active Case (Mock or Real)
+  const handleAddHearingSubmit = async (e: React.FormEvent, parentCaseId: string) => {
     e.preventDefault();
-    if (!newInvoiceDesc || !newInvoiceAmount || !selectedCaseIdForAdmin) return;
+    if (!newHearing.date || !newHearing.proceedings) {
+      alert("Please provide Hearing Date and Proceedings description.");
+      return;
+    }
 
-    const newInvoice: CaseInvoice = {
-      id: `INV-${Math.floor(Math.random() * 9000) + 1000}`,
-      description: newInvoiceDesc,
-      date: new Date().toISOString().split("T")[0],
-      amount: parseFloat(newInvoiceAmount),
-      status: "Pending"
+    setIsSavingCase(true);
+    const hearingObj: Hearing = {
+      date: newHearing.date,
+      nextHearingDate: newHearing.nextHearingDate || "N/A",
+      proceedings: newHearing.proceedings,
+      orderSheetUrl: newHearing.orderSheetUrl || "",
+      purpose: newHearing.purpose || "General Hearing",
+      judgeName: newHearing.judgeName || "District Judge",
+      courtName: newHearing.courtName || "High Court Bench"
     };
 
-    const updated = allCases.map((c) => {
-      if (c.id === selectedCaseIdForAdmin) {
-        return {
-          ...c,
-          invoices: [newInvoice, ...c.invoices]
-        };
+    if (isDemo) {
+      setTimeout(() => {
+        const updated = cases.map(c => {
+          if (c.id === parentCaseId) {
+            return {
+              ...c,
+              lastHearingDate: newHearing.date,
+              nextHearingDate: newHearing.nextHearingDate || c.nextHearingDate,
+              hearings: [hearingObj, ...(c.hearings || [])]
+            };
+          }
+          return c;
+        });
+        setCases(updated);
+        localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+        alert("Hearing record successfully registered to timeline!");
+        setNewHearing({
+          date: "",
+          nextHearingDate: "",
+          proceedings: "",
+          orderSheetUrl: "",
+          purpose: "",
+          judgeName: "",
+          courtName: ""
+        });
+        setIsSavingCase(false);
+      }, 500);
+    } else {
+      // Firestore hearing update
+      try {
+        const caseRef = doc(db, 'cases', parentCaseId);
+        const parentCase = cases.find(c => c.id === parentCaseId);
+        if (parentCase) {
+          const updatedHearings = [hearingObj, ...(parentCase.hearings || [])];
+          await updateDoc(caseRef, {
+            hearings: updatedHearings,
+            lastHearingDate: newHearing.date,
+            nextHearingDate: newHearing.nextHearingDate || parentCase.nextHearingDate,
+            updatedAt: serverTimestamp()
+          });
+          alert("Case hearing history updated in Firestore.");
+          setNewHearing({
+            date: "",
+            nextHearingDate: "",
+            proceedings: "",
+            orderSheetUrl: "",
+            purpose: "",
+            judgeName: "",
+            courtName: ""
+          });
+          fetchFirestoreCases();
+        }
+      } catch (err: any) {
+        alert(`Firestore Hearing Update failed: ${err.message}`);
+      } finally {
+        setIsSavingCase(false);
       }
-      return c;
-    });
-
-    saveCasesToStorage(updated);
-    setNewInvoiceDesc("");
-    setNewInvoiceAmount("");
+    }
   };
 
-  // Pay/settle client invoice online
-  const settleInvoice = (invoiceId: string) => {
-    if (!currentClientCase) return;
-    const updated = allCases.map((c) => {
-      if (c.id === currentClientCase.id) {
-        return {
-          ...c,
-          invoices: c.invoices.map((inv) => {
-            if (inv.id === invoiceId) {
-              return { ...inv, status: "Paid" as const };
-            }
-            return inv;
-          })
-        };
+  // Archive / Delete a Case
+  const handleArchiveCase = async (caseId: string) => {
+    if (!confirm("Are you sure you want to completely delete/archive this case record? This cannot be undone.")) return;
+
+    if (isDemo) {
+      const updated = cases.filter(c => c.id !== caseId);
+      setCases(updated);
+      localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+      alert("Case file successfully archived locally.");
+      setSelectedCaseId(null);
+    } else {
+      try {
+        const { deleteDoc, doc: fireDoc } = await import('firebase/firestore');
+        await deleteDoc(fireDoc(db, 'cases', caseId));
+        alert("Case record deleted from Firestore.");
+        setSelectedCaseId(null);
+        fetchFirestoreCases();
+      } catch (err: any) {
+        alert(`Delete Fail: ${err.message}`);
       }
-      return c;
-    });
-    saveCasesToStorage(updated);
+    }
   };
 
-  const selectedAdminCase = allCases.find((c) => c.id === selectedCaseIdForAdmin);
+  // Filtering list
+  const filteredCases = cases.filter(c => 
+    c.caseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.caseNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.clientId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedCase = cases.find(c => c.id === selectedCaseId) || null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#02050b]/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#0c1a30]/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div 
-        className="relative w-full max-w-6xl bg-[#091021] border border-gold/30 rounded-lg shadow-2xl flex flex-col md:flex-row h-[90vh] md:h-[680px] overflow-hidden"
-        id="privileged-liaison-portal"
+        className="relative w-full max-w-6xl bg-white border border-silver/30 rounded-2xl shadow-3xl flex flex-col md:flex-row h-[90vh] md:h-[720px] overflow-hidden"
+        id="awan-associates-portal"
       >
-        {/* Dynamic Header Watermark */}
-        <div className="absolute top-0 inset-x-0 h-[3.5px] bg-gradient-to-r from-gold/40 via-gold to-gold/40 z-10" />
+        {/* Top Gold Border Bar */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold/40 via-gold to-gold/40 z-10" />
 
-        {/* --- 1. LEFT PANEL: SECURE ACCREDITATION OR CONSOLE RAIL --- */}
-        <div className="w-full md:w-[280px] bg-[#050b16] border-b md:border-b-0 md:border-r border-white/5 p-6 flex flex-col justify-between shrink-0">
+        {/* --- LEFT PANEL NAVIGATION / STATS RIDER --- */}
+        <div className="w-full md:w-[280px] bg-[#0c1a30] p-6 flex flex-col justify-between shrink-0 text-white border-b md:border-b-0 md:border-r border-gold/15">
           <div>
-            <div className="flex items-center gap-2 mb-6">
-              <Shield className="w-6 h-6 text-gold animate-pulse" />
+            <div className="flex items-center gap-3 mb-6">
+              <Shield className="w-7 h-7 text-gold animate-pulse" />
               <div>
-                <span className="block text-[8px] uppercase tracking-widest font-extrabold text-[#ffbc57]/80">Jus & Lay Chambers</span>
-                <span className="block font-serif text-[13px] font-bold text-white tracking-wide">Privileged Client desk</span>
+                <span className="block text-[8px] uppercase tracking-widest font-extrabold text-gold">Awan Law Associates</span>
+                <span className="block font-serif text-[12px] font-bold text-white tracking-wide">Secure Client Portal</span>
               </div>
             </div>
 
-            {currentUser === "none" ? (
+            {view === "choice" || view.includes("login") ? (
               <div className="space-y-4">
-                <div className="p-3.5 rounded-sm bg-gold/5 border border-gold/15 text-left">
-                  <span className="text-[10px] font-sans font-extrabold uppercase text-gold tracking-widest block mb-1">
-                    System Credentials
+                <div className="p-3.5 rounded-xs bg-[#122847] border border-gold/20 text-left">
+                  <span className="text-[9px] font-sans font-extrabold uppercase text-gold tracking-widest block mb-1">
+                    System Encryption
                   </span>
-                  <p className="text-white/50 text-[10px] font-sans leading-relaxed">
-                    Access to both case files and regulatory invoices is protected by strict Qanun-e-Shahadat Solicitor Privilege standards.
+                  <p className="text-white/60 text-[10px] font-sans leading-relaxed">
+                    Gate communication, files registry, and legal order schedules are fully protected under privilege.
                   </p>
                 </div>
 
-                {/* Quick Access helper for easy testing */}
                 <div className="space-y-2 mt-4 text-left">
-                  <span className="text-[9px] uppercase tracking-wider text-white/50 font-bold block">
-                    Bypass Testing Gate:
+                  <span className="text-[9px] uppercase tracking-wider text-gold font-bold block">
+                    Fast Bypass Credentials
                   </span>
                   <div className="grid grid-cols-1 gap-1.5">
                     <button 
-                      onClick={() => bypassLogin("client@hbl.com", "client")}
-                      className="p-1 px-2.5 bg-navy border border-white/5 text-left text-[10px] hover:bg-gold/15 hover:border-gold/30 text-white/70 block transition-all"
+                      onClick={() => bypassLogin("client@hbl.com", "client123", "client")}
+                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
                     >
                       🛡️ HBL Client (client@hbl.com)
                     </button>
                     <button 
-                      onClick={() => bypassLogin("mna.director@secp-enterprise.com", "client")}
-                      className="p-1 px-2.5 bg-navy border border-white/5 text-left text-[10px] hover:bg-gold/15 hover:border-gold/30 text-white/70 block transition-all"
+                      onClick={() => bypassLogin("mna.director@secp-enterprise.com", "client123", "client")}
+                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
                     >
                       👔 SECP Client (mna.director@secp-enterprise.com)
                     </button>
                     <button 
-                      onClick={() => bypassLogin("admin@jusandlay.com", "admin")}
-                      className="p-1 px-2.5 bg-navy border border-white/5 text-left text-[10px] hover:bg-gold/15 hover:border-gold/30 text-white/70 block transition-all"
+                      onClick={() => bypassLogin("admin@awan.com", "admin123", "admin")}
+                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
                     >
-                      ⚖️ Chambers Admin (admin@jusandlay.com)
+                      ⚖️ Advocate Admin (admin@awan.com)
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded">
-                  <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center font-bold text-gold text-xs">
-                    {currentUser === "admin" ? "AD" : currentClientCase?.clientName?.substring(0, 2) || "CL"}
+              <div className="space-y-4 text-left">
+                <div className="flex items-center gap-3 p-3 bg-white/[0.04] border border-gold/20 rounded-xs">
+                  <div className="w-9 h-9 rounded-full bg-gold/20 flex items-center justify-center font-bold text-gold text-sm border border-gold/30">
+                    {sessionUser?.role === "admin" ? "AD" : "CL"}
                   </div>
-                  <div className="text-left overflow-hidden">
-                    <span className="block text-[11px] font-bold text-white truncate">
-                      {currentUser === "admin" ? "Chambers Partner" : currentClientCase?.clientName}
+                  <div className="min-w-0 flex-1">
+                    <span className="block text-xs font-bold text-white truncate">
+                      {sessionUser?.role === "admin" ? "Advocate Desk" : sessionUser?.email}
                     </span>
-                    <span className="block text-[9px] text-[#ffbc57] uppercase tracking-wider font-semibold">
-                      {currentUser === "admin" ? "Managing Desk" : currentClientCase?.caseNumber}
+                    <span className="block text-[8px] text-gold uppercase tracking-wider font-semibold">
+                      {sessionUser?.role === "admin" ? "Console Admin" : "Active Client"}
                     </span>
                   </div>
                 </div>
 
-                {/* Client specific menus */}
-                {currentUser === "client" && (
-                  <nav className="flex flex-col gap-1 mt-6 text-left">
-                    <button
-                      onClick={() => setActivePortalTab("overview")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${activePortalTab === "overview" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <Briefcase className="w-3.5 h-3.5" />
-                      <span>Case Dossier</span>
-                    </button>
-                    <button
-                      onClick={() => setActivePortalTab("documents")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${activePortalTab === "documents" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <FileCheck className="w-3.5 h-3.5" />
-                      <span>Document Vault</span>
-                    </button>
-                    <button
-                      onClick={() => setActivePortalTab("messages")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${activePortalTab === "messages" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Encrypted Liaison</span>
-                    </button>
-                    <button
-                      onClick={() => setActivePortalTab("billing")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${activePortalTab === "billing" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <DollarSign className="w-3.5 h-3.5" />
-                      <span>Retainer Ledger</span>
-                    </button>
-                  </nav>
+                {/* Subview selectors inside portals */}
+                {sessionUser?.role === "client" && (
+                  <div className="space-y-2 pt-4">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Navigation</div>
+                    <div className="p-2.5 bg-white/5 border border-gold/10 text-[11px] text-gold rounded-xs">
+                      📁 Connected Dossier View
+                    </div>
+                  </div>
                 )}
 
-                {/* Admin specific menus */}
-                {currentUser === "admin" && (
-                  <nav className="flex flex-col gap-1 mt-6 text-left">
-                    <button
-                      onClick={() => setAdminSection("cases")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${adminSection === "cases" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <Activity className="w-3.5 h-3.5" />
-                      <span>Chambers Docket ({allCases.length})</span>
-                    </button>
-                    <button
-                      onClick={() => setAdminSection("create")}
-                      className={`w-full py-2 px-3 rounded text-[11px] tracking-wide font-sans font-bold uppercase transition-all flex items-center gap-2 ${adminSection === "create" ? "bg-gold/10 text-gold border-l-2 border-gold" : "text-white/60 hover:bg-white/[0.02]"}`}
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Create Case File</span>
-                    </button>
-                  </nav>
+                {sessionUser?.role === "admin" && (
+                  <div className="space-y-2 pt-4">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Display Mode</div>
+                    <div className="flex bg-[#122847] p-1 rounded-xs border border-gold/10 overflow-hidden">
+                      <button 
+                        onClick={() => { setAdminMode("list"); setIsAddingCase(false); }}
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${adminMode === "list" ? "bg-gold text-[#0c1a30]" : "text-slate-300 hover:text-white"}`}
+                      >
+                        <LayoutGrid className="w-3.5 h-3.5" /> LIST
+                      </button>
+                      <button 
+                        onClick={() => { setAdminMode("calendar"); setIsAddingCase(false); }}
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${adminMode === "calendar" ? "bg-gold text-[#0c1a30]" : "text-slate-300 hover:text-white"}`}
+                      >
+                        <CalendarDays className="w-3.5 h-3.5" /> CALENDAR
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
           </div>
 
           <div className="space-y-4 text-left">
-            <span className="block text-[8px] uppercase tracking-wider text-white/35 font-mono">
-              Encryption Status: AES-GCM
+            <span className="block text-[9px] font-mono text-slate-400 tracking-wider">
+              {isDemo ? "🧪 SIMULATION MODE" : "🔒 WORKSPACE FIRESTORE"}
             </span>
-            {currentUser !== "none" && (
+
+            {sessionUser && (
               <button
-                onClick={handleLogout}
-                className="w-full py-2 rounded border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                onClick={handleSignOut}
+                className="w-full py-2 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 rounded-xs transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out Desk</span>
+                <span>Disconnect Desk</span>
               </button>
             )}
+
             <button
               onClick={onClose}
-              className="w-full py-2 rounded border border-white/10 hover:bg-white/5 transition-all text-xs text-white/60 font-bold block"
+              className="w-full py-2 bg-white/5 hover:bg-white/10 text-white rounded-xs border border-white/10 text-xs font-bold block transition-all cursor-pointer"
             >
-              Exit Gateway
+              Close Portal Window
             </button>
           </div>
         </div>
 
-        {/* --- 2. MAIN CENTER CONTENT PORTAL CONTAINER --- */}
-        <div className="flex-1 bg-navy/20 flex flex-col h-full overflow-y-auto">
-          {currentUser === "none" ? (
-            /* ================= LOGIN FORM VIEW ================= */
-            <div className="flex-1 flex flex-col justify-center items-center max-w-md mx-auto p-8 text-center space-y-6">
-              <div className="p-4 bg-gold/10 border border-gold/30 rounded-full">
-                <Lock className="w-8 h-8 text-gold animate-pulse" />
-              </div>
-
-              <div>
-                <h3 className="font-serif text-2xl font-extrabold text-white">Chamber Gateway</h3>
-                <p className="text-white/50 text-xs sm:text-sm font-sans mt-2">
-                  Please log in below to access sensitive filings, appellate dates, secure documents, and direct partner counsel threads.
+        {/* --- MAIN DISPLAY PANEL --- */}
+        <div className="flex-1 bg-slate-50 flex flex-col h-full overflow-y-auto">
+          {view === "choice" && (
+            /* ================= SELECT PORTAL VIEW ================= */
+            <div className="flex-grow flex flex-col justify-center items-center max-w-lg mx-auto p-8 text-center space-y-8 animate-fade-in">
+              <div className="space-y-3">
+                <div className="w-20 h-20 rounded-full bg-[#0c1a30] border-2 border-gold flex items-center justify-center mx-auto shadow-md">
+                  <Shield className="w-10 h-10 text-gold" />
+                </div>
+                <h2 className="font-serif text-3xl font-bold text-[#0c1a30] tracking-tight">Access Gateways</h2>
+                <p className="text-slate-600 text-sm">
+                  Welcome to Awan Law Associates legal services liaison center. Select your gateway node to establish encrypted session.
                 </p>
               </div>
 
-              {errorMsg && (
-                <div className="w-full text-left p-3.5 text-xs bg-red-500/15 border border-red-500/30 text-red-400 rounded flex gap-2.5 items-center">
-                  <ShieldAlert className="w-4 h-4 shrink-0" />
-                  <span>{errorMsg}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                <button
+                  onClick={() => setView("client-login")}
+                  className="p-6 bg-white border border-slate-200 hover:border-gold hover:shadow-lg transition-all rounded-xl text-left group cursor-pointer"
+                >
+                  <Briefcase className="w-8 h-8 text-[#0c1a30] group-hover:text-gold mb-4 transition-colors" />
+                  <h4 className="font-serif text-lg font-bold text-[#0c1a30]">Client Portal</h4>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    View active case dockets, upcoming hearing calendar details, and download compiled official Court Order sheets.
+                  </p>
+                </button>
+
+                <button
+                  onClick={() => setView("admin-login")}
+                  className="p-6 bg-white border border-slate-200 hover:border-gold hover:shadow-lg transition-all rounded-xl text-left group cursor-pointer"
+                >
+                  <Gavel className="w-8 h-8 text-[#0c1a30] group-hover:text-gold mb-4 transition-colors" />
+                  <h4 className="font-serif text-lg font-bold text-[#0c1a30]">Advocate Admin</h4>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    Centrally configure case filings, append court milestones, update hearing transcripts, and upload compilations.
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {view === "client-login" && (
+            /* ================= CLIENT LOGIN FORM ================= */
+            <div className="flex-grow flex flex-col justify-center items-center max-w-md mx-auto p-8 text-center space-y-6">
+              <div className="w-14 h-14 rounded-full bg-[#0c1a30] flex items-center justify-center shadow-lg">
+                <Lock className="w-6 h-6 text-gold" />
+              </div>
+
+              <div>
+                <h3 className="font-serif text-2xl font-bold text-[#0c1a30]">Client Secure Sign In</h3>
+                <p className="text-slate-500 text-xs mt-1.5">
+                  Enter your registered client account email to synchronize dossiers.
+                </p>
+              </div>
+
+              {authError && (
+                <div className="w-full text-left p-3.5 text-xs bg-red-50 border border-red-200 text-red-600 rounded-sm flex gap-2.5 items-center">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{authError}</span>
                 </div>
               )}
 
-              <form onSubmit={(e) => handleLogin(e, clientEmail === "admin@jusandlay.com" ? "admin" : "client")} className="w-full space-y-4">
-                <div>
-                  <label className="block text-left text-[10px] uppercase font-bold text-gold tracking-widest mb-1.5">
-                    Liaison Account Email
-                  </label>
+              <form onSubmit={(e) => handleLoginSubmit(e, "client")} className="w-full space-y-4">
+                <div className="text-left">
+                  <label className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Email Address</label>
                   <input
                     type="email"
                     required
-                    placeholder="e.g. client@hbl.com"
-                    value={clientEmail}
-                    onChange={(e) => setClientEmail(e.target.value)}
-                    className="w-full bg-[#050b16] border border-white/15 outline-none rounded p-3 text-xs focus:border-gold transition-colors text-white text-left font-mono"
+                    placeholder="client@hbl.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-sm p-3 mt-1 text-xs focus:ring-1 focus:ring-gold focus:border-gold outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-left text-[10px] uppercase font-bold text-gold tracking-widest mb-1.5">
-                    Security Passcode
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={clientPassword}
-                    onChange={(e) => setClientPassword(e.target.value)}
-                    className="w-full bg-[#050b16] border border-white/15 outline-none rounded p-3 text-xs focus:border-gold transition-colors text-white text-left font-mono"
-                  />
-                  <span className="block text-left text-[9px] text-white/30 font-sans mt-1">
-                    Demo Password: client123 or admin123
-                  </span>
+                <div className="text-left">
+                  <label className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Passcode</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-sm p-3 mt-1 text-xs focus:ring-1 focus:ring-gold focus:border-gold outline-none pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-2 gap-4 pt-3">
                   <button
                     type="button"
-                    onClick={(e) => {
-                      setClientEmail("client@hbl.com");
-                      setClientPassword("client123");
-                      setTimeout(() => {
-                        handleLogin(e as any, "client");
-                      }, 100);
-                    }}
-                    className="py-3 px-4 rounded border border-white/10 hover:border-gold/30 hover:bg-gold/5 bg-navy/40 transition-colors text-xs font-bold text-white/80 cursor-pointer"
+                    onClick={() => { setView("choice"); setAuthError(""); }}
+                    className="py-3 px-4 border border-slate-200 text-slate-700 text-xs font-bold rounded-sm hover:bg-slate-50 transition-colors cursor-pointer"
                   >
-                    Quick HBL Client
+                    Go Back
                   </button>
                   <button
-                    type="button"
-                    onClick={(e) => {
-                      setClientEmail("admin@jusandlay.com");
-                      setClientPassword("admin123");
-                      setTimeout(() => {
-                        handleLogin(e as any, "admin");
-                      }, 100);
-                    }}
-                    className="py-3 px-4 rounded bg-gold text-navy hover:bg-[#ffbc57] transition-all text-xs font-bold font-sans tracking-wide cursor-pointer"
+                    type="submit"
+                    disabled={authLoading}
+                    className="py-3 px-4 bg-[#0c1a30] hover:bg-gold text-white hover:text-[#0c1a30] text-xs font-bold rounded-sm transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    Partner Console
+                    {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify Session"}
                   </button>
                 </div>
               </form>
             </div>
-          ) : currentUser === "client" ? (
-            /* ================= CLIENT DESK VIEWS ================= */
-            <div className="p-6 md:p-8 space-y-6 flex-1 flex flex-col h-full overflow-y-auto">
-              
-              {/* Client Tab: Overview */}
-              {activePortalTab === "overview" && currentClientCase && (
-                <div className="space-y-6 text-left animate-fade-in">
-                  <div className="border-b border-white/5 pb-4">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/15 text-[9px] uppercase tracking-wider font-extrabold font-sans">
-                      Active Legal Matter
-                    </span>
-                    <h4 className="font-serif text-xl sm:text-2xl font-bold text-white mt-2">
-                      {currentClientCase.title}
-                    </h4>
-                    <p className="text-white/40 text-xs font-mono mt-1">Chambers Docket No: {currentClientCase.caseNumber}</p>
-                  </div>
+          )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#050b16] border border-white/5 rounded space-y-3">
-                      <span className="text-[10px] uppercase tracking-wider text-gold font-bold block">
-                        Assigned Counsel
-                      </span>
-                      <p className="text-sm font-semibold text-white">{currentClientCase.partnerInCharge}</p>
-                      <p className="text-xs text-white/60 leading-relaxed font-light">{currentClientCase.description}</p>
-                    </div>
+          {view === "admin-login" && (
+            /* ================= ADMIN LOGIN FORM ================= */
+            <div className="flex-grow flex flex-col justify-center items-center max-w-md mx-auto p-8 text-center space-y-6">
+              <div className="w-14 h-14 rounded-full bg-[#0c1a30] flex items-center justify-center shadow-lg border border-gold">
+                <Gavel className="w-6 h-6 text-gold" />
+              </div>
 
-                    <div className="p-4 bg-[#050b16] border border-white/5 rounded space-y-3">
-                      <span className="text-[10px] uppercase tracking-wider text-gold font-bold block">
-                        Hearing Calendar Panel
-                      </span>
-                      <div className="flex gap-3 items-center">
-                        <Calendar className="w-5 h-5 text-gold shrink-0" />
-                        <div>
-                          <p className="text-xs font-bold text-[#f2be6d] font-mono uppercase tracking-wide">Next Court Hearing</p>
-                          <p className="text-sm font-bold text-white font-mono mt-0.5">{currentClientCase.nextHearing || "N/A"}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 items-center pt-2 border-t border-white/5">
-                        <Activity className="w-5 h-5 text-gold shrink-0" />
-                        <div>
-                          <p className="text-xs font-bold text-white/50 uppercase tracking-wide">Flow Stage</p>
-                          <p className="text-xs font-bold text-green-400 mt-0.5 font-sans uppercase tracking-wider">{currentClientCase.status}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <div>
+                <h3 className="font-serif text-2xl font-bold text-[#0c1a30]">Advocate Control Gate</h3>
+                <p className="text-slate-500 text-xs mt-1.5">
+                  Restricted access. Authenticate to modify client dossiers.
+                </p>
+              </div>
 
-                  {/* Case Progress milestones timeline */}
-                  <div className="p-5 bg-[#050b16] border border-white/5 rounded space-y-4">
-                    <h5 className="font-serif text-xs uppercase font-extrabold text-gold tracking-widest border-b border-white/5 pb-2">
-                      Appellate & Procedural Milestones
-                    </h5>
-                    <div className="space-y-4 relative pl-6 border-l border-white/10 ml-2 pt-2">
-                      {currentClientCase.milestones.map((milestone, idx) => (
-                        <div key={idx} className="relative space-y-1">
-                          <span className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-2 flex items-center justify-center ${milestone.completed ? "bg-gold border-gold" : "bg-[#091021] border-[#ffbc57]"}`}>
-                            {milestone.completed && <Check className="w-2.5 h-2.5 text-navy-dark stroke-[3]" />}
-                          </span>
-                          <span className="block font-mono text-[10px] text-white/40">{milestone.date}</span>
-                          <p className="text-xs font-bold text-white">{milestone.title}</p>
-                          <p className="text-[11px] text-white/50 font-light leading-relaxed">{milestone.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {authError && (
+                <div className="w-full text-left p-3.5 text-xs bg-red-50 border border-red-200 text-red-600 rounded-sm flex gap-2.5 items-center">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{authError}</span>
                 </div>
               )}
 
-              {/* Client Tab: Document Vault */}
-              {activePortalTab === "documents" && currentClientCase && (
-                <div className="space-y-6 text-left animate-fade-in flex-grow flex flex-col h-full">
-                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                    <div>
-                      <h4 className="font-serif text-lg font-bold text-white">Privileged Document Vault</h4>
-                      <p className="text-white/45 text-xs">Direct upload portal to place secure briefs or court filings safely under privilege.</p>
-                    </div>
-                    <span className="text-[10px] font-mono px-2.5 py-1 bg-white/5 text-white/60 border border-white/10 rounded">
-                      SSL Confirmed
-                    </span>
-                  </div>
+              <div className="w-full space-y-4">
+                <button
+                  onClick={handleGoogleAdminLogin}
+                  disabled={authLoading}
+                  className="w-full p-4 bg-[#0c1a30] hover:bg-gold text-white hover:text-[#0c1a30] rounded-sm transition-all flex items-center justify-center gap-3 font-semibold text-xs cursor-pointer"
+                >
+                  {authLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      Sign In as Legal Administrator
+                    </>
+                  )}
+                </button>
 
-                  {/* Drag and Drop Uploader */}
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragOver={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDrop={handleDrop}
-                    className={`relative p-6 border-2 border-dashed rounded text-center transition-all ${
-                      dragActive ? "border-gold bg-gold/5" : "border-white/15 bg-navy/40 hover:border-gold/30"
-                    }`}
+                <div className="p-4 bg-slate-100 border border-slate-200 rounded text-center text-slate-500 text-[11px] italic">
+                  "Uses Single Sign-On. Click option to sign-in or use Advocate Admin bypass on left panel."
+                </div>
+
+                <div className="pt-2 border-t border-slate-200">
+                  <button
+                    onClick={() => { setView("choice"); setAuthError(""); }}
+                    className="text-xs text-[#0c1a30] font-bold hover:underline"
                   >
-                    <input
-                      type="file"
-                      id="case-doc-file-input"
-                      onChange={handleFileInput}
-                      className="hidden"
-                    />
-                    <label htmlFor="case-doc-file-input" className="cursor-pointer block">
-                      {uploadProgress !== null ? (
-                        <div className="space-y-3 py-2 flex flex-col items-center">
-                          <Loader2 className="w-8 h-8 text-gold animate-spin" />
-                          <span className="text-xs text-gold font-mono font-bold">Uploading to Chambers Vault: {uploadProgress}%</span>
-                          <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-gold transition-all duration-100" style={{ width: `${uploadProgress}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-3 py-2">
-                          <div className="mx-auto w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold">
-                            <Upload className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-white block">Drag & Drop case documents here, or click to browse</span>
-                            <span className="text-[10px] text-white/40 block mt-1">Acceptable formats: PDF, DOCX, PNG (Max 50MB)</span>
-                          </div>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-
-                  {/* File Lists */}
-                  <div className="space-y-2 overflow-y-auto max-h-[220px]">
-                    <span className="block text-[10px] uppercase tracking-wider font-extrabold text-gold">Vault Files Verified ({currentClientCase.documents.length})</span>
-                    {currentClientCase.documents.length === 0 ? (
-                      <div className="p-4 bg-[#050b16] border border-white/5 rounded text-center text-white/45 text-xs font-light">
-                        No custom filings uploaded yet.
-                      </div>
-                    ) : (
-                      currentClientCase.documents.map((doc, idx) => (
-                        <div key={idx} className="p-3 bg-[#050b16] border border-white/5 hover:border-gold/10 rounded flex items-center justify-between transition-all">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <FileText className="w-4.5 h-4.5 text-gold shrink-0" />
-                            <div className="text-left min-w-0">
-                              <span className="block text-xs font-bold text-white truncate pr-2">{doc.name}</span>
-                              <span className="block text-[9px] text-white/35 font-mono">{doc.size} • Uploaded on {doc.uploadedAt}</span>
-                            </div>
-                          </div>
-                          <span className="text-[9px] px-2.5 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 font-sans font-bold uppercase shrink-0">
-                            Verified
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                    Return to Portal Choice
+                  </button>
                 </div>
-              )}
-
-              {/* Client Tab: Encrypted Messages */}
-              {activePortalTab === "messages" && currentClientCase && (
-                <div className="space-y-4 text-left animate-fade-in flex-grow flex flex-col h-full overflow-hidden">
-                  <div className="border-b border-white/5 pb-2">
-                    <h4 className="font-serif text-lg font-bold text-white">Chambers Encrypted liaison</h4>
-                    <p className="text-white/45 text-xs">A direct privilege liaison stream with {currentClientCase.partnerInCharge} and handling clerks.</p>
-                  </div>
-
-                  {/* Message Window */}
-                  <div className="flex-grow bg-[#050b16]/70 border border-white/5 p-4 rounded overflow-y-auto space-y-4 h-[240px] flex flex-col">
-                    <div className="mt-auto space-y-3">
-                      {currentClientCase.messages.map((msg) => (
-                        <div key={msg.id} className={`flex flex-col max-w-[80%] ${msg.sender === "client" ? "ml-auto items-end" : "mr-auto items-start"}`}>
-                          <div className={`p-3 rounded-md text-xs leading-relaxed ${msg.sender === "client" ? "bg-gold text-navy-dark font-medium rounded-tr-none" : "bg-navy border border-white/10 text-white rounded-tl-none"}`}>
-                            {msg.text}
-                          </div>
-                          <span className="text-[8px] text-white/30 font-mono mt-1">{msg.timestamp}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Message Input */}
-                  <form onSubmit={sendClientMessage} className="flex gap-2 min-h-[44px]">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Type secure message to chambers clerk..."
-                      value={clientReplyText}
-                      onChange={(e) => setClientReplyText(e.target.value)}
-                      className="flex-grow bg-[#050b16] border border-white/15 outline-none rounded px-3 text-xs focus:border-gold text-white text-left"
-                    />
-                    <button
-                      type="submit"
-                      className="py-2.5 px-5 rounded bg-gold hover:bg-[#ffbc57] text-navy-dark font-extrabold uppercase text-[10px] tracking-wider transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Send</span>
-                    </button>
-                  </form>
-                </div>
-              )}
-
-              {/* Client Tab: Billing Retainers */}
-              {activePortalTab === "billing" && currentClientCase && (
-                <div className="space-y-6 text-left animate-fade-in flex-grow flex flex-col h-full">
-                  <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                    <div>
-                      <h4 className="font-serif text-lg font-bold text-white">Chambers Retainer Ledger</h4>
-                      <p className="text-white/45 text-xs">Direct log of professional fees, state registry costs, and courtroom retainers.</p>
-                    </div>
-                  </div>
-
-                  {/* Invoices List */}
-                  <div className="space-y-2 overflow-y-auto max-h-[340px]">
-                    {currentClientCase.invoices.length === 0 ? (
-                      <div className="p-6 bg-[#050b16] border border-white/5 rounded text-center text-white/45 text-xs font-light">
-                        No invoice ledger issued yet.
-                      </div>
-                    ) : (
-                      currentClientCase.invoices.map((inv) => (
-                        <div key={inv.id} className="p-4 bg-[#050b16] border border-white/5 rounded flex-col sm:flex sm:flex-row sm:items-center sm:justify-between gap-4 transition-all hover:border-gold/10">
-                          <div className="text-left space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs font-extrabold text-[#f1bf6d]">{inv.id}</span>
-                              <span className="text-[10px] text-white/50 font-mono">• Dated {inv.date}</span>
-                            </div>
-                            <span className="block text-xs text-white font-bold">{inv.description}</span>
-                            <span className="block font-mono text-xs text-white/70">Amount due: PKR {inv.amount.toLocaleString()}</span>
-                          </div>
-
-                          <div className="flex flex-col sm:items-end justify-between gap-2.5 mt-3 sm:mt-0">
-                            <span className={`inline-block text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border text-center ${
-                              inv.status === "Paid" 
-                                ? "bg-green-500/10 text-green-400 border-green-500/20" 
-                                : "bg-orange-500/10 text-orange-400 border-orange-500/20 animate-pulse"
-                            }`}>
-                              {inv.status}
-                            </span>
-                            {inv.status === "Pending" && (
-                              <button
-                                onClick={() => settleInvoice(inv.id)}
-                                className="px-3 py-1 bg-gold hover:bg-[#ebae53] text-[#070e1b] rounded text-[9px] uppercase font-bold tracking-wider max-w-max"
-                              >
-                                Online Clearing (PKR)
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
+              </div>
             </div>
-          ) : (
-            /* ================= ADMINISTRATIVE CHAMBERS DESK ================= */
-            <div className="p-6 md:p-8 flex-1 flex flex-col h-full overflow-y-auto text-left">
-              
-              {/* Admin Panel Actions */}
-              {adminSection === "cases" && (
-                <div className="space-y-6 flex-grow flex flex-col h-full animate-fade-in">
-                  <div className="border-b border-white/5 pb-2.5 flex justify-between items-center">
-                    <div>
-                      <h4 className="font-serif text-xl font-bold text-white">Chambers Case Index</h4>
-                      <p className="text-white/45 text-xs">Archive administration, status enforcement, hearing calendar, and invoicing.</p>
+          )}
+
+          {view === "client-dashboard" && selectedCase && (
+            /* ================= CLIENT DIGITAL PORTAL ================= */
+            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left">
+              {/* Header Box */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-200 pb-6 mb-4">
+                <div className="min-w-0">
+                  <span className="px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] uppercase tracking-wider font-extrabold border border-green-200">
+                    Encrypted Case Dossier View
+                  </span>
+                  <h2 className="font-serif text-2xl font-bold text-[#0c1a30] mt-2 block break-words">
+                    {selectedCase.caseTitle}
+                  </h2>
+                  <p className="text-slate-500 text-xs mt-1 font-mono">Case Registry Index: {selectedCase.caseNo}</p>
+                </div>
+
+                {/* Advocate Image Badge */}
+                <div className="flex items-center gap-3 pr-4 border-r border-slate-200">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-[10px] font-black text-gold uppercase tracking-widest">Counsel Officer</p>
+                    <p className="text-xs font-bold text-slate-700">{selectedCase.counselName}</p>
+                  </div>
+                  <div className="w-14 h-14 rounded-full border-2 border-gold overflow-hidden shrink-0">
+                    <img 
+                      src="https://images.pexels.com/photos/37339382/pexels-photo-37339382.png" 
+                      alt="Advocate Wajid Awan" 
+                      className="w-full h-full object-cover scale-110" 
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid Widgets */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white p-4 border border-slate-100 shadow-sm rounded-lg">
+                  <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">Case Catalog ID</span>
+                  <p className="text-xs font-mono font-bold text-[#0c1a30] mt-1 truncate">{selectedCase.caseNo}</p>
+                </div>
+                <div className="bg-white p-4 border border-slate-100 shadow-sm rounded-lg">
+                  <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">Sr. Calendar No</span>
+                  <p className="text-xs font-mono font-bold text-[#0c1a30] mt-1">{selectedCase.srNo}</p>
+                </div>
+                <div className="bg-white p-4 border border-slate-100 shadow-sm rounded-lg">
+                  <span className="text-[9px] font-black uppercase text-slate-400 block tracking-widest">Next Appointed Hearing</span>
+                  <p className="text-xs font-mono font-black text-amber-600 mt-1">{selectedCase.nextHearingDate}</p>
+                </div>
+                <div className="bg-white p-4 border border-[#0c1a30]/10 shadow-sm rounded-lg bg-[#0c1a30]/5">
+                  <span className="text-[9px] font-black uppercase text-gold block tracking-widest font-sans">Active Status</span>
+                  <p className="text-xs font-sans font-black text-[#0c1a30] mt-1 uppercase tracking-wide">Ongoing</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Timeline & details */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="p-5 bg-white border border-slate-100 shadow-xs rounded-xl space-y-4">
+                    <h4 className="font-serif text-sm font-bold text-[#0c1a30] border-b border-slate-100 pb-2">
+                      Legal Trial Context & Proceedings
+                    </h4>
+                    <p className="text-slate-600 text-xs leading-relaxed leading-6 font-light">{selectedCase.proceedings}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      <div>
+                        <span className="text-[9px] uppercase font-black text-slate-400">Presiding Bench</span>
+                        <p className="text-xs font-bold text-slate-800 uppercase mt-0.5">{selectedCase.judgeName}</p>
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase font-black text-slate-400">Legal Forum</span>
+                        <p className="text-xs font-bold text-[#0c1a30] uppercase mt-0.5">{selectedCase.courtName}</p>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => setAdminSection("create")}
-                      className="py-2 px-3 bg-gold hover:bg-[#ffbc57] text-[#050b16] text-[10px] font-bold font-sans tracking-wide rounded-sm uppercase flex items-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>New Case File</span>
-                    </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-[460px] overflow-hidden">
-                    
-                    {/* LEFT LIST: ALL CASES */}
-                    <div className="md:col-span-4 bg-[#050b16] border border-white/5 rounded overflow-y-auto p-2 space-y-1.5 h-full">
-                      <span className="block p-2 text-[10px] uppercase font-bold text-white/35 font-mono">List of Matters</span>
-                      {allCases.map((c) => (
-                        <button
-                          key={c.id}
-                          onClick={() => {
-                            setSelectedCaseIdForAdmin(c.id);
-                            setActivePortalTab("overview");
-                          }}
-                          className={`w-full text-left p-3 rounded transition-all cursor-pointer block border ${selectedCaseIdForAdmin === c.id ? "bg-gold/10 border-gold/40 text-gold" : "bg-transparent border-transparent text-white/70 hover:bg-white/[0.02]"}`}
-                        >
-                          <span className="block text-[11px] font-extrabold truncate text-white">{c.clientName}</span>
-                          <span className="block text-[9px] font-mono text-white/40 mt-0.5 truncate">{c.caseNumber}</span>
-                          <span className="inline-block mt-2 text-[8px] uppercase font-bold text-gold bg-gold/10 px-2 rounded-sm border border-gold/15">
-                            {c.status}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* RIGHT DETAIL CHANGER */}
-                    <div className="md:col-span-8 bg-[#050b16] border border-white/5 rounded p-5 overflow-y-auto h-full flex flex-col justify-between">
-                      {selectedAdminCase ? (
-                        <div className="space-y-4 flex-grow flex flex-col justify-between">
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-start gap-4">
-                              <div>
-                                <h5 className="text-sm font-bold text-white">{selectedAdminCase.title}</h5>
-                                <span className="block text-[10px] text-white/45 font-mono">Client Email: {selectedAdminCase.clientEmail} | Docket: {selectedAdminCase.caseNumber}</span>
-                              </div>
-                              <button
-                                onClick={() => handleDeleteCase(selectedAdminCase.id)}
-                                className="text-red-400 hover:text-red-500 font-bold p-1 hover:bg-red-500/15 rounded text-[10px] tracking-wide uppercase font-sans cursor-pointer focus:outline-none shrink-0"
-                              >
-                                Archive Docket
-                              </button>
-                            </div>
-
-                            {/* State Modifier */}
-                            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
-                              <div>
-                                <label className="block text-[9px] uppercase font-bold text-gold mb-1">Modify Case Flow Status</label>
-                                <select
-                                  value={selectedAdminCase.status}
-                                  onChange={(e) => updateCaseStatus(e.target.value)}
-                                  className="w-full bg-navy text-white text-xs border border-white/10 rounded p-2 focus:border-gold outline-none"
-                                >
-                                  <option value="Chambers Inquest Stage">Chambers Inquest Stage</option>
-                                  <option value="Filing Draft Finalized">Filing Draft Finalized</option>
-                                  <option value="Interim Stay Retained">Interim Stay Retained</option>
-                                  <option value="Under Appellate Stage (High Court)">Under Appellate Stage (High Court)</option>
-                                  <option value="Arguments Complete (Awaiting Decree)">Arguments Complete (Awaiting Decree)</option>
-                                  <option value="Resolved / Decree Satisfied">Resolved / Decree Satisfied</option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="block text-[9px] uppercase font-bold text-gold mb-1">Next Court Hearing Date</label>
-                                <input
-                                  type="date"
-                                  value={selectedAdminCase.nextHearing}
-                                  onChange={(e) => {
-                                    const updated = allCases.map((c) => {
-                                      if (c.id === selectedAdminCase.id) {
-                                        return { ...c, nextHearing: e.target.value };
-                                      }
-                                      return c;
-                                    });
-                                    saveCasesToStorage(updated);
-                                  }}
-                                  className="w-full bg-navy text-white text-xs border border-white/10 rounded p-1.5 focus:border-gold outline-none font-mono"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Invoicing Section inside Admin Details */}
-                            <div className="pt-4 border-t border-white/5 flex gap-4">
-                              <form onSubmit={handleAddInvoice} className="flex-1 bg-navy/40 p-3 rounded p-2.5 border border-white/5 flex flex-col gap-2">
-                                <span className="block text-[9px] uppercase font-bold text-gold">Issue Professional Retainer Fee</span>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <input
-                                    type="text"
-                                    placeholder="Invoice Description"
-                                    required
-                                    value={newInvoiceDesc}
-                                    onChange={(e) => setNewInvoiceDesc(e.target.value)}
-                                    className="bg-[#050b16] border border-white/10 text-xs text-white p-2 outline-none rounded focus:border-gold"
-                                  />
-                                  <input
-                                    type="number"
-                                    placeholder="Amount (PKR)"
-                                    required
-                                    value={newInvoiceAmount}
-                                    onChange={(e) => setNewInvoiceAmount(e.target.value)}
-                                    className="bg-[#050b16] border border-white/10 text-xs text-white p-2 outline-none rounded focus:border-gold font-mono"
-                                  />
-                                </div>
-                                <button type="submit" className="py-1.5 bg-gold text-[#050b16] rounded font-bold uppercase text-[9px] max-w-max px-4">
-                                  Post Retainer Fee Note
-                                </button>
-                              </form>
-                            </div>
-                          </div>
-
-                          {/* Message/Liaison Tab for selected Admin case */}
-                          <div className="space-y-2 border-t border-white/5 pt-4">
-                            <span className="block text-[10px] uppercase font-bold text-white/40">Secure Client Liaison (Live thread)</span>
-                            <div className="p-3 bg-navy/40 rounded h-[120px] overflow-y-auto space-y-2.5 max-h-[120px]">
-                              {selectedAdminCase.messages.map((m) => (
-                                <div key={m.id} className="text-xs">
-                                  <span className={`font-bold font-mono ${m.sender === "client" ? "text-green-400" : "text-amber-400"}`}>
-                                    [{m.sender === "client" ? "CLIENT" : "CHAMBERS"}]:{" "}
-                                  </span>
-                                  <span className="text-white/80 font-light">{m.text}</span>
-                                  <span className="block text-[8px] text-white/30 font-mono mt-0.5">{m.timestamp}</span>
-                                </div>
-                              ))}
-                            </div>
-                            <form onSubmit={sendAdminReply} className="flex gap-2">
-                              <input
-                                type="text"
-                                placeholder="Reply securely to client's boardroom dashboard..."
-                                required
-                                value={adminReplyText}
-                                onChange={(e) => setAdminReplyText(e.target.value)}
-                                className="flex-grow bg-[#050b16] border border-white/10 text-xs text-white p-2 outline-none rounded focus:border-gold"
-                              />
-                              <button type="submit" className="py-2 px-4 bg-gold text-[#050b16] rounded text-[10px] font-bold uppercase">
-                                Send Reply
-                              </button>
-                            </form>
-                          </div>
+                  {/* Official Order Sheets widget */}
+                  {selectedCase.orderSheetUrl && (
+                    <div className="p-5 bg-gold/10 border border-gold/40 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#0c1a30] rounded-lg text-gold flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5" />
                         </div>
+                        <div>
+                          <span className="text-slate-800 font-bold text-xs block">Main Compiled Order Sheet Compilation</span>
+                          <span className="text-[9px] text-[#0c1a30] font-mono block">Official certified PDF Copy</span>
+                        </div>
+                      </div>
+                      <a 
+                        href={selectedCase.orderSheetUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="py-1 px-3 bg-[#0c1a30] text-gold hover:bg-gold hover:text-[#0c1a30] text-[10px] font-black uppercase rounded-xs transition-colors shrink-0"
+                      >
+                        Download PDF
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Case timeline history copied exactly */}
+                  <div className="space-y-4">
+                    <h3 className="font-serif text-base font-bold text-[#0c1a30] flex items-center gap-2">
+                      <Clock className="w-4.5 h-4.5 text-gold" /> Court Hearing History Records
+                    </h3>
+                    <div className="relative pl-6 border-l border-slate-200 ml-3 space-y-6">
+                      {selectedCase.hearings && selectedCase.hearings.length > 0 ? (
+                        [...selectedCase.hearings].sort((a,b)=> new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
+                          <div key={i} className="relative space-y-2">
+                            <span className="absolute -left-[31px] top-1 w-4.5 h-4.5 rounded-full border border-gold bg-[#0c1a30] flex items-center justify-center">
+                              <span className="w-1.5 h-1.5 bg-gold rounded-full" />
+                            </span>
+                            <div className="bg-white p-4 border border-slate-100 rounded-lg shadow-xs hover:border-gold/30 transition-colors">
+                              <div className="flex flex-col sm:flex-row justify-between gap-2 border-b border-slate-50 pb-2 mb-2">
+                                <span className="text-xs font-bold text-[#0c1a30]">
+                                  📅 Hearing Date: {h.date} {h.purpose && <span className="ml-2 px-1.5 py-0.5 bg-gold/15 text-gold text-[8px] font-black rounded uppercase">{h.purpose}</span>}
+                                </span>
+                                {h.orderSheetUrl && (
+                                  <a 
+                                    href={h.orderSheetUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="text-[9px] text-[#0c1a30] font-black uppercase hover:underline"
+                                  >
+                                    Get Certified Order PDF
+                                  </a>
+                                )}
+                              </div>
+                              <p className="text-slate-600 text-xs leading-relaxed">{h.proceedings}</p>
+                            </div>
+                          </div>
+                        ))
                       ) : (
-                        <div className="h-full flex items-center justify-center text-white/40 text-xs font-light">
-                          Select an active case from the left panel to modify or message.
+                        <div className="relative space-y-2">
+                          <span className="absolute -left-[31px] top-1 w-4.5 h-4.5 rounded-full border border-gold bg-[#0c1a30] flex items-center justify-center" />
+                          <div className="bg-white p-4 border border-slate-100 rounded-lg text-slate-500 text-xs italic">
+                            Initial registration scheduled. No hearing transcripts archived as of yet.
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Create Case view */}
-              {adminSection === "create" && (
-                <div className="space-y-6 animate-fade-in text-left">
-                  <div className="border-b border-white/5 pb-2">
-                    <h4 className="font-serif text-lg font-bold text-white">Generate Secure Case File Docket</h4>
-                    <p className="text-white/45 text-xs">Generate pristine client dossiers with corresponding local passwords (client123) automatically allocated.</p>
+                {/* Right columns panels */}
+                <div className="space-y-6">
+                  {/* Select other cases for current client */}
+                  {cases.filter(c => c.clientId.toLowerCase() === sessionUser?.email.toLowerCase()).length > 1 && (
+                    <div className="p-4 bg-white border border-slate-100 rounded-xl space-y-3">
+                      <h4 className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Multi-Linked Cases</h4>
+                      <div className="space-y-2">
+                        {cases.filter(c => c.clientId.toLowerCase() === sessionUser?.email.toLowerCase()).map((c, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setSelectedCaseId(c.id || null)}
+                            className={`w-full p-2.5 rounded-xs text-left text-xs text-slate-700 block transition-all ${selectedCaseId === c.id ? "bg-[#0c1a30] text-gold font-bold" : "bg-slate-100 hover:bg-slate-200"}`}
+                          >
+                            📁 {c.caseNo}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Direct support console */}
+                  <div className="p-6 bg-[#0c1a30] text-white rounded-xl space-y-4">
+                    <Shield className="w-8 h-8 text-gold" />
+                    <h4 className="font-serif text-lg font-bold">Liaison Counsel Assistance</h4>
+                    <p className="text-slate-300 text-xs leading-relaxed">
+                      Need direct legal liaison or clarifications under privilege? Contact Advocate Wajid Awan directly on WhatsApp.
+                    </p>
+                    <a 
+                      href="https://wa.me/923218520085" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block w-full py-3 bg-gold text-[#0c1a30] text-center font-bold text-xs rounded-xs hover:bg-[#ebd59b] transition-all cursor-pointer"
+                    >
+                      🛡️ WhatsApp Legal Consult
+                    </a>
                   </div>
 
-                  <form onSubmit={handleCreateCase} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Client Enterprise Business Name</label>
-                      <input
-                        type="text"
+                  <div className="p-5 bg-white border border-slate-100 rounded-xl text-slate-500 text-xs leading-relaxed leading-6">
+                    <h5 className="font-bold text-[#0c1a30] mb-2 uppercase text-[10px] tracking-wider">Legal Framework Act</h5>
+                    Client transactions, case registries, judge listings, and proceedings recorded here are strictly secure and confidential.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {view === "admin-dashboard" && (
+            /* ================= ADMIN MANAGEMENT PANEL ================= */
+            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left">
+              {isAddingCase ? (
+                /* ================= ADMIN: CREATE CASE FORM ================= */
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-6">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="font-serif text-lg font-bold text-[#0c1a30] flex items-center gap-2">
+                      <Plus className="w-5 h-5 text-gold" /> Add New Case Registry
+                    </h3>
+                    <button 
+                      onClick={() => setIsAddingCase(false)}
+                      className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCreateCaseSubmit} className="space-y-4 text-xs grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2 text-left">
+                      <label className="font-bold text-slate-700">Case Registry Title</label>
+                      <input 
                         required
-                        placeholder="e.g. Allied Bank Limited (ABL)"
-                        value={newCaseClientName}
-                        onChange={(e) => setNewCaseClientName(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white"
+                        type="text"
+                        placeholder="Habib Bank Limited v. National Enterprises Inc."
+                        value={formData.caseTitle}
+                        onChange={e => setFormData({ ...formData, caseTitle: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded hover:border-slate-300 outline-none"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Client Liaison Designated Email</label>
-                      <input
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Case No / Registry Index</label>
+                      <input 
+                        required
+                        type="text"
+                        placeholder="HBL/LC-4890/2026"
+                        value={formData.caseNo}
+                        onChange={e => setFormData({ ...formData, caseNo: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
+                      />
+                    </div>
+
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Sr. Calendar No</label>
+                      <input 
+                        type="text"
+                        placeholder="12 / 2026"
+                        value={formData.srNo}
+                        onChange={e => setFormData({ ...formData, srNo: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
+                      />
+                    </div>
+
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Presiding Bench / Judge</label>
+                      <input 
+                        type="text"
+                        placeholder="Mr. Justice Babar Sattar"
+                        value={formData.judgeName}
+                        onChange={e => setFormData({ ...formData, judgeName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
+                      />
+                    </div>
+
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Legal Forum Court name</label>
+                      <input 
+                        type="text"
+                        placeholder="Islamabad High Court"
+                        value={formData.courtName}
+                        onChange={e => setFormData({ ...formData, courtName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
+                      />
+                    </div>
+
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Client Log-In ID / Email</label>
+                      <input 
+                        required
                         type="email"
-                        required
-                        placeholder="e.g. counsel@alliedbank.com.pk"
-                        value={newCaseClientEmail}
-                        onChange={(e) => setNewCaseClientEmail(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white font-mono"
+                        placeholder="client@hbl.com"
+                        value={formData.clientId}
+                        onChange={e => setFormData({ ...formData, clientId: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Chambers Unique Docket Case Number</label>
-                      <input
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Client Passcode</label>
+                      <input 
                         type="text"
-                        required
-                        placeholder="e.g. ABL/CIV-1234/2026"
-                        value={newCaseNumber}
-                        onChange={(e) => setNewCaseNumber(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white font-mono"
+                        placeholder="client123"
+                        value={formData.clientPassword}
+                        onChange={e => setFormData({ ...formData, clientPassword: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none text-slate-800"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Hearing Date (Optional)</label>
-                      <input
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Last Hearing Calendar Date</label>
+                      <input 
                         type="date"
-                        value={newCaseNextHearing}
-                        onChange={(e) => setNewCaseNextHearing(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white font-mono"
+                        value={formData.lastHearingDate}
+                        onChange={e => setFormData({ ...formData, lastHearingDate: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
                       />
                     </div>
 
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Case Legal Action Reference Title</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Allied Bank Limited v. National Finance Corporation (Mortgage Enforcement Suit)"
-                        value={newCaseTitle}
-                        onChange={(e) => setNewCaseTitle(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white"
+                    <div className="text-left">
+                      <label className="font-bold text-slate-700">Next Scheduled Court Date</label>
+                      <input 
+                        type="date"
+                        value={formData.nextHearingDate}
+                        onChange={e => setFormData({ ...formData, nextHearingDate: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
                       />
                     </div>
 
-                    <div className="sm:col-span-2">
-                      <label className="block text-[10px] uppercase font-bold text-gold mb-1.5">Privileged Litigation Background Description</label>
-                      <textarea
+                    <div className="md:col-span-2 text-left">
+                      <label className="font-bold text-slate-700">Default Court proceedings / description</label>
+                      <textarea 
                         rows={3}
-                        placeholder="Detailed legal action background and target defense scope..."
-                        value={newCaseDescription}
-                        onChange={(e) => setNewCaseDescription(e.target.value)}
-                        className="w-full bg-[#050b16] border border-white/10 outline-none rounded p-3 text-xs focus:border-gold text-white font-light leading-relaxed"
+                        placeholder="Stay order against corporate asset sell-off successfully sustained after lengthy oral debate."
+                        value={formData.proceedings}
+                        onChange={e => setFormData({ ...formData, proceedings: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
                       />
                     </div>
 
-                    <div className="sm:col-span-2 flex justify-end gap-3 pt-3">
+                    {/* Certified Order Upload block */}
+                    <div className="md:col-span-2 text-left space-y-2">
+                      <label className="font-bold text-slate-700 block">Certified Copy Sheet PDF Upload</label>
+                      <div 
+                        onDragEnter={handleDrag}
+                        onDragOver={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded p-4 text-center cursor-pointer transition-all ${dragActive ? "border-gold bg-gold/5":"border-slate-200 bg-slate-50"}`}
+                      >
+                        <input 
+                          type="file"
+                          id="admin-form-upload-pdf"
+                          onChange={e => handleFileUpload(e, "orderSheetUrl")}
+                          className="hidden"
+                        />
+                        <label htmlFor="admin-form-upload-pdf" className="cursor-pointer block">
+                          {isUploading ? (
+                            <div className="flex flex-col items-center gap-1.5">
+                              <Loader2 className="w-5 h-5 text-gold animate-spin" />
+                              <span className="font-semibold text-[10px] text-slate-500">Uploading File compilation: {uploadProgress}%</span>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <Upload className="w-5 h-5 text-slate-400 mx-auto" />
+                              <p className="text-[10px] text-slate-600">Drag PDF copy sheet here, or click to browse</p>
+                              {formData.orderSheetUrl && <p className="text-[9px] text-[#0c1a30] font-bold">✓ PDF compilation saved: {formData.orderSheetUrl.substring(0, 40)}...</p>}
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2 grid grid-cols-2 gap-4 pt-3 text-sm">
                       <button
                         type="button"
-                        onClick={() => setAdminSection("cases")}
-                        className="py-3 px-6 rounded border border-white/10 hover:bg-white/5 text-white text-xs font-bold uppercase transition-colors"
+                        onClick={() => setIsAddingCase(false)}
+                        className="py-3 bg-slate-100 font-bold hover:bg-slate-200 text-slate-800 rounded-sm transition-colors text-center cursor-pointer"
                       >
-                        Cancel
+                        Archive Draft
                       </button>
                       <button
                         type="submit"
-                        className="py-3 px-8 rounded bg-gold hover:bg-[#ffbc57] text-[#050b16] text-xs font-extrabold uppercase transition-all shadow-lg"
+                        disabled={isSavingCase}
+                        className="py-3 bg-[#0c1a30] text-gold font-bold hover:bg-gold hover:text-[#0c1a30] rounded-sm transition-all text-center cursor-pointer"
                       >
-                        Confirm generation
+                        {isSavingCase ? "Saving Docket..." : "Save Case File"}
                       </button>
                     </div>
                   </form>
                 </div>
-              )}
+              ) : adminMode === "calendar" ? (
+                /* ================= ADMIN: CALENDAR VIEW ================= */
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                    <h3 className="font-serif text-lg font-bold text-[#0c1a30]">Advocate Sessional Calendar</h3>
+                    <button 
+                      onClick={() => setAdminMode("list")}
+                      className="px-3 py-1.5 border border-[#0c1a30]/20 hover:bg-[#0c1a30] hover:text-white text-[10px] font-bold tracking-wider rounded-xs uppercase cursor-pointer"
+                    >
+                      Return to List
+                    </button>
+                  </div>
+                  
+                  {/* Calendar Matrix - Rendering all cases scheduled on nextHearingDate */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
+                    <div>
+                      <h4 className="font-bold text-slate-700 mb-2">Upcoming Scheduled Bench Appearances</h4>
+                      <div className="space-y-3">
+                        {cases.filter(c => c.nextHearingDate && c.nextHearingDate !== 'None Sched').map((c, i) => (
+                          <div key={i} className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg">
+                            <span className="font-mono text-[10px] text-amber-600 block font-bold">📅 SCHEDULED COURT DATE: {c.nextHearingDate}</span>
+                            <span className="font-bold text-slate-800 block text-xs mt-1">{c.caseTitle}</span>
+                            <span className="text-[10px] text-slate-500 block mt-0.5">Court: {c.courtName} • Index: {c.caseNo}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
+                    <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg text-slate-600 space-y-2">
+                      <span className="block text-[10px] uppercase font-black text-slate-400">Calendar Directives</span>
+                      <p className="leading-relaxed leading-5">
+                        Dates displayed represent critical hearings, appellate stay deadlines, or desk reviews compiled centrally. Ensure proper representations are issued in advance.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ================= ADMIN: CASES LIST & SEARCHING ================= */
+                <div className="space-y-6">
+                  {/* Stats Summary Bar */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-white border border-slate-100 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-10 h-10 rounded bg-[#0c1a30]/5 text-[#0c1a30] flex items-center justify-center font-bold">
+                        📁
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400">Total Docket Files</span>
+                        <p className="font-serif text-lg font-bold text-slate-800">{cases.length}</p>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white border border-slate-100 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-10 h-10 rounded bg-[#0c1a30]/5 text-gold flex items-center justify-center font-bold">
+                        👥
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-400">Enrolled Case Clients</span>
+                        <p className="font-serif text-lg font-bold text-slate-800">{new Set(cases.map(c => c.clientId)).size}</p>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-gold/15 border border-gold/40 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-10 h-10 rounded bg-white text-gold flex items-center justify-center font-bold">
+                        ⚡
+                      </div>
+                      <div>
+                        <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#0c1a30]">Quick Actions</span>
+                        <button 
+                          onClick={() => { setIsAddingCase(true); setSelectedCaseId(null); }}
+                          className="text-[10px] font-black uppercase text-[#0c1a30] block hover:underline"
+                        >
+                          + Create New Docket File
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Searching cases bar */}
+                  <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 border border-slate-200 rounded-xl">
+                    <div className="relative flex-grow w-full">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                      <input 
+                        type="text" 
+                        placeholder="Search docket filings by Title, Case No, or Client ID..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 py-2 pl-9 pr-4 rounded text-xs focus:ring-1 focus:ring-gold outline-none"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => setIsAddingCase(true)}
+                      className="w-full sm:w-auto px-5 py-2.5 bg-[#0c1a30] hover:bg-gold text-white hover:text-[#0c1a30] text-xs font-bold rounded-sm shrink-0 transition-colors cursor-pointer"
+                    >
+                      + Create Case
+                    </button>
+                  </div>
+
+                  {/* Case List Grid Split */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left case list */}
+                    <div className="lg:col-span-1 bg-white border border-slate-100 rounded-xl p-4 space-y-3 min-h-[300px]">
+                      <h4 className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Docket Files Catalog ({filteredCases.length})</h4>
+                      <div className="space-y-2 max-h-[420px] overflow-y-auto">
+                        {filteredCases.map((c, i) => (
+                          <div 
+                            key={i} 
+                            onClick={() => setSelectedCaseId(c.id || null)}
+                            className={`p-3 border rounded text-left transition-all cursor-pointer ${selectedCaseId === c.id ? "bg-[#0c1a30] text-gold border-[#0c1a30]":"bg-slate-50 border-slate-100 hover:border-slate-200"}`}
+                          >
+                            <span className={`block text-[9px] font-bold uppercase tracking-wider mr-2 ${selectedCaseId === c.id ? "text-amber-500":"text-indigo-900"}`}>{c.caseNo}</span>
+                            <span className="block text-xs font-bold mt-1 line-clamp-1">{c.caseTitle}</span>
+                            <span className="block text-[8px] text-slate-400 font-mono mt-0.5 truncate">Client: {c.clientId}</span>
+                          </div>
+                        ))}
+                        {filteredCases.length === 0 && <p className="text-xs text-slate-400 text-center py-6">No matching case filings registered.</p>}
+                      </div>
+                    </div>
+
+                    {/* Right case details + adding hearing timeline */}
+                    <div className="lg:col-span-2">
+                      {selectedCase ? (
+                        <div className="bg-white border border-slate-100 rounded-xl p-5 space-y-6">
+                          <div className="flex flex-wrap justify-between items-start gap-4 border-b border-slate-100 pb-4">
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-700 border border-green-200 font-black rounded uppercase">Ongoing Case Profile</span>
+                              <h3 className="font-serif text-lg font-bold text-[#0c1a30] mt-1 break-words leading-tight">{selectedCase.caseTitle}</h3>
+                              <p className="text-[10px] font-mono text-slate-500 mt-1">Registry Code: {selectedCase.caseNo} • Password: {selectedCase.clientPassword || "client123"}</p>
+                            </div>
+                            <button
+                              onClick={() => handleArchiveCase(selectedCase.id || "")}
+                              className="px-2.5 py-1.5 text-[9px] font-bold uppercase rounded bg-red-50 text-red-650 hover:bg-red-500 hover:text-white border border-red-200 transition-colors cursor-pointer shrink-0"
+                            >
+                              Archive Record
+                            </button>
+                          </div>
+
+                          {/* Quick details review */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div className="bg-slate-50 p-2.5 rounded border border-slate-100">
+                              <span className="text-[8px] font-black text-slate-400 block uppercase">Sr. Num</span>
+                              <p className="font-bold text-slate-800">{selectedCase.srNo}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2.5 rounded border border-slate-100">
+                              <span className="text-[8px] font-black text-slate-400 block uppercase">Last Hearing</span>
+                              <p className="font-bold text-slate-800">{selectedCase.lastHearingDate}</p>
+                            </div>
+                            <div className="bg-indigo-950 p-2.5 rounded border border-[#0c1a30]/20 text-white">
+                              <span className="text-[8px] font-black text-indigo-300 block uppercase">Next Scheduled</span>
+                              <p className="font-extrabold">{selectedCase.nextHearingDate}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2.5 rounded border border-slate-100">
+                              <span className="text-[8px] font-black text-slate-400 block uppercase">Client Mail</span>
+                              <p className="font-extrabold text-[#0c1a30] truncate">{selectedCase.clientId}</p>
+                            </div>
+                          </div>
+
+                          {/* ADD COURT HEARING EVENT FORM */}
+                          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
+                            <span className="font-serif font-bold text-xs text-[#0c1a30] block">Append Court Hearing Event Transcript</span>
+                            <form 
+                              onSubmit={(e) => handleAddHearingSubmit(e, selectedCase.id || "")}
+                              className="text-[10px] grid grid-cols-1 md:grid-cols-2 gap-3"
+                            >
+                              <div className="text-left">
+                                <label className="font-bold text-slate-600 block">Hearing Execution Date</label>
+                                <input 
+                                  required
+                                  type="date"
+                                  value={newHearing.date}
+                                  onChange={e => setNewHearing({ ...newHearing, date: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                />
+                              </div>
+
+                              <div className="text-left">
+                                <label className="font-bold text-slate-600 block">Next Scheduled Bench Date (Optional)</label>
+                                <input 
+                                  type="date"
+                                  value={newHearing.nextHearingDate}
+                                  onChange={e => setNewHearing({ ...newHearing, nextHearingDate: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                />
+                              </div>
+
+                              <div className="text-left">
+                                <label className="font-bold text-slate-600 block">Hearing Sub-Purpose</label>
+                                <input 
+                                  type="text"
+                                  placeholder="e.g. Interim Stay Arguments"
+                                  value={newHearing.purpose}
+                                  onChange={e => setNewHearing({ ...newHearing, purpose: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                />
+                              </div>
+
+                              <div className="text-left">
+                                <label className="font-bold text-slate-600 block">Judge Designation (If changed)</label>
+                                <input 
+                                  type="text"
+                                  placeholder={selectedCase.judgeName}
+                                  value={newHearing.judgeName}
+                                  onChange={e => setNewHearing({ ...newHearing, judgeName: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                />
+                              </div>
+
+                              <div className="md:col-span-2 text-left">
+                                <label className="font-bold text-slate-600 block">Hearing Detailed Decisions / Proceedings transcription</label>
+                                <textarea 
+                                  required
+                                  rows={2}
+                                  placeholder="Detailed proceedings transcript..."
+                                  value={newHearing.proceedings}
+                                  onChange={e => setNewHearing({ ...newHearing, proceedings: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                />
+                              </div>
+
+                              {/* Upload Hearing Sheet Order */}
+                              <div className="md:col-span-2 text-left space-y-1">
+                                <label className="font-bold text-slate-600 block">Certified File / Judgment PDF (Optional)</label>
+                                <input 
+                                  type="file"
+                                  onChange={(e) => handleFileUpload(e, "hearingOrderSheet")}
+                                  className="w-full bg-white text-slate-500 border border-slate-200 p-1 rounded file:bg-slate-200 file:border-none file:px-2 file:py-1 file:text-[9px] file:font-semibold"
+                                />
+                                {newHearing.orderSheetUrl && <p className="text-[8px] text-green-600 font-bold">✓ PDF sheet compiled successfully: {newHearing.orderSheetUrl.substring(0, 50)}...</p>}
+                              </div>
+
+                              <div className="md:col-span-2 text-right pt-2">
+                                <button
+                                  type="submit"
+                                  disabled={isSavingCase}
+                                  className="px-4 py-2 bg-[#0c1a30] text-gold font-bold hover:bg-gold hover:text-[#0c1a30] rounded-xs transition-colors cursor-pointer"
+                                >
+                                  {isSavingCase ? "Saving..." : "Append Hearing Record"}
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+
+                          {/* Historical Timeline block */}
+                          <div className="space-y-3">
+                            <span className="block font-serif font-bold text-slate-800 text-xs text-left">Timeline Hearings History</span>
+                            <div className="relative pl-5 border-l border-slate-200 space-y-4 text-xs">
+                              {selectedCase.hearings && selectedCase.hearings.length > 0 ? (
+                                [...selectedCase.hearings].sort((a,b)=> new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, i) => (
+                                  <div key={i} className="relative text-left p-3 border border-slate-100 rounded-lg bg-slate-50 shadow-2xs">
+                                    <div className="absolute -left-[27.5px] top-4 w-3.5 h-3.5 rounded-full bg-gold border border-[#0c1a30]" />
+                                    <span className="font-bold text-slate-800 block">Date: {h.date} {h.purpose && <span className="ml-2 px-1 py-0.2 bg-[#0c1a30] text-gold rounded text-[8px] uppercase">{h.purpose}</span>}</span>
+                                    {h.nextHearingDate && <span className="text-[9px] text-[#0c1a30] block mt-0.5 font-bold">↳ Next Sched Date: {h.nextHearingDate}</span>}
+                                    <p className="text-slate-600 mt-1.5 leading-relaxed font-light">{h.proceedings}</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-slate-500 text-xs italic text-left">No historical court appearances appended yet.</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-white border border-slate-100 border-dashed rounded-xl p-12 text-center text-slate-500 text-xs h-full flex flex-col justify-center items-center">
+                          📁 Select or query a case filing from direct search listing catalog to edit listings.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
