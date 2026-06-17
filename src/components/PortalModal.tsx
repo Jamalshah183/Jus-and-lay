@@ -106,6 +106,19 @@ interface UserProfile {
   role: string;
 }
 
+const getCounselPhoto = (name: string) => {
+  const norm = (name || "").toLowerCase();
+  if (norm.includes("ammar")) return "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg";
+  if (norm.includes("ali")) return "https://images.pexels.com/photos/38097665/pexels-photo-38097665.jpeg";
+  if (norm.includes("abid") || norm.includes("malik")) return "https://images.pexels.com/photos/38097667/pexels-photo-38097667.jpeg";
+  if (norm.includes("taqi")) return "https://images.pexels.com/photos/38097666/pexels-photo-38097666.jpeg";
+  if (norm.includes("qalb")) return "https://images.pexels.com/photos/38098637/pexels-photo-38098637.jpeg";
+  if (norm.includes("javed")) return "https://images.pexels.com/photos/38098705/pexels-photo-38098705.jpeg";
+  if (norm.includes("mansoor")) return "https://images.pexels.com/photos/38145957/pexels-photo-38145957.jpeg";
+  if (norm.includes("palwasha")) return "https://images.pexels.com/photos/38146781/pexels-photo-38146781.jpeg";
+  return "https://images.pexels.com/photos/38052861/pexels-photo-38052861.jpeg"; // Default Ammar Yasir Naqvi
+};
+
 // Fallback/Mock cases to run offline in preview if Firebase keys are absent
 const DEFAULT_MOCK_CASES: CaseData[] = [
   {
@@ -115,7 +128,7 @@ const DEFAULT_MOCK_CASES: CaseData[] = [
     srNo: "12 / 2026",
     judgeName: "Mr. Justice Babar Sattar",
     courtName: "Islamabad High Court, Islamabad",
-    counselName: "Advocate Wajid Awan",
+    counselName: "Ammar Yasir Naqvi",
     lastHearingDate: "2026-06-12",
     nextHearingDate: "2026-06-28",
     clientId: "client@hbl.com",
@@ -150,7 +163,7 @@ const DEFAULT_MOCK_CASES: CaseData[] = [
     srNo: "45",
     judgeName: "Registrar SECP Desk",
     courtName: "Securities & Exchange Commission of Pakistan",
-    counselName: "Advocate Wajid Awan",
+    counselName: "Ammar Yasir Naqvi",
     lastHearingDate: "2026-06-10",
     nextHearingDate: "2026-07-04",
     clientId: "mna.director@secp-enterprise.com",
@@ -206,7 +219,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
     srNo: "",
     judgeName: "",
     courtName: "",
-    counselName: "Advocate Wajid Awan",
+    counselName: "Ammar Yasir Naqvi",
     lastHearingDate: "",
     nextHearingDate: "",
     clientId: "",
@@ -239,19 +252,19 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
 
     if (isDemo) {
       // LocalStorage mode
-      const saved = localStorage.getItem("awan_cases_data");
+      const saved = localStorage.getItem("jus_lay_cases_data");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           setCases(parsed);
           setCasesLoading(false);
         } catch {
-          localStorage.setItem("awan_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
+          localStorage.setItem("jus_lay_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
           setCases(DEFAULT_MOCK_CASES);
           setCasesLoading(false);
         }
       } else {
-        localStorage.setItem("awan_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
+        localStorage.setItem("jus_lay_cases_data", JSON.stringify(DEFAULT_MOCK_CASES));
         setCases(DEFAULT_MOCK_CASES);
         setCasesLoading(false);
       }
@@ -313,7 +326,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
         const userEmail = email.trim().toLowerCase();
         
         if (role === "admin") {
-          const admins = ['jamalshah183@gmail.com', 'wajid112211@gmail.com', 'admin@awan.com'];
+          const admins = ['jamalshah183@gmail.com', 'wajid112211@gmail.com', 'admin@jusandlay.com'];
           if (admins.includes(userEmail) && password === "admin123") {
             setSessionUser({
               email: email.trim(),
@@ -322,7 +335,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
             });
             setView("admin-dashboard");
           } else {
-            setAuthError("Unauthorized credentials. Type 'admin@awan.com' or 'jamalshah183@gmail.com' and password 'admin123' to bypass.");
+            setAuthError("Unauthorized credentials. Type 'admin@jusandlay.com' or 'jamalshah183@gmail.com' and password 'admin123' to bypass.");
           }
         } else {
           // Client login helper
@@ -535,7 +548,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
       nextHearingDate: formData.nextHearingDate || "None Sched",
       clientId: formData.clientId.trim().toLowerCase(),
       clientPassword: formData.clientPassword || "client123",
-      proceedings: formData.proceedings || "Case file initialized on Awan digital docket index.",
+      proceedings: formData.proceedings || "Case file initialized on Jus & Lay digital docket index.",
       orderSheetUrl: formData.orderSheetUrl,
       hearings: [],
       status: "Ongoing"
@@ -547,7 +560,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
         const withId = { ...casePayload, id: `case-${Date.now()}` };
         const updated = [withId, ...cases];
         setCases(updated);
-        localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+        localStorage.setItem("jus_lay_cases_data", JSON.stringify(updated));
         alert("Case docket successfully created locally!");
         setIsAddingCase(false);
         setFormData({
@@ -556,7 +569,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
           srNo: "",
           judgeName: "",
           courtName: "",
-          counselName: "Advocate Wajid Awan",
+          counselName: "Ammar Yasir Naqvi",
           lastHearingDate: "",
           nextHearingDate: "",
           clientId: "",
@@ -581,7 +594,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
           srNo: "",
           judgeName: "",
           courtName: "",
-          counselName: "Advocate Wajid Awan",
+          counselName: "Ammar Yasir Naqvi",
           lastHearingDate: "",
           nextHearingDate: "",
           clientId: "",
@@ -631,7 +644,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
           return c;
         });
         setCases(updated);
-        localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+        localStorage.setItem("jus_lay_cases_data", JSON.stringify(updated));
         alert("Hearing record successfully registered to timeline!");
         setNewHearing({
           date: "",
@@ -684,7 +697,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
     if (isDemo) {
       const updated = cases.filter(c => c.id !== caseId);
       setCases(updated);
-      localStorage.setItem("awan_cases_data", JSON.stringify(updated));
+      localStorage.setItem("jus_lay_cases_data", JSON.stringify(updated));
       alert("Case file successfully archived locally.");
       setSelectedCaseId(null);
     } else {
@@ -713,7 +726,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
     <div className="fixed inset-0 z-50 bg-[#0c1a30]/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div 
         className="relative w-full max-w-6xl bg-white border border-silver/30 rounded-2xl shadow-3xl flex flex-col md:flex-row h-[90vh] md:h-[720px] overflow-hidden"
-        id="awan-associates-portal"
+        id="jus-lay-portal"
       >
         {/* Top Gold Border Bar */}
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold/40 via-gold to-gold/40 z-10" />
@@ -724,7 +737,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
             <div className="flex items-center gap-3 mb-6">
               <Shield className="w-7 h-7 text-gold animate-pulse" />
               <div>
-                <span className="block text-[8px] uppercase tracking-widest font-extrabold text-gold">Awan Law Associates</span>
+                <span className="block text-[8px] uppercase tracking-widest font-extrabold text-gold">JUS & LAY ADVOCATES</span>
                 <span className="block font-serif text-[12px] font-bold text-white tracking-wide">Secure Client Portal</span>
               </div>
             </div>
@@ -758,10 +771,10 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                       👔 SECP Client (mna.director@secp-enterprise.com)
                     </button>
                     <button 
-                      onClick={() => bypassLogin("admin@awan.com", "admin123", "admin")}
+                      onClick={() => bypassLogin("admin@jusandlay.com", "admin123", "admin")}
                       className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
                     >
-                      ⚖️ Advocate Admin (admin@awan.com)
+                      ⚖️ Advocate Admin (admin@jusandlay.com)
                     </button>
                   </div>
                 </div>
@@ -850,7 +863,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                 </div>
                 <h2 className="font-serif text-3xl font-bold text-[#0c1a30] tracking-tight">Access Gateways</h2>
                 <p className="text-slate-600 text-sm">
-                  Welcome to Awan Law Associates legal services liaison center. Select your gateway node to establish encrypted session.
+                  Welcome to JUS & LAY legal services liaison center. Select your gateway node to establish encrypted session.
                 </p>
               </div>
 
@@ -1031,8 +1044,8 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                   </div>
                   <div className="w-14 h-14 rounded-full border-2 border-gold overflow-hidden shrink-0">
                     <img 
-                      src="https://images.pexels.com/photos/37339382/pexels-photo-37339382.png" 
-                      alt="Advocate Wajid Awan" 
+                      src={getCounselPhoto(selectedCase.counselName)} 
+                      alt={selectedCase.counselName} 
                       className="w-full h-full object-cover scale-110" 
                       referrerPolicy="no-referrer"
                     />
@@ -1172,7 +1185,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                     <Shield className="w-8 h-8 text-gold" />
                     <h4 className="font-serif text-lg font-bold">Liaison Counsel Assistance</h4>
                     <p className="text-slate-300 text-xs leading-relaxed">
-                      Need direct legal liaison or clarifications under privilege? Contact Advocate Wajid Awan directly on WhatsApp.
+                      Need direct legal liaison or clarifications under privilege? Contact Advocate Ammar Yasir Naqvi directly on WhatsApp.
                     </p>
                     <a 
                       href="https://wa.me/923218520085" 
