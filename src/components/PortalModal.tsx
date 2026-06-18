@@ -65,6 +65,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 interface PortalModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialView?: "choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard";
 }
 
 // Interfaces matching raw files exactly
@@ -184,10 +185,40 @@ const DEFAULT_MOCK_CASES: CaseData[] = [
   }
 ];
 
-export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
+export default function PortalModal({ isOpen, onClose, initialView }: PortalModalProps) {
   // Views navigation state: "choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard"
-  const [view, setView] = useState<"choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard">("choice");
-  
+  const [view, setView] = useState<"choice" | "client-login" | "admin-login" | "client-dashboard" | "admin-dashboard">(initialView || "choice");
+
+  useEffect(() => {
+    if (initialView) {
+      setView(initialView);
+    }
+  }, [initialView, isOpen]);
+
+  // Calendar tracking states
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth()); // 0-11
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const ADVOCATES_LIST = [
+    "Ammar Yasir Naqvi",
+    "Malik Abid Hussain Awan",
+    "Taqi Hussain Naqvi",
+    "Qalb-i-Mohtasham",
+    "Javed Jalal Naqvi",
+    "Mansoor Khan Awan",
+    "Palwasha"
+  ];
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
   // Real or Mock mode flag
   const isDemo = !isFirebaseConfigured;
 
@@ -335,12 +366,13 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
             });
             setView("admin-dashboard");
           } else {
-            setAuthError("Unauthorized credentials. Type 'admin@jusandlay.com' or 'jamalshah183@gmail.com' and password 'admin123' to bypass.");
+            setAuthError("Unauthorized credentials. Type 'admin@jusandlay.com' or 'jamalshah183@gmail.com' and password 'admin123' to authenticate.");
           }
         } else {
           // Client login helper
           const matched = cases.find(c => c.clientId.toLowerCase() === userEmail);
-          if (matched && password === "client123") {
+          const correctPassword = matched?.clientPassword || "client123";
+          if (matched && password === correctPassword) {
             setSessionUser({
               email: email.trim(),
               uid: userEmail,
@@ -349,7 +381,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
             setSelectedCaseId(matched.id || null);
             setView("client-dashboard");
           } else {
-            setAuthError("No registered client found. Type 'client@hbl.com' and password 'client123' to bypass.");
+            setAuthError("Authentication failed. No registered client matching this email and passcode combination was found.");
           }
         }
         setAuthLoading(false);
@@ -534,6 +566,16 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
       return;
     }
 
+    if (formData.lastHearingDate && formData.lastHearingDate > todayStr) {
+      alert("Invalid Selection: Last hearing date cannot be after today.");
+      return;
+    }
+
+    if (formData.nextHearingDate && formData.nextHearingDate !== "None Sched" && formData.nextHearingDate < todayStr) {
+      alert("Invalid Selection: Next hearing date cannot be before today.");
+      return;
+    }
+
     setIsSavingCase(true);
     const dateStr = new Date().toISOString().split("T")[0];
 
@@ -616,6 +658,16 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
     e.preventDefault();
     if (!newHearing.date || !newHearing.proceedings) {
       alert("Please provide Hearing Date and Proceedings description.");
+      return;
+    }
+
+    if (newHearing.date && newHearing.date > todayStr) {
+      alert("Invalid Selection: Hearing execution date cannot be after today.");
+      return;
+    }
+
+    if (newHearing.nextHearingDate && newHearing.nextHearingDate !== "None Sched" && newHearing.nextHearingDate < todayStr) {
+      alert("Invalid Selection: Next scheduled date cannot be before today.");
       return;
     }
 
@@ -711,6 +763,38 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
         alert(`Delete Fail: ${err.message}`);
       }
     }
+  };
+
+  const handlePrevMonth = () => {
+    if (calendarMonth === 0) {
+      setCalendarMonth(11);
+      setCalendarYear(prev => prev - 1);
+    } else {
+      setCalendarMonth(prev => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (calendarMonth === 11) {
+      setCalendarMonth(0);
+      setCalendarYear(prev => prev + 1);
+    } else {
+      setCalendarMonth(prev => prev + 1);
+    }
+  };
+
+  const getFormattedDateStr = (day: number) => {
+    const yStr = String(calendarYear);
+    const mStr = String(calendarMonth + 1).padStart(2, '0');
+    const dStr = String(day).padStart(2, '0');
+    return `${yStr}-${mStr}-${dStr}`;
+  };
+
+  const getCasesOnDate = (dateStr: string) => {
+    return cases.filter(c => {
+      if (c.nextHearingDate === dateStr) return true;
+      return c.hearings?.some(h => h.date === dateStr || h.nextHearingDate === dateStr);
+    });
   };
 
   // Filtering list
@@ -829,8 +913,8 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
           </div>
 
           <div className="space-y-4 text-left">
-            <span className="block text-[9px] font-mono text-slate-400 tracking-wider">
-              {isDemo ? "🧪 SIMULATION MODE" : "🔒 WORKSPACE FIRESTORE"}
+            <span className="block text-[9px] font-mono text-slate-400 uppercase tracking-wider">
+              🔒 SECURE LIVE SYSTEM GATE
             </span>
 
             {sessionUser && (
@@ -1005,8 +1089,8 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                   )}
                 </button>
 
-                <div className="p-4 bg-slate-100 border border-slate-200 rounded text-center text-slate-500 text-[11px] italic">
-                  "Uses Single Sign-On. Click option to sign-in or use Advocate Admin bypass on left panel."
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded text-center text-slate-500 text-[11px]">
+                  Authorized access only. All actions are securely logged for confidentiality.
                 </div>
 
                 <div className="pt-2 border-t border-slate-200">
@@ -1023,7 +1107,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
 
           {view === "client-dashboard" && selectedCase && (
             /* ================= CLIENT DIGITAL PORTAL ================= */
-            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left">
+            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left text-slate-800 bg-white">
               {/* Header Box */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-200 pb-6 mb-4">
                 <div className="min-w-0">
@@ -1208,7 +1292,7 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
 
           {view === "admin-dashboard" && (
             /* ================= ADMIN MANAGEMENT PANEL ================= */
-            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left">
+            <div className="p-6 md:p-8 space-y-6 animate-fade-in text-left text-slate-800 bg-white">
               {isAddingCase ? (
                 /* ================= ADMIN: CREATE CASE FORM ================= */
                 <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-6">
@@ -1283,6 +1367,20 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                     </div>
 
                     <div className="text-left">
+                      <label className="font-bold text-slate-700 block">Specific Assigned Advocate Selection</label>
+                      <select 
+                        required
+                        value={formData.counselName}
+                        onChange={e => setFormData({ ...formData, counselName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none text-slate-800 cursor-pointer"
+                      >
+                        {ADVOCATES_LIST.map((adv, idx) => (
+                          <option key={idx} value={adv}>{adv}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="text-left">
                       <label className="font-bold text-slate-700">Client Log-In ID / Email</label>
                       <input 
                         required
@@ -1306,9 +1404,10 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                     </div>
 
                     <div className="text-left">
-                      <label className="font-bold text-slate-700">Last Hearing Calendar Date</label>
+                      <label className="font-bold text-slate-700">Last Hearing Calendar Date (Past Only)</label>
                       <input 
                         type="date"
+                        max={todayStr}
                         value={formData.lastHearingDate}
                         onChange={e => setFormData({ ...formData, lastHearingDate: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
@@ -1316,9 +1415,10 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                     </div>
 
                     <div className="text-left">
-                      <label className="font-bold text-slate-700">Next Scheduled Court Date</label>
+                      <label className="font-bold text-slate-700">Next Scheduled Court Date (Future Only)</label>
                       <input 
                         type="date"
+                        min={todayStr}
                         value={formData.nextHearingDate}
                         onChange={e => setFormData({ ...formData, nextHearingDate: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 mt-1 p-2.5 rounded outline-none"
@@ -1389,37 +1489,134 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                 </div>
               ) : adminMode === "calendar" ? (
                 /* ================= ADMIN: CALENDAR VIEW ================= */
-                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4">
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4 text-slate-800">
                   <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                    <h3 className="font-serif text-lg font-bold text-[#0c1a30]">Advocate Sessional Calendar</h3>
+                    <h3 className="font-serif text-lg font-bold text-[#0c1a30] flex items-center gap-2">
+                      <CalendarDays className="w-5 h-5 text-[#ebd59b]" /> Advocate Sessional Calendar grid
+                    </h3>
                     <button 
                       onClick={() => setAdminMode("list")}
-                      className="px-3 py-1.5 border border-[#0c1a30]/20 hover:bg-[#0c1a30] hover:text-white text-[10px] font-bold tracking-wider rounded-xs uppercase cursor-pointer"
+                      className="px-3 py-1.5 border border-[#0c1a30]/20 hover:bg-[#0c1a30] hover:text-white text-[10px] font-bold tracking-wider rounded-xs uppercase cursor-pointer text-[#0c1a30]"
                     >
                       Return to List
                     </button>
                   </div>
                   
-                  {/* Calendar Matrix - Rendering all cases scheduled on nextHearingDate */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
-                    <div>
-                      <h4 className="font-bold text-slate-700 mb-2">Upcoming Scheduled Bench Appearances</h4>
-                      <div className="space-y-3">
-                        {cases.filter(c => c.nextHearingDate && c.nextHearingDate !== 'None Sched').map((c, i) => (
-                          <div key={i} className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg">
-                            <span className="font-mono text-[10px] text-amber-600 block font-bold">📅 SCHEDULED COURT DATE: {c.nextHearingDate}</span>
-                            <span className="font-bold text-slate-800 block text-xs mt-1">{c.caseTitle}</span>
-                            <span className="text-[10px] text-slate-500 block mt-0.5">Court: {c.courtName} • Index: {c.caseNo}</span>
-                          </div>
+                  {/* Calendar Matrix - Multi-column setup for visual representation */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-2">
+                    {/* Monthly Calendar View */}
+                    <div className="md:col-span-7 bg-slate-50 p-4 border border-slate-200 rounded-xl">
+                      <div className="flex justify-between items-center mb-4">
+                        <button 
+                          onClick={handlePrevMonth}
+                          type="button"
+                          className="p-1 px-3 bg-white border border-slate-300 text-[#0c1a30] rounded hover:bg-slate-100 font-bold text-[10px]"
+                        >
+                          &larr; Prev
+                        </button>
+                        <span className="font-serif font-bold text-sm text-[#0c1a30]">
+                          {monthNames[calendarMonth]} {calendarYear}
+                        </span>
+                        <button 
+                          onClick={handleNextMonth}
+                          type="button"
+                          className="p-1 px-3 bg-white border border-slate-300 text-[#0c1a30] rounded hover:bg-slate-100 font-bold text-[10px]"
+                        >
+                          Next &rarr;
+                        </button>
+                      </div>
+
+                      {/* Day Labels */}
+                      <div className="grid grid-cols-7 gap-1 text-center font-bold text-[9px] text-slate-400 uppercase tracking-widest mb-2">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                      </div>
+
+                      {/* Day Grid Cells */}
+                      <div className="grid grid-cols-7 gap-1">
+                        {Array.from({ length: new Date(calendarYear, calendarMonth, 1).getDay() }).map((_, idx) => (
+                          <div key={`spacer-${idx}`} className="h-9" />
                         ))}
+
+                        {Array.from({ length: new Date(calendarYear, calendarMonth + 1, 0).getDate() }).map((_, idx) => {
+                          const dayNo = idx + 1;
+                          const cellFormattedStr = getFormattedDateStr(dayNo);
+                          const isCurrentlySelected = selectedCalendarDate === cellFormattedStr;
+                          const activeCases = getCasesOnDate(cellFormattedStr);
+                          const isOccupiedDay = activeCases.length > 0;
+
+                          return (
+                            <button
+                              key={`monthday-${dayNo}`}
+                              onClick={() => setSelectedCalendarDate(cellFormattedStr)}
+                              type="button"
+                              className={`h-9 text-xs rounded-sm font-sans flex flex-col items-center justify-center relative transition-all border cursor-pointer ${
+                                isCurrentlySelected
+                                  ? "bg-[#0c1a30] text-gold font-bold border-[#0c1a30]"
+                                  : "bg-white border-slate-200 hover:border-gold hover:bg-gold/5 text-slate-800"
+                              }`}
+                            >
+                              <span>{dayNo}</span>
+                              {isOccupiedDay && (
+                                <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${isCurrentlySelected ? "bg-gold":"bg-amber-600 animate-pulse"}`} />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    <div className="bg-slate-50 p-4 border border-slate-200 rounded-lg text-slate-600 space-y-2">
-                      <span className="block text-[10px] uppercase font-black text-slate-400">Calendar Directives</span>
-                      <p className="leading-relaxed leading-5">
-                        Dates displayed represent critical hearings, appellate stay deadlines, or desk reviews compiled centrally. Ensure proper representations are issued in advance.
-                      </p>
+                    {/* Target list matching dates in selector */}
+                    <div className="md:col-span-5 bg-white border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                      <div>
+                        <h4 className="font-serif font-bold text-[#0c1a30] text-xs mb-3 pb-1.5 border-b border-slate-200 uppercase tracking-widest">
+                          Hearings Scheduled: {selectedCalendarDate}
+                        </h4>
+
+                        <div className="space-y-2.5 max-h-[340px] overflow-y-auto">
+                          {selectedCalendarDate ? (
+                            (() => {
+                              const matchingDockets = getCasesOnDate(selectedCalendarDate);
+                              if (matchingDockets.length === 0) {
+                                return (
+                                  <div className="text-center py-10 text-slate-400 text-xs italic">
+                                    No hearings or active appearances scheduled for this date.
+                                  </div>
+                                );
+                              }
+                              return matchingDockets.map((c, idx) => (
+                                <div key={idx} className="p-3 bg-amber-50/50 border border-gold/25 rounded-lg text-left text-xs text-slate-800">
+                                  <span className="font-mono text-[8px] text-white bg-[#0c1a30] px-2 py-0.5 rounded font-bold uppercase block mb-1.5 w-max">
+                                    {c.caseNo}
+                                  </span>
+                                  <h5 className="font-bold text-[#0c1a30] text-xs leading-snug mb-1">{c.caseTitle}</h5>
+                                  <div className="space-y-0.5 text-[10px] text-slate-600 font-sans mt-1">
+                                    <p><span className="font-bold">Bench:</span> {c.judgeName}</p>
+                                    <p><span className="font-bold">Forum:</span> {c.courtName}</p>
+                                    <p><span className="font-bold">counsel:</span> {c.counselName}</p>
+                                  </div>
+                                </div>
+                              ));
+                            })()
+                          ) : (
+                            <div className="text-center py-10 text-slate-400 text-xs italic">
+                              Select a date on grid.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50 p-3 border border-slate-200 rounded-lg text-slate-600 text-[10px] space-y-1 mt-4">
+                        <span className="block text-[9px] uppercase font-black text-slate-450 tracking-wider">Calendar Directives</span>
+                        <p className="leading-relaxed">
+                          Highlighted dates map to critical docket entries, review representations accordingly.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1492,11 +1689,11 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                           <div 
                             key={i} 
                             onClick={() => setSelectedCaseId(c.id || null)}
-                            className={`p-3 border rounded text-left transition-all cursor-pointer ${selectedCaseId === c.id ? "bg-[#0c1a30] text-gold border-[#0c1a30]":"bg-slate-50 border-slate-100 hover:border-slate-200"}`}
+                            className={`p-3 border rounded text-left transition-all cursor-pointer ${selectedCaseId === c.id ? "bg-[#0c1a30] text-gold border-[#0c1a30]":"bg-slate-150 border-slate-200 hover:border-slate-300 text-slate-800"}`}
                           >
-                            <span className={`block text-[9px] font-bold uppercase tracking-wider mr-2 ${selectedCaseId === c.id ? "text-amber-500":"text-indigo-900"}`}>{c.caseNo}</span>
-                            <span className="block text-xs font-bold mt-1 line-clamp-1">{c.caseTitle}</span>
-                            <span className="block text-[8px] text-slate-400 font-mono mt-0.5 truncate">Client: {c.clientId}</span>
+                            <span className={`block text-[9px] font-bold uppercase tracking-wider mr-2 ${selectedCaseId === c.id ? "text-amber-500":"text-indigo-950 font-black"}`}>{c.caseNo}</span>
+                            <span className={`block text-xs font-bold mt-1 line-clamp-1 ${selectedCaseId === c.id ? "text-white":"text-slate-900"}`}>{c.caseTitle}</span>
+                            <span className={`block text-[8px] font-mono mt-0.5 truncate ${selectedCaseId === c.id ? "text-slate-300" : "text-slate-600 font-bold"}`}>Client: {c.clientId}</span>
                           </div>
                         ))}
                         {filteredCases.length === 0 && <p className="text-xs text-slate-400 text-center py-6">No matching case filings registered.</p>}
@@ -1549,23 +1746,25 @@ export default function PortalModal({ isOpen, onClose }: PortalModalProps) {
                               className="text-[10px] grid grid-cols-1 md:grid-cols-2 gap-3"
                             >
                               <div className="text-left">
-                                <label className="font-bold text-slate-600 block">Hearing Execution Date</label>
+                                <label className="font-bold text-slate-600 block">Hearing Execution Date (Past Only)</label>
                                 <input 
                                   required
                                   type="date"
+                                  max={todayStr}
                                   value={newHearing.date}
                                   onChange={e => setNewHearing({ ...newHearing, date: e.target.value })}
-                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none text-slate-800"
                                 />
                               </div>
 
                               <div className="text-left">
-                                <label className="font-bold text-slate-600 block">Next Scheduled Bench Date (Optional)</label>
+                                <label className="font-bold text-slate-600 block">Next Scheduled Bench Date (Future Only)</label>
                                 <input 
                                   type="date"
+                                  min={todayStr}
                                   value={newHearing.nextHearingDate}
                                   onChange={e => setNewHearing({ ...newHearing, nextHearingDate: e.target.value })}
-                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none"
+                                  className="w-full bg-white border border-slate-200 mt-1 p-2 rounded outline-none text-slate-800"
                                 />
                               </div>
 

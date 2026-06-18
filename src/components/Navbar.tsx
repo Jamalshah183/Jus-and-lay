@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, Shield } from "lucide-react";
+import { Menu, X, Phone, Shield, Gavel } from "lucide-react";
 
 interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
   consultationCount?: number;
   onServicesClick?: () => void;
-  onOpenPortal?: () => void;
+  onOpenClientPortal?: () => void;
+  onOpenAdminPortal?: () => void;
 }
 
-export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick, onOpenPortal }: NavbarProps) {
+export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick, onOpenClientPortal, onOpenAdminPortal }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -93,13 +94,20 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
           <div className="h-6 w-[1px] bg-navy-light/20" />
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
-              onClick={onOpenPortal}
-              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-xs hover:bg-gold hover:text-navy hover:shadow-[0_0_15px_rgba(215,160,82,0.35)] transition-all duration-300 flex items-center gap-2 cursor-pointer"
+              onClick={onOpenClientPortal}
+              className="px-4 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-xs hover:bg-gold hover:text-navy hover:shadow-[0_0_15px_rgba(215,160,82,0.35)] transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
             >
               <Shield className="w-3.5 h-3.5 text-gold shrink-0" />
               <span>Client Portal</span>
+            </button>
+            <button
+              onClick={onOpenAdminPortal}
+              className="px-4 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#bd9e5f] hover:bg-[#a28245] text-white border border-gold/20 rounded-xs hover:shadow-[0_0_15px_rgba(189,158,95,0.3)] transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
+            >
+              <Gavel className="w-3.5 h-3.5 shrink-0" />
+              <span>Admin Portal</span>
             </button>
           </div>
         </div>
@@ -135,13 +143,23 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
           <div className="flex flex-col gap-3 pt-2">
             <button
               onClick={() => {
-                if (onOpenPortal) onOpenPortal();
+                if (onOpenClientPortal) onOpenClientPortal();
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-xs hover:bg-gold hover:text-navy transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full text-center px-4 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#0c1a30] text-gold border border-gold/40 rounded-sm hover:bg-gold hover:text-navy transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Shield className="w-4 h-4 text-gold shrink-0" />
               <span>Client Portal</span>
+            </button>
+            <button
+              onClick={() => {
+                if (onOpenAdminPortal) onOpenAdminPortal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full text-center px-4 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#bd9e5f] text-white border border-gold/20 rounded-sm hover:bg-[#a28245] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Gavel className="w-4 h-4 shrink-0" />
+              <span>Admin Portal</span>
             </button>
             <a
               href="tel:03218520085"
