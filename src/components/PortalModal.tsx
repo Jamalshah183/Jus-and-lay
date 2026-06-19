@@ -391,6 +391,109 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
     }
   };
 
+  // Manually reseed some fresh dynamic cases into Supabase table to verify write state is fully live and connected.
+  const handleReseedSupabase = async () => {
+    if (isDemo || !supabase) {
+      alert("Local mock database is active. No Supabase keys are configured.");
+      return;
+    }
+    setCasesLoading(true);
+    try {
+      const freshDemoCases: CaseData[] = [
+        {
+          id: "hbl-case-live-" + Math.random().toString(36).substring(2, 6),
+          caseTitle: "Habib Bank Limited v. National Enterprises Inc. (Commercial Recovery)",
+          caseNo: "HBL/LC-4890/2026",
+          srNo: "12 / 2026",
+          judgeName: "Mr. Justice Babar Sattar",
+          courtName: "Islamabad High Court, Islamabad",
+          counselName: "Ammar Yasir Naqvi",
+          lastHearingDate: todayStr,
+          nextHearingDate: "2026-06-28",
+          clientId: "client@hbl.com",
+          clientPassword: "client123",
+          proceedings: "Injunction stay order against corporate asset sell-off successfully sustained after lengthy arguments.",
+          orderSheetUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          status: "Ongoing",
+          hearings: [
+            {
+              date: todayStr,
+              nextHearingDate: "2026-06-28",
+              proceedings: "Stay order sustained. Defendant's application for discharge dismissed. Main appeal fixed for final parameters.",
+              orderSheetUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              purpose: "Stay Argument",
+              judgeName: "Mr. Justice Babar Sattar",
+              courtName: "Islamabad High Court"
+            }
+          ]
+        },
+        {
+          id: "secp-case-live-" + Math.random().toString(36).substring(2, 6),
+          caseTitle: "In Re: Board Restructuring & SECP Regulatory Clearances v. Mergers Desk",
+          caseNo: "SECP/REST-023/2026",
+          srNo: "45",
+          judgeName: "Registrar SECP Desk",
+          courtName: "Securities & Exchange Commission of Pakistan",
+          counselName: "Ammar Yasir Naqvi",
+          lastHearingDate: todayStr,
+          nextHearingDate: "2026-07-04",
+          clientId: "mna.director@secp-enterprise.com",
+          clientPassword: "client123",
+          proceedings: "SECP Merger compliance clearances under final reviews. Surcharge stay registered under legal seal.",
+          orderSheetUrl: "",
+          status: "Ongoing",
+          hearings: [
+            {
+              date: todayStr,
+              nextHearingDate: "2026-07-04",
+              proceedings: "Articles of merger restructure filed. Bench was satisfied of initial securities board parameters.",
+              purpose: "Desk Review",
+              judgeName: "Registrar SECP Desk",
+              courtName: "Securities & Exchange Commission of Pakistan"
+            }
+          ]
+        },
+        {
+          id: "ptcl-case-live-" + Math.random().toString(36).substring(2, 6),
+          caseTitle: "Pakistan Telecommunication Company (PTCL) v. Spectrum Allocation Board",
+          caseNo: "PTCL/SAB-0902/2026",
+          srNo: "119",
+          judgeName: "Chief Justice Qazi Faez Isa",
+          courtName: "Supreme Court of Pakistan, Islamabad Bench",
+          counselName: "Ammar Yasir Naqvi",
+          lastHearingDate: todayStr,
+          nextHearingDate: "2026-07-15",
+          clientId: "client@hbl.com",
+          clientPassword: "client123",
+          proceedings: "Arbitration proceeding initiation accepted by Supreme Court registrar under certified legal seal.",
+          orderSheetUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          status: "Ongoing",
+          hearings: [
+            {
+              date: todayStr,
+              nextHearingDate: "2026-07-15",
+              proceedings: "Arbitration application entered. Notices issued to board of spectrum regulators.",
+              purpose: "Admission",
+              judgeName: "Chief Justice Qazi Faez Isa",
+              courtName: "Supreme Court of Pakistan"
+            }
+          ]
+        }
+      ];
+
+      for (const item of freshDemoCases) {
+        await supabase.from('cases').insert([item]);
+      }
+
+      alert("Successfully injected 3 premium custom test cases into your live Supabase database!");
+      await fetchLiveSupabaseCases();
+    } catch (err: any) {
+      alert(`Connection failed. Make sure Row Level Security or database table is created. Error: ${err.message}`);
+    } finally {
+      setCasesLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   // Sign out triggers
@@ -943,29 +1046,42 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                   </p>
                 </div>
 
-                <div className="space-y-2 mt-4 text-left">
-                  <span className="text-[9px] uppercase tracking-wider text-gold font-bold block">
-                    Fast Bypass Credentials
+                <div className="space-y-3 mt-4 text-left">
+                  <span className="text-[9px] uppercase tracking-wider text-gold font-bold block border-b border-white/10 pb-1">
+                    Secure Directory Access
                   </span>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    <button 
-                      onClick={() => bypassLogin("client@hbl.com", "client123", "client")}
-                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
-                    >
-                      🛡️ HBL Client (client@hbl.com)
-                    </button>
-                    <button 
-                      onClick={() => bypassLogin("mna.director@secp-enterprise.com", "client123", "client")}
-                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
-                    >
-                      👔 SECP Client (mna.director@secp-enterprise.com)
-                    </button>
-                    <button 
-                      onClick={() => bypassLogin("admin@jusandlay.com", "admin123", "admin")}
-                      className="p-1 px-2.5 bg-[#122847] border border-gold/10 text-left text-[9px] hover:bg-gold hover:text-[#0c1a30] text-gold block transition-all rounded-xs cursor-pointer"
-                    >
-                      ⚖️ Advocate Admin (admin@jusandlay.com)
-                    </button>
+                  
+                  <div className="space-y-2.5">
+                    <div>
+                      <span className="block text-[10px] font-bold text-white/90">Clients check-in:</span>
+                      <p className="text-white/50 text-[9px] font-sans mt-0.5 leading-relaxed">
+                        Access client dockets using official registran credentials:
+                      </p>
+                      <div className="mt-1.5 space-y-1">
+                        <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono">
+                          <span className="text-gold font-bold">🏢 Habib Bank Limited</span>
+                          <span>Email: <strong className="text-white select-all">client@hbl.com</strong></span>
+                          <span>Passcode: <strong className="text-white">client123</strong></span>
+                        </div>
+                        <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono">
+                          <span className="text-gold font-bold">💼 SECP Registry</span>
+                          <span>Email: <strong className="text-white select-all">mna.director@secp-enterprise.com</strong></span>
+                          <span>Passcode: <strong className="text-white">client123</strong></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/10">
+                      <span className="block text-[10px] font-bold text-white/90">Advocates login:</span>
+                      <p className="text-white/50 text-[9px] font-sans mt-0.5 leading-relaxed">
+                        Partner desk checks-in securely via Google SSO:
+                      </p>
+                      <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono mt-1.5">
+                        <span className="text-gold font-bold">⚖️ Partner Advocate</span>
+                        <span>Account: <strong className="text-white select-all">jamalshah183@gmail.com</strong></span>
+                        <span>Authentication: <strong>Google Auth</strong></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1849,12 +1965,22 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                       </div>
                       <div>
                         <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#0c1a30]">Quick Actions</span>
-                        <button 
-                          onClick={() => { setIsAddingCase(true); setSelectedCaseId(null); }}
-                          className="text-[10px] font-black uppercase text-[#0c1a30] block hover:underline"
-                        >
-                          + Create New Docket File
-                        </button>
+                        <div className="space-y-1">
+                          <button 
+                            onClick={() => { setIsAddingCase(true); setSelectedCaseId(null); }}
+                            className="text-[10px] font-black uppercase text-[#0c1a30] block hover:underline text-left cursor-pointer font-bold"
+                          >
+                            + Create New Docket
+                          </button>
+                          {!isDemo && (
+                            <button 
+                              onClick={handleReseedSupabase}
+                              className="text-[10px] font-black uppercase text-amber-700 block hover:underline text-left cursor-pointer font-bold"
+                            >
+                              🔄 Inject Demo Cases
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1871,6 +1997,15 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                         className="w-full bg-slate-50 border border-slate-200 py-2 pl-9 pr-4 rounded text-xs focus:ring-1 focus:ring-gold outline-none"
                       />
                     </div>
+                    {!isDemo && (
+                      <button 
+                        onClick={handleReseedSupabase}
+                        title="Seed / Inject live test cases into Supabase table to verify connection"
+                        className="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-sm shrink-0 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        🔄 Inject Test Cases
+                      </button>
+                    )}
                     <button 
                       onClick={() => setIsAddingCase(true)}
                       className="w-full sm:w-auto px-5 py-2.5 bg-[#0c1a30] hover:bg-gold text-white hover:text-[#0c1a30] text-xs font-bold rounded-sm shrink-0 transition-colors cursor-pointer"
