@@ -237,11 +237,6 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
   // Session user profile
   const [sessionUser, setSessionUser] = useState<{ email: string; uid: string; role: "client" | "admin" } | null>(null);
 
-  // Google account chooser states for administrators
-  const [selectedAdminEmail, setSelectedAdminEmail] = useState("jamalshah183@gmail.com");
-  const [customAdminEmail, setCustomAdminEmail] = useState("");
-  const [isCustomEmailMode, setIsCustomEmailMode] = useState(false);
-
   // Authentication Fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -614,22 +609,8 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
     setAuthLoading(true);
     setAuthError("");
     
-    const emailValue = (isCustomEmailMode ? customAdminEmail : selectedAdminEmail).trim().toLowerCase();
+    const emailValue = "jamalshah183@gmail.com";
     
-    if (!emailValue) {
-      setAuthError("Please specify a valid Google Account email address.");
-      setAuthLoading(false);
-      return;
-    }
-
-    const admins = ['jamalshah183@gmail.com'];
-    
-    if (!admins.includes(emailValue)) {
-      setAuthError("Unauthorized access. Active Google Account email does not match registered advocate registry.");
-      setAuthLoading(false);
-      return;
-    }
-
     if (!isDemo && supabase) {
       try {
         // Attempt authentic Supabase redirect OAuth
@@ -1045,45 +1026,6 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                     Gate communication, files registry, and legal order schedules are fully protected under privilege.
                   </p>
                 </div>
-
-                <div className="space-y-3 mt-4 text-left">
-                  <span className="text-[9px] uppercase tracking-wider text-gold font-bold block border-b border-white/10 pb-1">
-                    Secure Directory Access
-                  </span>
-                  
-                  <div className="space-y-2.5">
-                    <div>
-                      <span className="block text-[10px] font-bold text-white/90">Clients check-in:</span>
-                      <p className="text-white/50 text-[9px] font-sans mt-0.5 leading-relaxed">
-                        Access client dockets using official registran credentials:
-                      </p>
-                      <div className="mt-1.5 space-y-1">
-                        <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono">
-                          <span className="text-gold font-bold">🏢 Habib Bank Limited</span>
-                          <span>Email: <strong className="text-white select-all">client@hbl.com</strong></span>
-                          <span>Passcode: <strong className="text-white">client123</strong></span>
-                        </div>
-                        <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono">
-                          <span className="text-gold font-bold">💼 SECP Registry</span>
-                          <span>Email: <strong className="text-white select-all">mna.director@secp-enterprise.com</strong></span>
-                          <span>Passcode: <strong className="text-white">client123</strong></span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-white/10">
-                      <span className="block text-[10px] font-bold text-white/90">Advocates login:</span>
-                      <p className="text-white/50 text-[9px] font-sans mt-0.5 leading-relaxed">
-                        Partner desk checks-in securely via Google SSO:
-                      </p>
-                      <div className="p-2 bg-[#122847] rounded-xs border border-gold/10 flex flex-col gap-0.5 text-[9px] text-slate-300 font-mono mt-1.5">
-                        <span className="text-gold font-bold">⚖️ Partner Advocate</span>
-                        <span>Account: <strong className="text-white select-all">jamalshah183@gmail.com</strong></span>
-                        <span>Authentication: <strong>Google Auth</strong></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="space-y-4 text-left">
@@ -1135,23 +1077,6 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
           </div>
 
           <div className="space-y-4 text-left">
-            <div className="pt-2 border-t border-white/10">
-              <span className="block text-[8px] uppercase font-mono tracking-widest text-[#94a3b8]">Database Engine</span>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured ? "bg-emerald-400" : "bg-amber-400"}`} />
-                <span className="font-mono text-[10px] uppercase font-bold text-white tracking-wider">
-                  {isSupabaseConfigured ? "⚡ SUPABASE LIVE" : "🧪 LOCAL STORAGE"}
-                </span>
-              </div>
-              <button 
-                onClick={() => setShowSqlSetup(true)}
-                type="button"
-                className="block text-[10px] text-yellow-500 hover:underline mt-1 cursor-pointer font-semibold text-left transition-all"
-              >
-                📋 View Supabase SQL setup
-              </button>
-            </div>
-
             {sessionUser && (
               <button
                 onClick={handleSignOut}
@@ -1297,7 +1222,7 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
               <div>
                 <h3 className="font-serif text-2xl font-bold text-[#0c1a30]">Advocate Control Gate</h3>
                 <p className="text-slate-500 text-xs mt-1.5 font-sans">
-                  Select your authorized Google Account or enter credentials to sign into the Admin Console.
+                  Sign in with your authorized Google Account to access the Advocate Admin Console.
                 </p>
               </div>
 
@@ -1305,82 +1230,6 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                 <div className="w-full text-left p-3.5 text-xs bg-red-50 border border-red-200 text-red-600 rounded-sm flex gap-2.5 items-center">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{authError}</span>
-                </div>
-              )}
-
-              {/* Elegant Google SSO Account Chooser */}
-              <div className="w-full text-left space-y-2.5">
-                <label className="text-[10px] uppercase font-black text-slate-400 tracking-wider block">Google Accounts Registry</label>
-                
-                <div className="space-y-2">
-                  {/* Account 1: jamalshah183@gmail.com */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedAdminEmail("jamalshah183@gmail.com");
-                      setIsCustomEmailMode(false);
-                    }}
-                    className={`w-full p-3.5 rounded border text-left flex items-start gap-3.5 transition-all cursor-pointer ${
-                      selectedAdminEmail === "jamalshah183@gmail.com" && !isCustomEmailMode
-                        ? "border-gold bg-[#fcfaef]"
-                        : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0 font-mono select-none">
-                      JS
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0c1a30] truncate">jamalshah183@gmail.com</span>
-                        {selectedAdminEmail === "jamalshah183@gmail.com" && !isCustomEmailMode && (
-                          <Check className="w-4 h-4 text-gold shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-0.5 font-sans">Primary App Owner & Administrator</p>
-                    </div>
-                  </button>
-
-                  {/* Custom Option: Use another account */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCustomEmailMode(true);
-                    }}
-                    className={`w-full p-3.5 rounded border text-left flex items-start gap-3.5 transition-all cursor-pointer ${
-                      isCustomEmailMode
-                        ? "border-gold bg-[#fcfaef]"
-                        : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 select-none">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#0c1a30]">Use another account</span>
-                        {isCustomEmailMode && (
-                          <Check className="w-4 h-4 text-gold shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-0.5 font-sans">Enter an authorized legal email address</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {isCustomEmailMode && (
-                <div className="w-full text-left space-y-1">
-                  <label className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Custom Admin Email Address</label>
-                  <input
-                    type="email"
-                    value={customAdminEmail}
-                    onChange={(e) => {
-                      setCustomAdminEmail(e.target.value);
-                      setSelectedAdminEmail(e.target.value);
-                    }}
-                    placeholder="yourname@jusandlay.com"
-                    className="w-full bg-white border border-slate-200 rounded p-3 mt-1 text-xs focus:ring-1 focus:ring-gold focus:border-gold outline-none font-sans"
-                  />
                 </div>
               )}
 
