@@ -1,14 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Access Supabase credentials from Vite environment variables
-let sanitizedUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+let rawUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+if (rawUrl.startsWith('"') && rawUrl.endsWith('"')) {
+  rawUrl = rawUrl.slice(1, -1).trim();
+}
+if (rawUrl.startsWith("'") && rawUrl.endsWith("'")) {
+  rawUrl = rawUrl.slice(1, -1).trim();
+}
+
+let sanitizedUrl = rawUrl;
 if (sanitizedUrl.endsWith('/rest/v1/')) {
   sanitizedUrl = sanitizedUrl.replace('/rest/v1/', '');
 } else if (sanitizedUrl.endsWith('/rest/v1')) {
   sanitizedUrl = sanitizedUrl.replace('/rest/v1', '');
 }
 const supabaseUrl = sanitizedUrl;
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+
+let rawAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+if (rawAnonKey.startsWith('"') && rawAnonKey.endsWith('"')) {
+  rawAnonKey = rawAnonKey.slice(1, -1).trim();
+}
+if (rawAnonKey.startsWith("'") && rawAnonKey.endsWith("'")) {
+  rawAnonKey = rawAnonKey.slice(1, -1).trim();
+}
+const supabaseAnonKey = rawAnonKey;
 
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('your_supabase_project_url'));
 
