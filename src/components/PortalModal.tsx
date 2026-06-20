@@ -234,6 +234,8 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
   // Supabase SQL instruction popup state
   const [showSqlSetup, setShowSqlSetup] = useState(false);
 
+  // Google SSO authentication overlay state is handled by a native popup window as requested
+
   // Session user profile
   const [sessionUser, setSessionUser] = useState<{ email: string; uid: string; role: "client" | "admin" } | null>(null);
 
@@ -370,6 +372,8 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
       subscription.unsubscribe();
     };
   }, [isDemo]);
+
+
 
   // Supabase fetch callback with safe default seeding
   const fetchLiveSupabaseCases = async () => {
@@ -604,16 +608,13 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
     }
   };
 
-  // Google SSO authentication for Admins in real Supabase mode
+  // Google SSO authentication for Admins
   const handleGoogleAdminLogin = async () => {
     setAuthLoading(true);
     setAuthError("");
     
-    const emailValue = "jamalshah183@gmail.com";
-    
     if (!isDemo && supabase) {
       try {
-        // Attempt authentic Supabase redirect OAuth
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -622,29 +623,12 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
         });
         if (error) throw error;
       } catch (err: any) {
-        console.warn("OAuth popup or frame constraints detected inside sandbox, enabling seamless AI Studio bypass:", err);
-        // Seamless responsive fallback that resolves iframe-blocked popup constraints
-        setTimeout(() => {
-          setSessionUser({
-            email: emailValue,
-            uid: "sso-admin-session-" + Math.random().toString(36).substring(2, 9),
-            role: "admin"
-          });
-          setView("admin-dashboard");
-          setAuthLoading(false);
-        }, 500);
+        setAuthError(err.message || "OAuth sign-in failed via Supabase.");
+        setAuthLoading(false);
       }
     } else {
-      // Demo SSO Simulation
-      setTimeout(() => {
-        setSessionUser({
-          email: emailValue,
-          uid: "sso-admin-session-simulator",
-          role: "admin"
-        });
-        setView("admin-dashboard");
-        setAuthLoading(false);
-      }, 550);
+      setAuthError("Database Connection Not Configured. Please configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY first.");
+      setAuthLoading(false);
     }
   };
 
@@ -2119,6 +2103,7 @@ export default function PortalModal({ isOpen, onClose, initialView }: PortalModa
                 </motion.div>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
       </div>

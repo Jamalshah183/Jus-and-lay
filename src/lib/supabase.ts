@@ -26,7 +26,12 @@ if (rawAnonKey.startsWith("'") && rawAnonKey.endsWith("'")) {
 }
 const supabaseAnonKey = rawAnonKey;
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('your_supabase_project_url'));
+export const isSupabaseConfigured = !!(
+  supabaseUrl && 
+  supabaseAnonKey && 
+  (supabaseUrl.startsWith('http://') || supabaseUrl.startsWith('https://')) &&
+  !supabaseUrl.includes('your_supabase_project_url')
+);
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
