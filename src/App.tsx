@@ -20,13 +20,10 @@ import ConsultationForm from "./components/ConsultationForm";
 import CEOSection from "./components/CEOSection";
 import FirmProfile from "./components/FirmProfile";
 import LoadingScreen from "./components/LoadingScreen";
-import PortalModal from "./components/PortalModal";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [profileTab, setProfileTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
-  const [isPortalOpen, setIsPortalOpen] = useState(false);
-  const [portalView, setPortalView] = useState<"choice" | "client-login" | "admin-login">("choice");
 
   useEffect(() => {
     const handleLoad = () => {
@@ -77,11 +74,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* 1. STICKY NAVBAR */}
-      <Navbar 
-        onServicesClick={() => setProfileTab("practices")} 
-        onOpenClientPortal={() => { setPortalView("client-login"); setIsPortalOpen(true); }} 
-        onOpenAdminPortal={() => { setPortalView("admin-login"); setIsPortalOpen(true); }} 
-      />
+      <Navbar onServicesClick={() => setProfileTab("practices")} />
 
       {/* 2. HERO VIEW using the client's specified Introduction text */}
       <ParallaxSection
@@ -551,8 +544,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
-      <PortalModal isOpen={isPortalOpen} onClose={() => setIsPortalOpen(false)} initialView={portalView} />
 
     </div>
   );
