@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, setDoc, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, deleteUser, initializeAuth, inMemoryPersistence } from 'firebase/auth';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { db, auth, config as firebaseConfig, handleFirestoreError, OperationType, storage } from '../lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { 
   Users, Gavel, Plus, Search, LogOut, 
   ChevronRight, Calendar, FileText, 
   ShieldCheck, ArrowLeft, Loader2, Save,
   ChevronLeft, LayoutGrid, CalendarDays,
   Building2, ExternalLink, Clock, Eye, EyeOff,
-  Edit
+  Edit, FileBox, Trash2, AlertTriangle
 } from 'lucide-react';
 import { LEGAL_TEAM } from '../data';
+import { compressImageIfPossible, fileToBase64, openOrDownloadFile } from '../lib/fileHelper';
+import { DocumentUploader } from '../components/DocumentUploader';
+import { safeConfirm, safeAlert } from '../lib/modalHelper';
 
 interface Hearing {
+  id?: string;
   date: string;
   nextHearingDate?: string;
   proceedings: string;
@@ -129,6 +133,41 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
 
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const selectedCase = cases.find(c => c.id === selectedCaseId) || null;
+  const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
+  const [uploadedHearingFileName, setUploadedHearingFileName] = useState<string>('');
+  const [uploadedCaseFileName, setUploadedCaseFileName] = useState<string>('');
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'case' | 'hearing' | 'document';
+    id: string;
+    secondaryId?: string;
+    data?: any;
+    step: 1 | 2;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!selectedCaseId) {
+      setUploadedDocs([]);
+      return;
+    }
+
+    const docsPath = 'documents';
+    const q = query(
+      collection(db, docsPath),
+      where('caseId', '==', selectedCaseId)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setUploadedDocs(docsData);
+    }, (error) => {
+      console.error("Error subscribing to case documents in AdminPortal:", error);
+    });
+
+    return () => unsubscribe();
+  }, [selectedCaseId]);
 
   const startEditing = (c: Case) => {
     setEditFormData({
@@ -160,44 +199,69 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
 
   const [isUploading, setIsUploading] = useState(false);
  
-  // Helper for file upload to Firebase Storage
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void) => {
-    const file = e.target.files?.[0];
+  // Helper for file upload to Firebase Storage with intelligent Base64 Firestore fallbacks
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>, 
+    setter: (url: string) => void,
+    nameSetter?: (name: string) => void
+  ) => {
+    let file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) { 
-      alert("File is too large. Please upload files smaller than 10MB.");
+    if (nameSetter) {
+      nameSetter(file.name);
+    }
+
+    if (file.size > 15 * 1024 * 1024) { 
+      safeAlert("File is too large. Please upload files smaller than 15MB.");
       return;
     }
 
     setIsUploading(true);
     try {
+      // Step 1: Client-side compression if image to reduce transport/storage size
+      if (file.type.startsWith('image/')) {
+        try {
+          const compressed = await compressImageIfPossible(file);
+          file = compressed;
+        } catch (compErr) {
+          console.warn("Image pre-compression failed, proceeding with original file:", compErr);
+        }
+      }
+
+      // Step 2: Try Firebase Storage Cloud upload
       const storageRef = ref(storage, `cases/${Date.now()}_${file.name}`);
       const metadata = {
         contentType: file.type || 'application/octet-stream',
       };
       
-      console.log("Attempting upload to:", storageRef.fullPath, "with type:", metadata.contentType);
+      console.log("Attempting cloud upload to:", storageRef.fullPath, "with type:", metadata.contentType);
       
       const snapshot = await uploadBytes(storageRef, file, metadata);
       const downloadURL = await getDownloadURL(snapshot.ref);
       setter(downloadURL);
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      console.error("Storage upload error detailed:", error);
-      let errorMessage = "Failed to upload file.";
+    } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      console.warn("Storage upload failed, attempting auto database fallback:", e);
       
-      const firebaseError = error as { code?: string; message?: string };
-      if (firebaseError.code === 'storage/unauthorized') {
-        errorMessage = "Permission denied. Please ensure you are logged in as an authorized admin.";
-      } else if (firebaseError.code === 'storage/canceled') {
-        errorMessage = "Upload was canceled.";
-      } else if (firebaseError.code === 'storage/unknown') {
-        errorMessage = "An unknown error occurred during upload. Check your connection.";
-      } else if (firebaseError.message) {
-        errorMessage = firebaseError.message;
+      // Step 3: Handle automatic Firestore-safe fallback (Base64) for files under 800KB
+      if (file.size <= 800 * 1024) {
+        try {
+          const base64Data = await fileToBase64(file);
+          setter(base64Data);
+          safeAlert("Notice: Firebase Storage is not yet enabled or rules are restricted. Your file has been successfully converted and stored inside the database instead!");
+        } catch (base64Err) {
+          console.error("Base64 conversion failed:", base64Err);
+          safeAlert("Failed to compress/encode file for local database fallback.");
+        }
+      } else {
+        // File is too large for Firestore's 1MB limit & Cloud Storage failed
+        let storageError = "Failed to upload file.";
+        if (e.code === 'storage/unauthorized') {
+          storageError = "Firebase Storage permissions are restricted in your Google console.";
+        }
+        
+        safeAlert(`${storageError}\n\nSince Cloud Storage is locked, files up to 800KB are automatically saved in the database as a fallback. However, this file is ${Math.round(file.size / 1024)}KB.\n\nPlease upload a smaller file (under 800KB) OR update your Firebase Console rules to enable Storage.`);
       }
-      
-      alert(`Storage Error: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -235,6 +299,22 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         const userEmail = u.email?.toLowerCase();
         
         if (userEmail && admins.includes(userEmail) && u.providerData.some(p => p.providerId === 'google.com')) {
+          // Ensure admin user profile document exists in the 'users' collection
+          const ensureAdminProfile = async () => {
+            try {
+              const uRef = doc(db, 'users', u.uid);
+              await setDoc(uRef, {
+                uid: u.uid,
+                email: u.email || '',
+                role: 'admin',
+                name: u.displayName || 'Admin',
+                createdAt: serverTimestamp()
+              }, { merge: true });
+            } catch (err) {
+              console.error("Failed to ensure admin profile document:", err);
+            }
+          };
+          ensureAdminProfile();
           fetchCases();
           
           // Auto-bootstrap check for empty databases
@@ -307,15 +387,23 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     return () => unsubscribe();
   }, [setView, fetchCases]);
 
-  const handleDeleteCase = async (caseId: string, clientId: string) => {
-    if (!confirm('Are you sure you want to delete this case? This action cannot be undone.')) return;
+  const handleDeleteCase = async (caseId: string, clientId: string, bypassConfirm = false) => {
+    if (!bypassConfirm) {
+      setDeleteConfirm({
+        type: 'case',
+        id: caseId,
+        secondaryId: clientId,
+        step: 1
+      });
+      return;
+    }
     
     setIsSaving(true);
     try {
-      const otherCases = cases.filter(c => c.id !== caseId && c.clientId.toLowerCase() === clientId.toLowerCase());
+      const otherCases = cases.filter(c => c.id !== caseId && c.clientId?.toLowerCase() === clientId?.toLowerCase());
       
-      if (otherCases.length === 0) {
-        const userProfile = users.find(u => u.email.toLowerCase() === clientId.toLowerCase());
+      if (clientId && otherCases.length === 0) {
+        const userProfile = users.find(u => u.email?.toLowerCase() === clientId.toLowerCase());
         
         if (userProfile && userProfile.password) {
            let secondaryApp;
@@ -339,17 +427,89 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         }
       }
       
-      const { deleteDoc: delDoc, doc: fireDoc } = await import('firebase/firestore');
-      if (caseId) {
-        await delDoc(fireDoc(db, 'cases', caseId));
-      }
+      await deleteDoc(doc(db, 'cases', caseId));
       
       fetchCases();
-      alert("Case record deleted.");
+      safeAlert("Case record deleted.");
       if (selectedCaseId === caseId) setSelectedCaseId(null);
     } catch (error) {
       console.error("Error deleting case:", error);
-      alert("Failed to delete the case record.");
+      safeAlert("Failed to delete the case record.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string, fileUrl?: string, bypassConfirm = false) => {
+    if (!bypassConfirm) {
+      setDeleteConfirm({
+        type: 'document',
+        id: docId,
+        secondaryId: fileUrl,
+        step: 1
+      });
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, 'documents', docId));
+      
+      if (fileUrl && fileUrl.includes('firebasestorage.googleapis.com')) {
+        try {
+          const fileRef = ref(storage, fileUrl);
+          await deleteObject(fileRef);
+        } catch (storageErr) {
+          console.warn("Storage item cleanup bypassed/failed:", storageErr);
+        }
+      }
+      safeAlert("Document deleted successfully from vault.");
+    } catch (err) {
+      console.error("Error deleting document:", err);
+      safeAlert("Failed to delete the document.");
+    }
+  };
+
+  const handleDeleteHearing = async (hearingToDelete: Hearing, bypassConfirm = false) => {
+    if (!selectedCase?.id) return;
+    if (!bypassConfirm) {
+      setDeleteConfirm({
+        type: 'hearing',
+        id: hearingToDelete.id || `h_${(hearingToDelete.date || '').replace(/[^a-zA-Z0-9]/g, '')}_${(hearingToDelete.proceedings || '').substring(0, 10).replace(/[^a-zA-Z0-9]/g, '')}`,
+        data: hearingToDelete,
+        step: 1
+      });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const caseId = selectedCase.id;
+      // Determine hearing ID (fallback for legacy records that don't have an ID)
+      const hearingId = hearingToDelete.id || `h_${(hearingToDelete.date || '').replace(/[^a-zA-Z0-9]/g, '')}_${(hearingToDelete.proceedings || '').substring(0, 10).replace(/[^a-zA-Z0-9]/g, '')}`;
+      
+      // Delete the specific hearing document from the subcollection
+      await deleteDoc(doc(db, "cases", caseId, "hearings", hearingId));
+      
+      // Remove the hearing from the array in the parent case document
+      const caseRef = doc(db, 'cases', caseId);
+      const updatedHearings = (selectedCase.hearings || []).filter(h => 
+        !(h.date === hearingToDelete.date && h.proceedings === hearingToDelete.proceedings)
+      );
+      
+      await updateDoc(caseRef, {
+        hearings: updatedHearings,
+        updatedAt: serverTimestamp()
+      });
+      
+      // Update local state immediately so UI updates without flickering or waiting for reload
+      setCases(prevCases => prevCases.map(c => c.id === caseId ? { ...c, hearings: updatedHearings } : c));
+      
+      safeAlert("Hearing record successfully removed.");
+    } catch (error: any) {
+      console.error("Error removing hearing:", error);
+      if (error?.code === 'permission-denied') {
+        safeAlert("Error: You do not have permission to delete this hearing.");
+      } else {
+        safeAlert("Failed to remove hearing record: " + (error instanceof Error ? error.message : String(error)));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -362,11 +522,28 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     setIsSaving(true);
     try {
       const caseRef = doc(db, 'cases', selectedCase.id);
+      
+      // Generate a unique ID for the new hearing document in the subcollection
+      const hearingsColRef = collection(db, 'cases', selectedCase.id, 'hearings');
+      const newHearingDocRef = doc(hearingsColRef);
+      const hearingId = newHearingDocRef.id;
+
       const hearingWithContext = {
+        id: hearingId,
         ...newHearing,
         judgeName: newHearing.judgeName || selectedCase.judgeName,
         courtName: newHearing.courtName || selectedCase.courtName
       };
+
+      // 1. Write the hearing document to the subcollection
+      await setDoc(newHearingDocRef, {
+        ...hearingWithContext,
+        caseId: selectedCase.id,
+        clientId: selectedCase.clientId || '',
+        createdAt: serverTimestamp()
+      });
+
+      // 2. Add to parent cases array for real-time reads in main list
       const updatedHearings = [...(selectedCase.hearings || []), hearingWithContext];
       
       await updateDoc(caseRef, {
@@ -375,13 +552,30 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         nextHearingDate: newHearing.nextHearingDate,
         updatedAt: serverTimestamp()
       });
+
+      if (newHearing.orderSheetUrl) {
+        try {
+          const fileName = uploadedHearingFileName || `Order_Sheet_${newHearing.date || Date.now()}.pdf`;
+          await addDoc(collection(db, 'documents'), {
+            fileName: fileName,
+            fileUrl: newHearing.orderSheetUrl,
+            fileType: fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+            caseId: selectedCase.id,
+            uploadedBy: auth.currentUser?.uid || 'admin',
+            createdAt: serverTimestamp()
+          });
+          setUploadedHearingFileName('');
+        } catch (docErr) {
+          console.error("Auto document upload sync failed on add hearing:", docErr);
+        }
+      }
       
       setNewHearing({ date: '', nextHearingDate: '', proceedings: '', orderSheetUrl: '', purpose: '', judgeName: '', courtName: '' });
       fetchCases();
-      alert("Hearing committed to official record.");
+      safeAlert("Hearing committed to official record.");
     } catch (error) {
       console.error("Error adding hearing:", error);
-      alert("Failed to update hearing record.");
+      safeAlert("Failed to update hearing record.");
       handleFirestoreError(error, OperationType.UPDATE, `cases/${selectedCase.id}`);
     } finally {
       setIsSaving(false);
@@ -418,7 +612,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                 console.warn("Could not retrieve UID during update:", loginError);
               }
             } else if (errorCode === 'auth/weak-password') {
-              alert("Password too weak (6 chars min).");
+              safeAlert("Password too weak (6 chars min).");
               throw authError;
             } else {
               throw authError;
@@ -473,12 +667,29 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
       }
       
       await updateDoc(caseRef, caseDataToUpdate);
+
+      if (editFormData.orderSheetUrl && editFormData.orderSheetUrl !== selectedCase.orderSheetUrl) {
+        try {
+          const fileName = uploadedCaseFileName || 'Updated_Order_Sheet.pdf';
+          await addDoc(collection(db, 'documents'), {
+            fileName: fileName,
+            fileUrl: editFormData.orderSheetUrl,
+            fileType: fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+            caseId: selectedCase.id,
+            uploadedBy: auth.currentUser?.uid || 'admin',
+            createdAt: serverTimestamp()
+          });
+          setUploadedCaseFileName('');
+        } catch (docErr) {
+          console.error("Auto document upload sync failed on case update:", docErr);
+        }
+      }
       setIsEditingCase(false);
       fetchCases();
-      alert("Case record successfully updated!");
+      safeAlert("Case record successfully updated!");
     } catch (error) {
       console.error("Error updating case:", error);
-      alert("Failed to update case record: " + (error instanceof Error ? error.message : String(error)));
+      safeAlert("Failed to update case record: " + (error instanceof Error ? error.message : String(error)));
       handleFirestoreError(error, OperationType.UPDATE, `cases/${selectedCase.id}`);
     } finally {
       setIsSaving(false);
@@ -513,7 +724,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                 console.warn("Could not retrieve UID:", loginError);
               }
             } else if (errorCode === 'auth/weak-password') {
-              alert("Password too weak (6 chars min).");
+              safeAlert("Password too weak (6 chars min).");
               throw authError;
             } else {
               throw authError;
@@ -565,11 +776,28 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         caseDataToInsert.orderSheetUrl = formData.orderSheetUrl;
       }
 
-      await addDoc(collection(db, 'cases'), {
+      const docRef = await addDoc(collection(db, 'cases'), {
         ...caseDataToInsert,
         hearings: [],
         createdAt: serverTimestamp()
       });
+
+      if (formData.orderSheetUrl) {
+        try {
+          const fileName = uploadedCaseFileName || 'Initial_Order_Sheet.pdf';
+          await addDoc(collection(db, 'documents'), {
+            fileName: fileName,
+            fileUrl: formData.orderSheetUrl,
+            fileType: fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+            caseId: docRef.id,
+            uploadedBy: auth.currentUser?.uid || 'admin',
+            createdAt: serverTimestamp()
+          });
+          setUploadedCaseFileName('');
+        } catch (docErr) {
+          console.error("Auto document upload sync failed on case create:", docErr);
+        }
+      }
       setIsAdding(false);
       setFormData({
         caseTitle: '',
@@ -586,10 +814,10 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         orderSheetUrl: '',
       });
       fetchCases();
-      alert("Case record successfully created!");
+      safeAlert("Case record successfully created!");
     } catch (error) {
       console.error("Error adding case:", error);
-      alert("Failed to create new case record: " + (error instanceof Error ? error.message : String(error)));
+      safeAlert("Failed to create new case record: " + (error instanceof Error ? error.message : String(error)));
       handleFirestoreError(error, OperationType.CREATE, 'cases');
     } finally {
       setIsSaving(false);
@@ -794,7 +1022,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
 
                     <div className="space-y-2 border-t border-zinc-850 pt-6">
                       <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Order Sheet Attachment (PDF or Image)</label>
-                      <input type="file" accept="image/*,application/pdf" id="main-case-upload" onChange={(e) => handleFileUpload(e, (url) => setFormData({...formData, orderSheetUrl: url}))} className="hidden" />
+                      <input type="file" accept="image/*,application/pdf" id="main-case-upload" onChange={(e) => handleFileUpload(e, (url) => setFormData({...formData, orderSheetUrl: url}), (name) => setUploadedCaseFileName(name))} className="hidden" />
                       <label htmlFor="main-case-upload" className={`w-full flex items-center justify-between bg-black border border-zinc-850 rounded-xl px-4 py-3 text-sm cursor-pointer hover:border-amber-500/30 transition-all ${formData.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
                         <span className="flex items-center gap-2 text-zinc-400">
                           {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
@@ -941,7 +1169,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
 
                       <div className="space-y-2 border-t border-zinc-850 pt-6">
                         <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Order Sheet Attachment (PDF or Image)</label>
-                        <input type="file" accept="image/*,application/pdf" id="edit-case-upload" onChange={(e) => handleFileUpload(e, (url) => setEditFormData({...editFormData, orderSheetUrl: url}))} className="hidden" />
+                        <input type="file" accept="image/*,application/pdf" id="edit-case-upload" onChange={(e) => handleFileUpload(e, (url) => setEditFormData({...editFormData, orderSheetUrl: url}), (name) => setUploadedCaseFileName(name))} className="hidden" />
                         <label htmlFor="edit-case-upload" className={`w-full flex items-center justify-between bg-black border border-zinc-850 rounded-xl px-4 py-3 text-sm cursor-pointer hover:border-amber-500/30 transition-all ${editFormData.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
                           <span className="flex items-center gap-2 text-zinc-400">
                             {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
@@ -1046,7 +1274,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                         </div>
                         <div className="space-y-1">
                           <label className="text-[9px] font-black uppercase text-zinc-500">Upload Order Sheet (PDF/JPG)</label>
-                          <input type="file" accept="image/*,application/pdf" id="hearing-file-spec" onChange={(e) => handleFileUpload(e, (url) => setNewHearing({...newHearing, orderSheetUrl: url}))} className="hidden" />
+                          <input type="file" accept="image/*,application/pdf" id="hearing-file-spec" onChange={(e) => handleFileUpload(e, (url) => setNewHearing({...newHearing, orderSheetUrl: url}), (name) => setUploadedHearingFileName(name))} className="hidden" />
                           <label htmlFor="hearing-file-spec" className={`w-full flex items-center justify-between bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-xs cursor-pointer hover:border-amber-500/30 transition-all ${newHearing.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
                             <span className="truncate text-zinc-400">
                              {isUploading ? 'Uploading...' : newHearing.orderSheetUrl ? 'Sheet uploaded' : 'Select order attachment'}
@@ -1106,11 +1334,23 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                               <div className="bg-black/50 p-4 rounded-xl border border-zinc-850 flex-grow">
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-[10px] font-black text-amber-500">{h.date}</span>
-                                  {h.orderSheetUrl && (
-                                    <a href={h.orderSheetUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black uppercase text-amber-500 hover:underline flex items-center gap-1 cursor-pointer">
-                                      <FileText className="w-3 h-3" /> View Sheet
-                                    </a>
-                                  )}
+                                  <div className="flex items-center gap-3">
+                                    {h.orderSheetUrl && (
+                                      <button 
+                                        onClick={() => openOrDownloadFile(h.orderSheetUrl || '', `${h.caseNo || 'hearing'}_order_${h.date}`)}
+                                        className="text-[9px] font-black uppercase text-amber-500 hover:underline flex items-center gap-1 cursor-pointer bg-transparent border-none appearance-none"
+                                      >
+                                        <FileText className="w-3 h-3" /> View Sheet
+                                      </button>
+                                    )}
+                                    <button 
+                                      onClick={() => handleDeleteHearing(h)}
+                                      className="text-[9px] font-black uppercase text-red-500 hover:text-red-400 flex items-center gap-1 cursor-pointer bg-transparent border-none appearance-none hover:underline"
+                                      title="Delete Hearing Record"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                                    </button>
+                                  </div>
                                 </div>
                                 <p className="text-white/60 text-xs leading-relaxed">{h.proceedings}</p>
                               </div>
@@ -1119,6 +1359,66 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                         : (
                           <p className="text-xs text-white/30 italic">No previous hearing records compiled.</p>
                         )}
+                      </div>
+                    </div>
+
+                    {/* Case Secure Documents Vault */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 lg:p-8 space-y-6" id="admin-case-vault-section">
+                      <div className="flex items-center gap-2">
+                        <FileBox className="w-5 h-5 text-amber-500" />
+                        <h3 className="text-xs font-black text-white uppercase tracking-wider">Dynamic Case Documents Vault ({uploadedDocs.length})</h3>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6 items-start">
+                        {/* List of currently uploaded files */}
+                        <div className="space-y-3 font-sans">
+                          <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-500 mb-2">Vault Stored Records</h4>
+                          
+                          {uploadedDocs.length > 0 ? (
+                            <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                              {uploadedDocs.map((doc) => (
+                                <div 
+                                  key={doc.id}
+                                  className="flex items-center justify-between bg-black/40 px-4 py-3 rounded-xl border border-zinc-850 hover:border-amber-500/25 transition-all min-w-0"
+                                >
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-8 h-8 bg-zinc-800 text-amber-500 rounded-xl flex items-center justify-center shrink-0">
+                                      <FileText className="w-4 h-4" />
+                                    </div>
+                                    <div className="text-left min-w-0">
+                                      <span className="text-white font-bold text-xs block truncate max-w-[130px] sm:max-w-[180px]">{doc.fileName}</span>
+                                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Admin Archive</span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button 
+                                      onClick={() => openOrDownloadFile(doc.fileUrl, doc.fileName)}
+                                      className="text-[9px] font-black uppercase text-amber-500 font-extrabold hover:underline select-none bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 py-1.5 px-3 rounded-lg cursor-pointer transition-all"
+                                    >
+                                      View
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteDocument(doc.id, doc.fileUrl)}
+                                      className="text-[9px] font-black uppercase text-red-500 font-extrabold hover:bg-red-500/10 border border-red-500/20 py-1.5 px-2.5 rounded-lg cursor-pointer transition-all flex items-center justify-center"
+                                      title="Delete Document"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-white/30 italic bg-black/40 p-5 rounded-2xl border border-dashed border-zinc-850 text-center">
+                              No documents yet transmitted. Deliver files via the uploader widget.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Uploader section */}
+                        <div>
+                          {selectedCase.id && <DocumentUploader caseId={selectedCase.id} />}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1202,6 +1502,84 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
           <p>© {new Date().getFullYear()} JUS & LAY Administration. Strictly confidential access key protocols active.</p>
         </div>
       </footer>
+
+      {/* Custom Deletion Confirmation Modal with Double Warning */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-6 border-b border-zinc-900 flex items-center gap-3 bg-red-950/20">
+              <AlertTriangle className="w-6 h-6 text-red-500 animate-pulse" />
+              <h3 className="text-lg font-serif font-bold text-white uppercase tracking-wide">
+                {deleteConfirm.step === 1 ? '⚠️ Confirm Deletion' : '🛑 Critical Confirmation'}
+              </h3>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              {deleteConfirm.step === 1 ? (
+                <>
+                  <p className="text-zinc-300 text-sm leading-relaxed text-left">
+                    Are you sure you want to delete this <strong className="text-white capitalize">{deleteConfirm.type}</strong>? This action cannot be undone.
+                  </p>
+                  <p className="text-zinc-500 text-xs italic bg-zinc-900/50 p-3 rounded-lg border border-zinc-900 text-left">
+                    {deleteConfirm.type === 'case' && "All hearings and documents under this case file will remain in database but the master case file will be removed permanently."}
+                    {deleteConfirm.type === 'hearing' && "The selected hearing record and its associated proceedings data will be permanently removed."}
+                    {deleteConfirm.type === 'document' && "The document record and its underlying physical file in secure storage will be deleted."}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-red-400 font-bold text-sm leading-relaxed uppercase tracking-wider text-left">
+                    ⚠️ PLEASE CONFIRM ONCE MORE!
+                  </p>
+                  <p className="text-zinc-300 text-sm leading-relaxed text-left">
+                    You are about to permanently delete this {deleteConfirm.type}. There is NO recycle bin or undo option. Please click the button below only if you are absolutely certain.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 bg-zinc-900/40 border-t border-zinc-900 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              {deleteConfirm.step === 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirm(prev => prev ? { ...prev, step: 2 } : null)}
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  Proceed to Step 2
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const { type, id, secondaryId, data } = deleteConfirm;
+                    setDeleteConfirm(null);
+                    if (type === 'case') {
+                      await handleDeleteCase(id, secondaryId || '', true);
+                    } else if (type === 'document') {
+                      await handleDeleteDocument(id, secondaryId, true);
+                    } else if (type === 'hearing') {
+                      await handleDeleteHearing(data, true);
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow-lg shadow-red-900/20"
+                >
+                  Yes, Permanently Delete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

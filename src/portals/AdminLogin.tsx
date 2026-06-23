@@ -110,7 +110,20 @@ export default function AdminLogin({ setView }: AdminLoginProps) {
                 <div className="pt-2 border-t border-zinc-850">
                   <p className="text-[8px] text-white/30 mb-2 uppercase font-black text-center">Trouble signing in?</p>
                   <button 
-                    onClick={() => window.open(window.location.href, '_blank')}
+                    onClick={() => {
+                      try {
+                        window.open(window.location.href, '_blank');
+                      } catch (err) {
+                        console.warn("Failed to open tab:", err);
+                        // fallback
+                        const link = document.createElement('a');
+                        link.href = window.location.href;
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }
+                    }}
                     className="w-full text-[10px] text-amber-500 font-bold hover:underline cursor-pointer"
                   >
                     Open Admin Login in New Tab
