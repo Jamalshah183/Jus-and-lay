@@ -21,9 +21,21 @@ import CEOSection from "./components/CEOSection";
 import FirmProfile from "./components/FirmProfile";
 import LoadingScreen from "./components/LoadingScreen";
 
+// Import Portal Views and Auth
+import { AuthProvider } from "./hooks/useAuth";
+import AdminLogin from "./portals/AdminLogin";
+import AdminPortal from "./portals/AdminPortal";
+import ClientLogin from "./portals/ClientLogin";
+import ClientPortal from "./portals/ClientPortal";
+
 export default function App() {
+  const [currentView, setCurrentView] = useState<'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal'>('main');
   const [isLoading, setIsLoading] = useState(true);
   const [profileTab, setProfileTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]);
 
   useEffect(() => {
     const handleLoad = () => {
@@ -67,25 +79,28 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070e1b] text-white selection:bg-gold selection:text-navy selection:font-bold overflow-x-hidden font-sans">
-      
-      <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen key="loader" />}
-      </AnimatePresence>
+    <AuthProvider>
+      <div className="min-h-screen bg-[#070e1b] text-white selection:bg-gold selection:text-navy selection:font-bold overflow-x-hidden font-sans">
+        
+        {currentView === 'main' ? (
+          <>
+            <AnimatePresence mode="wait">
+              {isLoading && <LoadingScreen key="loader" />}
+            </AnimatePresence>
 
-      {/* 1. STICKY NAVBAR */}
-      <Navbar onServicesClick={() => setProfileTab("practices")} />
+            {/* 1. STICKY NAVBAR */}
+            <Navbar onServicesClick={() => setProfileTab("practices")} onViewChange={setCurrentView} />
 
-      {/* 2. HERO VIEW using the client's specified Introduction text */}
-      <ParallaxSection
-        id="home"
-        backgroundImage={IMAGES.heroBg}
-        mobileBackgroundImage="https://images.pexels.com/photos/7876151/pexels-photo-7876151.jpeg"
-        heightClass="min-h-screen lg:h-screen pt-28 pb-32 lg:py-16"
-        overlayOpacity="opacity-65"
-        overlayColor="bg-black"
-        showScrollIndicator={true}
-      >
+            {/* 2. HERO VIEW using the client's specified Introduction text */}
+            <ParallaxSection
+              id="home"
+              backgroundImage={IMAGES.heroBg}
+              mobileBackgroundImage="https://images.pexels.com/photos/7876151/pexels-photo-7876151.jpeg"
+              heightClass="min-h-screen lg:h-screen pt-28 pb-32 lg:py-16"
+              overlayOpacity="opacity-65"
+              overlayColor="bg-black"
+              showScrollIndicator={true}
+            >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full pt-16">
           <div className="lg:col-span-12 space-y-8 text-left max-w-4xl">
             <motion.div
@@ -545,6 +560,18 @@ export default function App() {
         </div>
       </footer>
 
-    </div>
+          </>
+        ) : currentView === 'admin-login' ? (
+          <AdminLogin setView={setCurrentView} />
+        ) : currentView === 'admin-portal' ? (
+          <AdminPortal setView={setCurrentView} />
+        ) : currentView === 'client-login' ? (
+          <ClientLogin setView={setCurrentView} />
+        ) : (
+          <ClientPortal setView={setCurrentView} />
+        )}
+
+      </div>
+    </AuthProvider>
   );
 }

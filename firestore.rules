@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 3. Primitive Definition
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    // bootstrapped admin
+    function isAdmin() { 
+      return isSignedIn() && (
+        request.auth.token.email == 'juslay3@gmail.com' ||
+        request.auth.token.email == 'Juslay3@gmail.com' ||
+        request.auth.token.email == 'jamalshah183@gmail.com' ||
+        request.auth.token.email == 'Jamalshah183@gmail.com'
+      ); 
+    }
+
+    // Validation Blueprints
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 100 &&
+             data.role in ['client', 'admin', 'lawyer'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidCase(data) {
+      return data.caseTitle is string && data.caseTitle.size() <= 256 &&
+             data.caseNo is string && data.caseNo.size() <= 100 &&
+             data.clientId is string &&
+             data.courtName is string;
+    }
+
+    // Rules for Collections
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin() || (isSignedIn() && request.auth.uid == userId && isValidUser(incoming()));
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == userId && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'password']));
+    }
+
+    match /cases/{caseId} {
+      allow read, list: if isAdmin() || (isSignedIn() && (resource.data.clientId == request.auth.uid || resource.data.clientId == request.auth.token.email));
+      allow write: if isAdmin();
+    }
+
+    match /lawyers/{lawyerId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /clients/{clientId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == clientId);
+      allow write: if isAdmin();
+    }
+
+    match /hearings/{hearingId} {
+      allow read: if isAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/cases/$(resource.data.caseId)) && get(/databases/$(database)/documents/cases/$(resource.data.caseId)).data.clientId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    match /caseUpdates/{updateId} {
+      allow read: if isAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/cases/$(resource.data.caseId)) && get(/databases/$(database)/documents/cases/$(resource.data.caseId)).data.clientId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    match /documents/{docId} {
+      allow read: if isAdmin() || (isSignedIn() && (resource.data.uploadedBy == request.auth.uid || (resource.data.caseId != null && get(/databases/$(database)/documents/cases/$(resource.data.caseId)).data.clientId == request.auth.uid)));
+      allow write: if isAdmin() || (isSignedIn() && resource.data.uploadedBy == request.auth.uid);
+    }
+
+    match /notifications/{noteId} {
+      allow read, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, delete: if isAdmin();
+    }
+
+    match /appointments/{appId} {
+      allow read: if isAdmin() || (isSignedIn() && (resource.data.clientId == request.auth.uid || resource.data.lawyerId == request.auth.uid));
+      allow create: if isSignedIn() && incoming().clientId == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() && (resource.data.clientId == request.auth.uid || resource.data.lawyerId == request.auth.uid));
+    }
+
+    match /admin/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /consultations/{consultationId} {
+      allow create: if true; // Public submission
+      allow read, write: if isAdmin();
+    }
+  }
+}

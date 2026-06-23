@@ -1,0 +1,1461 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, deleteUser, initializeAuth, inMemoryPersistence } from 'firebase/auth';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { db, auth, config as firebaseConfig, handleFirestoreError, OperationType, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { 
+  Users, Gavel, Plus, Search, LogOut, 
+  ChevronRight, Calendar, FileText, 
+  ShieldCheck, ArrowLeft, Loader2, Save,
+  ChevronLeft, LayoutGrid, CalendarDays,
+  Building2, ExternalLink, Clock, Eye, EyeOff,
+  Edit
+} from 'lucide-react';
+import { LEGAL_TEAM } from '../data';
+
+interface Hearing {
+  date: string;
+  nextHearingDate?: string;
+  proceedings: string;
+  orderSheetUrl?: string;
+  caseTitle?: string;
+  caseNo?: string;
+  purpose?: string;
+  judgeName?: string;
+  courtName?: string;
+  caseId?: string;
+}
+
+interface Case {
+  id?: string;
+  caseTitle: string;
+  caseNo: string;
+  srNo: string;
+  judgeName: string;
+  courtName: string;
+  counselName: string;
+  lastHearingDate: string;
+  nextHearingDate: string;
+  clientId: string;
+  clientPassword?: string;
+  proceedings: string;
+  orderSheetUrl?: string;
+  hearings: Hearing[];
+  status?: string;
+}
+
+interface UserProfile {
+  id: string;
+  email: string;
+  password?: string;
+  role: string;
+  createdAt?: { toDate: () => Date };
+}
+
+interface AdminPortalProps {
+  setView: (view: 'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal') => void;
+}
+
+export default function AdminPortal({ setView }: AdminPortalProps) {
+  const [cases, setCases] = useState<Case[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const getClientPassword = (clientId: string) => {
+    if (!clientId) return null;
+    const searchId = clientId.toLowerCase().trim();
+    
+    // First check dedicated users collection
+    const userDoc = users.find(u => u.email?.toLowerCase().trim() === searchId);
+    if (userDoc?.password) return userDoc.password;
+
+    // Fallback to searching all cases for any record that contains a password for this client ID
+    const caseWithPassword = cases.find(c => 
+      c.clientId?.toLowerCase().trim() === searchId && 
+      c.clientPassword && 
+      c.clientPassword.trim() !== ''
+    );
+    return caseWithPassword?.clientPassword || null;
+  };
+
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const today = new Date().toISOString().split('T')[0];
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDateHearings, setSelectedDateHearings] = useState<Hearing[]>([]);
+
+  const filteredCases = cases.filter(c => 
+    !c.caseTitle.includes('Sample Trial Case') && (
+      c.caseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.caseNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.clientId.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const [formData, setFormData] = useState({
+    caseTitle: '',
+    caseNo: '',
+    srNo: '',
+    judgeName: '',
+    courtName: '',
+    counselName: '',
+    lastHearingDate: '',
+    nextHearingDate: '',
+    clientId: '',
+    clientPassword: '',
+    proceedings: '',
+    orderSheetUrl: '',
+  });
+
+  const [isEditingCase, setIsEditingCase] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    caseTitle: '',
+    caseNo: '',
+    srNo: '',
+    judgeName: '',
+    courtName: '',
+    counselName: '',
+    lastHearingDate: '',
+    nextHearingDate: '',
+    clientId: '',
+    clientPassword: '',
+    proceedings: '',
+    orderSheetUrl: '',
+  });
+
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const selectedCase = cases.find(c => c.id === selectedCaseId) || null;
+
+  const startEditing = (c: Case) => {
+    setEditFormData({
+      caseTitle: c.caseTitle || '',
+      caseNo: c.caseNo || '',
+      srNo: c.srNo || '',
+      judgeName: c.judgeName || '',
+      courtName: c.courtName || '',
+      counselName: c.counselName || '',
+      lastHearingDate: c.lastHearingDate || '',
+      nextHearingDate: c.nextHearingDate || '',
+      clientId: c.clientId || '',
+      clientPassword: getClientPassword(c.clientId) || c.clientPassword || '',
+      proceedings: c.proceedings || '',
+      orderSheetUrl: c.orderSheetUrl || '',
+    });
+    setIsEditingCase(true);
+  };
+
+  const [newHearing, setNewHearing] = useState({
+    date: '',
+    nextHearingDate: '',
+    proceedings: '',
+    orderSheetUrl: '',
+    purpose: '',
+    judgeName: '',
+    courtName: ''
+  });
+
+  const [isUploading, setIsUploading] = useState(false);
+ 
+  // Helper for file upload to Firebase Storage
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) { 
+      alert("File is too large. Please upload files smaller than 10MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const storageRef = ref(storage, `cases/${Date.now()}_${file.name}`);
+      const metadata = {
+        contentType: file.type || 'application/octet-stream',
+      };
+      
+      console.log("Attempting upload to:", storageRef.fullPath, "with type:", metadata.contentType);
+      
+      const snapshot = await uploadBytes(storageRef, file, metadata);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      setter(downloadURL);
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      console.error("Storage upload error detailed:", error);
+      let errorMessage = "Failed to upload file.";
+      
+      const firebaseError = error as { code?: string; message?: string };
+      if (firebaseError.code === 'storage/unauthorized') {
+        errorMessage = "Permission denied. Please ensure you are logged in as an authorized admin.";
+      } else if (firebaseError.code === 'storage/canceled') {
+        errorMessage = "Upload was canceled.";
+      } else if (firebaseError.code === 'storage/unknown') {
+        errorMessage = "An unknown error occurred during upload. Check your connection.";
+      } else if (firebaseError.message) {
+        errorMessage = firebaseError.message;
+      }
+      
+      alert(`Storage Error: ${errorMessage}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const fetchUsers = React.useCallback(async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
+      const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  }, []);
+
+  const fetchCases = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const q = query(collection(db, 'cases'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const fetchedCases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Case));
+      setCases(fetchedCases);
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error fetching cases:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchUsers]);
+
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const seedDatabaseRecords = React.useCallback(async (isAuto: boolean = false) => {
+    if (!isAuto) setIsSeeding(true);
+    try {
+      const defaultCases = [
+        {
+          caseTitle: "State vs John Doe",
+          caseNo: "CR-2026-904",
+          srNo: "12",
+          judgeName: "Justice Wajid Ali",
+          courtName: "LHC Bench 4",
+          counselName: LEGAL_TEAM[0]?.name || "AMMAR YASIR NAQVI",
+          lastHearingDate: "2026-06-15",
+          nextHearingDate: "2026-07-10",
+          clientId: "client@test.com",
+          clientPassword: "password123",
+          proceedings: "Arguments completed. Adjourned for files submission.",
+          hearings: [
+            {
+              date: "2026-06-15",
+              nextHearingDate: "2026-07-10",
+              proceedings: "Counsel for accused argued on interim bail motion. Records subpoenaed from local authorities.",
+              purpose: "Interim Bail",
+              judgeName: "Justice Wajid Ali",
+              courtName: "LHC Bench 4"
+            }
+          ],
+          createdAt: serverTimestamp()
+        },
+        {
+          caseTitle: "Habib Bank Limited vs Malik Industries",
+          caseNo: "COS-2026-118",
+          srNo: "03",
+          judgeName: "Justice Ayesha A. Malik",
+          courtName: "LHC Commercial Court 1",
+          counselName: "AMMAR YASIR NAQVI",
+          lastHearingDate: "2026-06-10",
+          nextHearingDate: "2026-07-15",
+          clientId: "finance@malikindustries.com",
+          clientPassword: "malikindustries123",
+          proceedings: "Financial restructuring proposal filed. Opposing counsel requested time to review proposal.",
+          hearings: [
+            {
+              date: "2026-06-10",
+              nextHearingDate: "2026-07-15",
+              proceedings: "Amended structural resolution petition submitted under Banking Companies Ordinance.",
+              purpose: "Restructuring Petition",
+              judgeName: "Justice Ayesha A. Malik",
+              courtName: "LHC Commercial Court 1"
+            }
+          ],
+          createdAt: serverTimestamp()
+        },
+        {
+          caseTitle: "Syed Ghaus Shah vs Federal Land Commission",
+          caseNo: "W.P-2026-8802",
+          srNo: "24",
+          judgeName: "Justice Syed Mansoor Ali Shah",
+          courtName: "Supreme Court of Pakistan, Bench II",
+          counselName: "SYED TAQI UL HASSAN",
+          lastHearingDate: "2026-06-05",
+          nextHearingDate: "2026-08-01",
+          clientId: "ghaus.shah@gmail.com",
+          clientPassword: "ghausshah123",
+          proceedings: "Constitutional writ on land tenure rights. Formal rejoinder filed by Attorney General. Case adjourned.",
+          hearings: [
+            {
+              date: "2026-06-05",
+              nextHearingDate: "2026-08-01",
+              proceedings: "Arguments heard on jurisdiction. Rebuttals slated for next scheduled hearing.",
+              purpose: "Jurisdictional Argument",
+              judgeName: "Justice Syed Mansoor Ali Shah",
+              courtName: "Supreme Court of Pakistan, Bench II"
+            }
+          ],
+          createdAt: serverTimestamp()
+        },
+        {
+          caseTitle: "ZTBL vs Abid Hussain Awan Agriculture Ltd",
+          caseNo: "B.O-2026-4411",
+          srNo: "08",
+          judgeName: "Justice Muhammad Ameer Bhatti",
+          courtName: "LHC Lahore Appellate Bench",
+          counselName: "MALIK ABID HUSSAIN AWAN",
+          lastHearingDate: "2026-06-18",
+          nextHearingDate: "2026-07-22",
+          clientId: "abid.awan@jusandlay.com",
+          clientPassword: "awanpassword123",
+          proceedings: "Agricultural loan collateral recovery defense. Secured dynamic stay order on execution proceedings.",
+          hearings: [
+            {
+              date: "2026-06-18",
+              nextHearingDate: "2026-07-22",
+              proceedings: "Stay order granted pending adjudication of final audit statement.",
+              purpose: "Stay Order Motion",
+              judgeName: "Justice Muhammad Ameer Bhatti",
+              courtName: "LHC Lahore Appellate Bench"
+            }
+          ],
+          createdAt: serverTimestamp()
+        }
+      ];
+
+      for (const c of defaultCases) {
+        await addDoc(collection(db, 'cases'), c);
+      }
+
+      const usersToCreate = [
+        { email: 'client@test.com', password: 'password123' },
+        { email: 'finance@malikindustries.com', password: 'malikindustries123' },
+        { email: 'ghaus.shah@gmail.com', password: 'ghausshah123' },
+        { email: 'abid.awan@jusandlay.com', password: 'awanpassword123' }
+      ];
+
+      const secondaryApp = initializeApp(firebaseConfig, `Bootstrap_${Date.now()}`);
+      const secondaryAuth = initializeAuth(secondaryApp, {
+        persistence: inMemoryPersistence
+      });
+
+      for (const userEntry of usersToCreate) {
+        try {
+          const uc = await createUserWithEmailAndPassword(secondaryAuth, userEntry.email, userEntry.password);
+          const uRef = doc(db, 'users', uc.user.uid);
+          await setDoc(uRef, {
+            email: userEntry.email,
+            password: userEntry.password,
+            role: 'client',
+            createdAt: serverTimestamp()
+          });
+        } catch (ec: any) {
+          if (ec.code !== 'auth/email-already-in-use') {
+            console.warn(`User error for ${userEntry.email}:`, ec);
+          }
+        }
+      }
+
+      await deleteApp(secondaryApp);
+      if (!isAuto) {
+        alert('Premium Legal Workspace Cases and corresponding Client Accounts successfully seeded in Firebase Firestore!');
+      }
+      fetchCases();
+    } catch (err: any) {
+      console.error('Seeding failed:', err);
+      if (!isAuto) {
+        alert(`Seeding failed: ${err.message || err}`);
+      }
+    } finally {
+      if (!isAuto) setIsSeeding(false);
+    }
+  }, [fetchCases]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      if (u) {
+        const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com'];
+        const userEmail = u.email?.toLowerCase();
+        
+        if (userEmail && admins.includes(userEmail) && u.providerData.some(p => p.providerId === 'google.com')) {
+          fetchCases();
+          
+          // Auto-bootstrap check for empty databases
+          const checkAndBootstrap = async () => {
+             try {
+              const snap = await getDocs(collection(db, 'cases'));
+              if (snap.empty) {
+                console.log('Database empty, auto-bootstrapping default items...');
+                await seedDatabaseRecords(true);
+              }
+            } catch (err: unknown) {
+              console.error('Auto-bootstrap failed:', err);
+            }
+          };
+          checkAndBootstrap();
+
+        } else {
+          auth.signOut();
+          localStorage.removeItem('session_start_time');
+          localStorage.removeItem('last_activity_time');
+          setView('admin-login');
+        }
+      } else {
+        setView('admin-login');
+      }
+    });
+    return () => unsubscribe();
+  }, [setView, fetchCases]);
+
+  const handleDeleteCase = async (caseId: string, clientId: string) => {
+    if (!confirm('Are you sure you want to delete this case? This action cannot be undone.')) return;
+    
+    setIsSaving(true);
+    try {
+      const otherCases = cases.filter(c => c.id !== caseId && c.clientId.toLowerCase() === clientId.toLowerCase());
+      
+      if (otherCases.length === 0) {
+        const userProfile = users.find(u => u.email.toLowerCase() === clientId.toLowerCase());
+        
+        if (userProfile && userProfile.password) {
+           let secondaryApp;
+           try {
+             secondaryApp = initializeApp(firebaseConfig, `DeleteUser_${Date.now()}`);
+             const secondaryAuth = initializeAuth(secondaryApp, {
+               persistence: inMemoryPersistence
+             });
+             const userCred = await signInWithEmailAndPassword(secondaryAuth, userProfile.email, userProfile.password);
+             await deleteUser(userCred.user);
+             
+             const { deleteDoc: delDoc, doc: fireDoc } = await import('firebase/firestore');
+             await delDoc(fireDoc(db, 'users', userProfile.id));
+             
+             console.log("Cleaned up user account for client:", clientId);
+           } catch (deleteError) {
+             console.warn("User account cleanup warning:", deleteError);
+           } finally {
+             if (secondaryApp) await deleteApp(secondaryApp);
+           }
+        }
+      }
+      
+      const { deleteDoc: delDoc, doc: fireDoc } = await import('firebase/firestore');
+      if (caseId) {
+        await delDoc(fireDoc(db, 'cases', caseId));
+      }
+      
+      fetchCases();
+      alert("Case record deleted.");
+      if (selectedCaseId === caseId) setSelectedCaseId(null);
+    } catch (error) {
+      console.error("Error deleting case:", error);
+      alert("Failed to delete the case record.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAddHearing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCase?.id) return;
+    
+    setIsSaving(true);
+    try {
+      const caseRef = doc(db, 'cases', selectedCase.id);
+      const hearingWithContext = {
+        ...newHearing,
+        judgeName: newHearing.judgeName || selectedCase.judgeName,
+        courtName: newHearing.courtName || selectedCase.courtName
+      };
+      const updatedHearings = [...(selectedCase.hearings || []), hearingWithContext];
+      
+      await updateDoc(caseRef, {
+        hearings: updatedHearings,
+        lastHearingDate: newHearing.date,
+        nextHearingDate: newHearing.nextHearingDate,
+        updatedAt: serverTimestamp()
+      });
+      
+      setNewHearing({ date: '', nextHearingDate: '', proceedings: '', orderSheetUrl: '', purpose: '', judgeName: '', courtName: '' });
+      fetchCases();
+      alert("Hearing committed to official record.");
+    } catch (error) {
+      console.error("Error adding hearing:", error);
+      alert("Failed to update hearing record.");
+      handleFirestoreError(error, OperationType.UPDATE, `cases/${selectedCase.id}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateCase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCase?.id) return;
+    
+    setIsSaving(true);
+    const userDocExists = users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase());
+    
+    try {
+      if (editFormData.clientPassword && editFormData.clientId.includes('@')) {
+        let secondaryApp;
+        try {
+          secondaryApp = initializeApp(firebaseConfig, `AuthSyncUpdate_${Date.now()}`);
+          const secondaryAuth = initializeAuth(secondaryApp, {
+            persistence: inMemoryPersistence
+          });
+          
+          let userId = '';
+          try {
+            const userCred = await createUserWithEmailAndPassword(secondaryAuth, editFormData.clientId, editFormData.clientPassword);
+            userId = userCred.user.uid;
+          } catch (authError: unknown) {
+            const errorCode = (authError as { code?: string })?.code;
+            if (errorCode === 'auth/email-already-in-use') {
+              try {
+                const userCred = await signInWithEmailAndPassword(secondaryAuth, editFormData.clientId, editFormData.clientPassword);
+                userId = userCred.user.uid;
+              } catch (loginError) {
+                console.warn("Could not retrieve UID during update:", loginError);
+              }
+            } else if (errorCode === 'auth/weak-password') {
+              alert("Password too weak (6 chars min).");
+              throw authError;
+            } else {
+              throw authError;
+            }
+          }
+          
+          if (userId) {
+            const userRef = doc(db, 'users', userId);
+            const userPayload: Record<string, any> = {
+              email: editFormData.clientId || '',
+              password: editFormData.clientPassword || '',
+              role: 'client',
+              updatedAt: serverTimestamp()
+            };
+            if (!userDocExists) {
+              userPayload.createdAt = serverTimestamp();
+            }
+            await setDoc(userRef, userPayload, { merge: true });
+          }
+          
+          const { signOut: sOut } = await import('firebase/auth');
+          await sOut(secondaryAuth);
+        } catch (authError: unknown) {
+          console.warn("Auth sync error during update:", authError);
+        } finally {
+          if (secondaryApp) {
+            await deleteApp(secondaryApp);
+          }
+        }
+      }
+      
+      const caseRef = doc(db, 'cases', selectedCase.id);
+      const caseDataToUpdate: Record<string, any> = {
+        caseTitle: editFormData.caseTitle || '',
+        caseNo: editFormData.caseNo || '',
+        srNo: editFormData.srNo || '',
+        judgeName: editFormData.judgeName || '',
+        courtName: editFormData.courtName || '',
+        counselName: editFormData.counselName || '',
+        lastHearingDate: editFormData.lastHearingDate || '',
+        nextHearingDate: editFormData.nextHearingDate || '',
+        clientId: editFormData.clientId || '',
+        proceedings: editFormData.proceedings || '',
+        updatedAt: serverTimestamp()
+      };
+      
+      if (editFormData.clientPassword) {
+        caseDataToUpdate.clientPassword = editFormData.clientPassword;
+      }
+      if (editFormData.orderSheetUrl) {
+        caseDataToUpdate.orderSheetUrl = editFormData.orderSheetUrl;
+      }
+      
+      await updateDoc(caseRef, caseDataToUpdate);
+      setIsEditingCase(false);
+      fetchCases();
+      alert("Case record successfully updated!");
+    } catch (error) {
+      console.error("Error updating case:", error);
+      alert("Failed to update case record: " + (error instanceof Error ? error.message : String(error)));
+      handleFirestoreError(error, OperationType.UPDATE, `cases/${selectedCase.id}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    const userDocExists = users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase());
+
+    try {
+      if (formData.clientPassword && formData.clientId.includes('@')) {
+        let secondaryApp;
+        try {
+          secondaryApp = initializeApp(firebaseConfig, `AuthSync_${Date.now()}`);
+          const secondaryAuth = initializeAuth(secondaryApp, {
+            persistence: inMemoryPersistence
+          });
+          
+          let userId = '';
+          try {
+            const userCred = await createUserWithEmailAndPassword(secondaryAuth, formData.clientId, formData.clientPassword);
+            userId = userCred.user.uid;
+          } catch (authError: unknown) {
+            const errorCode = (authError as { code?: string })?.code;
+            if (errorCode === 'auth/email-already-in-use') {
+              try {
+                const userCred = await signInWithEmailAndPassword(secondaryAuth, formData.clientId, formData.clientPassword);
+                userId = userCred.user.uid;
+              } catch (loginError) {
+                console.warn("Could not retrieve UID:", loginError);
+              }
+            } else if (errorCode === 'auth/weak-password') {
+              alert("Password too weak (6 chars min).");
+              throw authError;
+            } else {
+              throw authError;
+            }
+          }
+          
+          if (userId) {
+            const userRef = doc(db, 'users', userId);
+            const userPayload: Record<string, any> = {
+              email: formData.clientId || '',
+              password: formData.clientPassword || '',
+              role: 'client',
+              updatedAt: serverTimestamp()
+            };
+            if (!userDocExists) {
+              userPayload.createdAt = serverTimestamp();
+            }
+            await setDoc(userRef, userPayload, { merge: true });
+          }
+
+          const { signOut: sOut } = await import('firebase/auth');
+          await sOut(secondaryAuth);
+        } catch (authError: unknown) {
+          console.warn("Auth sync error:", authError);
+        } finally {
+          if (secondaryApp) {
+            await deleteApp(secondaryApp);
+          }
+        }
+      }
+
+      const caseDataToInsert: Record<string, any> = {
+        caseTitle: formData.caseTitle || '',
+        caseNo: formData.caseNo || '',
+        srNo: formData.srNo || '',
+        judgeName: formData.judgeName || '',
+        courtName: formData.courtName || '',
+        counselName: formData.counselName || '',
+        lastHearingDate: formData.lastHearingDate || '',
+        nextHearingDate: formData.nextHearingDate || '',
+        clientId: formData.clientId || '',
+        proceedings: formData.proceedings || '',
+      };
+
+      if (formData.clientPassword) {
+        caseDataToInsert.clientPassword = formData.clientPassword;
+      }
+      if (formData.orderSheetUrl) {
+        caseDataToInsert.orderSheetUrl = formData.orderSheetUrl;
+      }
+
+      await addDoc(collection(db, 'cases'), {
+        ...caseDataToInsert,
+        hearings: [],
+        createdAt: serverTimestamp()
+      });
+      setIsAdding(false);
+      setFormData({
+        caseTitle: '',
+        caseNo: '',
+        srNo: '',
+        judgeName: '',
+        courtName: '',
+        counselName: '',
+        lastHearingDate: '',
+        nextHearingDate: '',
+        clientId: '',
+        clientPassword: '',
+        proceedings: '',
+        orderSheetUrl: '',
+      });
+      fetchCases();
+      alert("Case record successfully created!");
+    } catch (error) {
+      console.error("Error adding case:", error);
+      alert("Failed to create new case record: " + (error instanceof Error ? error.message : String(error)));
+      handleFirestoreError(error, OperationType.CREATE, 'cases');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    auth.signOut();
+    localStorage.removeItem('session_start_time');
+    setView('main');
+  };
+
+  const getCounselImage = (name: string) => {
+    const member = LEGAL_TEAM.find(t => t.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(t.name.toLowerCase()));
+    return member?.image || "https://images.pexels.com/photos/37339382/pexels-photo-37339382.png";
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col justify-between font-sans selection:bg-gold-500 selection:text-black">
+      {/* Mini Portal Header */}
+      <header className="border-b border-zinc-900 bg-[#040811] py-4 px-6 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <button onClick={() => setView('main')} className="flex items-center gap-2 text-gold-500 hover:text-white transition-colors cursor-pointer">
+            <Gavel className="w-5 h-5" />
+            <span className="font-serif font-bold text-lg text-white">Jus & Lay Admin Control</span>
+          </button>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-white/40 hidden sm:inline">{auth.currentUser?.email}</span>
+            <button 
+              onClick={() => setView('main')}
+              className="text-white/60 hover:text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              ← Return to Website
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Admin Control Header */}
+      <div className="bg-zinc-900 text-white py-10 px-4 shadow-xl border-b border-amber-500/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-left">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <ShieldCheck className="w-7 h-7 text-black" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-serif font-bold tracking-tight text-white m-0">Admin Workspace</h1>
+              <div className="flex items-center gap-4 mt-1 flex-wrap">
+                <p className="text-zinc-400 text-xs font-medium">Record Entry, File Vault, and Calendar.</p>
+                <div className="flex items-center gap-2 bg-zinc-800 px-3 py-1 rounded-full border border-amber-500/20">
+                  <span className="text-[10px] font-black uppercase text-amber-500 tracking-widest">Active Cases:</span>
+                  <span className="text-xs font-black text-white">{cases.length}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button 
+              onClick={handleSignOut}
+              className="px-4 py-2.5 bg-zinc-850 hover:bg-zinc-800 border border-zinc-805 text-white/80 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Exit Workspace
+            </button>
+            <button 
+              onClick={() => { setIsAdding(true); setSelectedCaseId(null); }}
+              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl text-xs font-extrabold hover:scale-[1.02] transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Log Record
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar controls */}
+          <div className="lg:col-span-1 space-y-6 text-left">
+            <div className="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-sm">
+              <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">View Toggle</h3>
+              <div className="grid grid-cols-2 gap-2 bg-black p-1.5 rounded-2xl">
+                <button 
+                  onClick={() => { setViewMode('list'); setSelectedCaseId(null); setIsAdding(false); }}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'list' ? 'bg-zinc-800 text-amber-500 shadow-sm' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" /> LIST
+                </button>
+                <button 
+                  onClick={() => { setViewMode('calendar'); setSelectedCaseId(null); setIsAdding(false); }}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'calendar' ? 'bg-zinc-800 text-amber-500 shadow-sm' : 'text-zinc-500 hover:text-white'}`}
+                >
+                  <CalendarDays className="w-3.5 h-3.5" /> CALENDAR
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-sm select-none">
+              <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-4">System Telemetry</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500">
+                      <Gavel className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-zinc-400">Cases</span>
+                  </div>
+                  <span className="text-sm font-black text-white">{cases.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-zinc-400">Authenticated Users</span>
+                  </div>
+                  <span className="text-sm font-black text-white">
+                    {new Set(cases.map(c => c.clientId)).size}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-sm select-none text-left">
+              <h3 className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-3">Database Utilities</h3>
+              <p className="text-zinc-400 text-xs mb-4 leading-relaxed">
+                Add pristine mock cases with real active hearings & corresponding client logins for testing.
+              </p>
+              <button
+                disabled={isSeeding || isLoading}
+                onClick={() => seedDatabaseRecords(false)}
+                className="w-full py-3 bg-zinc-850 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-zinc-800 disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+              >
+                {isSeeding ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                    Seeding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5 text-amber-500" />
+                    Seed Premium Cases
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Main Workspace Frame */}
+          <div className="lg:col-span-3">
+            <AnimatePresence mode="wait">
+              {isAdding ? (
+                <motion.div 
+                  key="add-case"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-zinc-900 rounded-3xl border border-zinc-850 p-6 lg:p-10 text-left"
+                >
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-5 mb-8">
+                    <div className="flex items-center gap-3">
+                      <Gavel className="w-6 h-6 text-amber-500" />
+                      <h2 className="text-xl font-serif font-bold text-white uppercase">Initialize New Case File</h2>
+                    </div>
+                    <button 
+                      onClick={() => setIsAdding(false)} 
+                      className="text-xs font-bold text-white/50 hover:text-white"
+                    >
+                      Cancel Entry
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-8 font-sans">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Title / Parties Name</label>
+                        <input required type="text" placeholder="e.g. State vs. Malik" value={formData.caseTitle} onChange={(e) => setFormData({...formData, caseTitle: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case File Number</label>
+                        <input required type="text" placeholder="e.g. CIV-2026-0041" value={formData.caseNo} onChange={(e) => setFormData({...formData, caseNo: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Serial Number</label>
+                        <input type="text" placeholder="e.g. 15" value={formData.srNo} onChange={(e) => setFormData({...formData, srNo: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Presiding Judge</label>
+                        <input required type="text" placeholder="e.g. Justice Syed Ali" value={formData.judgeName} onChange={(e) => setFormData({...formData, judgeName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Court Venue / Jurisdiction</label>
+                        <input required type="text" placeholder="e.g. Sessions Court, Lahore" value={formData.courtName} onChange={(e) => setFormData({...formData, courtName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Lead Counsel in Charge</label>
+                        <select required value={formData.counselName} onChange={(e) => setFormData({...formData, counselName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3.5 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]">
+                          <option value="">Select Counsel</option>
+                          {LEGAL_TEAM.map(l => (
+                            <option key={l.id} value={l.name}>{l.name} ({l.role})</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6 border-t border-zinc-850 pt-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Initial / Last Hearing Date</label>
+                        <input required type="date" value={formData.lastHearingDate} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setFormData({...formData, lastHearingDate: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 text-amber-500 font-bold">Upcoming Hearing Date</label>
+                        <input required type="date" value={formData.nextHearingDate} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setFormData({...formData, nextHearingDate: e.target.value})} className="w-full bg-black border border-amber-500/20 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]" />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6 border-t border-zinc-850 pt-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 font-bold text-amber-500">Client Login Email (Drives Access)</label>
+                        <input required type="email" placeholder="client@test.com" value={formData.clientId} onChange={(e) => setFormData({...formData, clientId: e.target.value})} className="w-full bg-black border border-amber-500/20 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Assign Portal Password (6 Chars Min)</label>
+                        <input required type="text" placeholder="password123" value={formData.clientPassword} onChange={(e) => setFormData({...formData, clientPassword: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        <span className="text-[9px] text-white/30 block ml-1 font-bold">Client will use this key and email to read case files.</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 border-t border-zinc-850 pt-6">
+                      <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Order Sheet Attachment (PDF or Image)</label>
+                      <input type="file" accept="image/*,application/pdf" id="main-case-upload" onChange={(e) => handleFileUpload(e, (url) => setFormData({...formData, orderSheetUrl: url}))} className="hidden" />
+                      <label htmlFor="main-case-upload" className={`w-full flex items-center justify-between bg-black border border-zinc-850 rounded-xl px-4 py-3 text-sm cursor-pointer hover:border-amber-500/30 transition-all ${formData.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
+                        <span className="flex items-center gap-2 text-zinc-400">
+                          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                          {formData.orderSheetUrl ? 'File Staged successfully' : 'Drag or Upload Document'}
+                        </span>
+                        {formData.orderSheetUrl && <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded uppercase">Stored</span>}
+                      </label>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Current State / Latest Proceedings Overview</label>
+                      <textarea required rows={4} placeholder="Summarize what went down on the last court hearing..." value={formData.proceedings} onChange={(e) => setFormData({...formData, proceedings: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-2xl px-4 py-4 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none resize-none text-white" />
+                    </div>
+
+                    <div className="flex gap-4 justify-end">
+                      <button type="button" onClick={() => setIsAdding(false)} className="px-6 py-3.5 bg-zinc-850 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-all cursor-pointer">Discard</button>
+                      <button type="submit" disabled={isSaving || isUploading} className="px-8 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl text-xs font-black hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer">
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {isUploading ? 'Uploading file...' : 'Build Official Dossier'}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              ) : viewMode === 'calendar' && !selectedCase ? (
+                <motion.div 
+                  key="calendar-frame"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-zinc-900 rounded-[2rem] border border-zinc-800 overflow-hidden shadow-xl"
+                >
+                  <CalendarSection 
+                    cases={cases} 
+                    currentMonth={currentMonth} 
+                    setCurrentMonth={setCurrentMonth}
+                    onDateClick={(hs) => setSelectedDateHearings(hs)}
+                  />
+
+                  {selectedDateHearings.length > 0 && (
+                    <div className="p-8 bg-zinc-800/40 border-t border-amber-500/25">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest flex items-center gap-3">
+                          <Gavel className="w-4 h-4" /> Schedule Logs for {selectedDateHearings[0].date}
+                        </h3>
+                        <button onClick={() => setSelectedDateHearings([])} className="text-xs font-bold text-zinc-500 hover:text-white cursor-pointer">Close</button>
+                      </div>
+                      <div className="grid gap-4">
+                        {selectedDateHearings.map((h, i) => (
+                          <div 
+                            key={i}
+                            onClick={() => { if(h.caseId) { setSelectedCaseId(h.caseId); setSelectedDateHearings([]); setShowPassword(false); } }}
+                            className="bg-black p-5 rounded-2xl border border-zinc-850 flex justify-between items-center hover:border-amber-500/30 transition-all cursor-pointer group text-left"
+                          >
+                            <div className="min-w-0">
+                              <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">{h.caseNo}</span>
+                              <h4 className="text-sm font-bold text-white uppercase mt-0.5 group-hover:text-amber-500 transition-colors truncate">{h.caseTitle}</h4>
+                              <p className="text-xs text-white/50 italic mt-2 line-clamp-1">&quot;{h.proceedings}&quot;</p>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-zinc-650 group-hover:text-amber-500 shrink-0 transition-all translate-x-0 group-hover:translate-x-1" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ) : selectedCase ? (
+                isEditingCase ? (
+                  <motion.div 
+                    key="case-edit-form"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="bg-zinc-900 rounded-[2.5rem] border border-zinc-800 shadow-xl p-6 lg:p-10 text-left animate-in duration-200"
+                  >
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-5 mb-8">
+                      <div className="flex items-center gap-3">
+                        <Gavel className="w-6 h-6 text-amber-500" />
+                        <h2 className="text-xl font-serif font-bold text-white uppercase">Edit Case File Details</h2>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setIsEditingCase(false)} 
+                        className="text-xs font-bold text-white/50 hover:text-white"
+                      >
+                        Cancel Edit
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleUpdateCase} className="space-y-8 font-sans">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Title / Parties Name</label>
+                          <input required type="text" placeholder="e.g. State vs. Malik" value={editFormData.caseTitle} onChange={(e) => setEditFormData({...editFormData, caseTitle: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case File Number</label>
+                          <input required type="text" placeholder="e.g. CIV-2026-0041" value={editFormData.caseNo} onChange={(e) => setEditFormData({...editFormData, caseNo: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Serial Number</label>
+                          <input type="text" placeholder="e.g. 15" value={editFormData.srNo} onChange={(e) => setEditFormData({...editFormData, srNo: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Presiding Judge</label>
+                          <input required type="text" placeholder="e.g. Justice Syed Ali" value={editFormData.judgeName} onChange={(e) => setEditFormData({...editFormData, judgeName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Court Venue / Jurisdiction</label>
+                          <input required type="text" placeholder="e.g. Sessions Court, Lahore" value={editFormData.courtName} onChange={(e) => setEditFormData({...editFormData, courtName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Lead Counsel in Charge</label>
+                          <select required value={editFormData.counselName} onChange={(e) => setEditFormData({...editFormData, counselName: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3.5 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]">
+                            <option value="">Select Counsel</option>
+                            {LEGAL_TEAM.map(l => (
+                              <option key={l.id} value={l.name}>{l.name} ({l.role})</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6 border-t border-zinc-850 pt-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Last Hearing Date</label>
+                          <input required type="date" value={editFormData.lastHearingDate} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setEditFormData({...editFormData, lastHearingDate: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 text-amber-500 font-bold">Upcoming Hearing Date</label>
+                          <input required type="date" value={editFormData.nextHearingDate} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setEditFormData({...editFormData, nextHearingDate: e.target.value})} className="w-full bg-black border border-amber-500/20 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white [color-scheme:dark]" />
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6 border-t border-zinc-850 pt-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1 font-bold text-amber-500">Client Login Email (Drives Access)</label>
+                          <input required type="email" placeholder="client@test.com" value={editFormData.clientId} onChange={(e) => setEditFormData({...editFormData, clientId: e.target.value})} className="w-full bg-black border border-amber-500/20 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Update Portal Password (6 Chars Min)</label>
+                          <input required type="text" placeholder="password123" value={editFormData.clientPassword} onChange={(e) => setEditFormData({...editFormData, clientPassword: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none text-white" />
+                          <span className="text-[9px] text-white/30 block ml-1 font-bold">Overwrites or creates the client's auth profile.</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 border-t border-zinc-850 pt-6">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Case Order Sheet Attachment (PDF or Image)</label>
+                        <input type="file" accept="image/*,application/pdf" id="edit-case-upload" onChange={(e) => handleFileUpload(e, (url) => setEditFormData({...editFormData, orderSheetUrl: url}))} className="hidden" />
+                        <label htmlFor="edit-case-upload" className={`w-full flex items-center justify-between bg-black border border-zinc-850 rounded-xl px-4 py-3 text-sm cursor-pointer hover:border-amber-500/30 transition-all ${editFormData.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
+                          <span className="flex items-center gap-2 text-zinc-400">
+                            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                            {editFormData.orderSheetUrl ? 'File Staged successfully' : 'Drag or Upload Document'}
+                          </span>
+                          {editFormData.orderSheetUrl && <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded uppercase">Stored</span>}
+                        </label>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">Current State / Latest Proceedings Overview</label>
+                        <textarea required rows={4} placeholder="Summarize what went down on the last court hearing..." value={editFormData.proceedings} onChange={(e) => setEditFormData({...editFormData, proceedings: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-2xl px-4 py-4 text-sm focus:ring-4 focus:ring-amber-500/5 outline-none resize-none text-white" />
+                      </div>
+
+                      <div className="flex gap-4 justify-end">
+                        <button type="button" onClick={() => setIsEditingCase(false)} className="px-6 py-3.5 bg-zinc-850 text-white rounded-xl text-xs font-bold hover:bg-zinc-800 transition-all cursor-pointer">Discard</button>
+                        <button type="submit" disabled={isSaving || isUploading} className="px-8 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl text-xs font-black hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer">
+                          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          {isUploading ? 'Uploading file...' : 'Save File Updates'}
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="case-detail"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="bg-zinc-900 rounded-[2.5rem] border border-zinc-800 shadow-xl overflow-hidden text-left animate-in duration-200"
+                  >
+                    {/* Detailed Panel View */}
+                    <div className="p-6 lg:p-10 bg-zinc-800/30 border-b border-zinc-850">
+                      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-3">
+                            <span className="px-3 py-1 bg-amber-500 text-black text-[8px] font-black uppercase rounded-full tracking-widest">Active File</span>
+                            <span className="text-xs font-mono font-black text-amber-500 break-all bg-amber-500/5 px-2.5 py-1 rounded border border-amber-500/20">{selectedCase.caseNo}</span>
+                          </div>
+                          <h2 className="text-xl lg:text-2xl font-serif font-bold text-white uppercase leading-tight truncate max-w-sm md:max-w-md lg:max-w-lg">{selectedCase.caseTitle}</h2>
+                          
+                          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-4 text-xs font-bold text-white/50">
+                            <p className="flex items-center gap-2 shrink-0"><Users className="w-4 h-4 text-amber-500" /> Owner ID: <span className="text-amber-500 font-bold">{selectedCase.clientId}</span></p>
+                            <div className="flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-zinc-800">
+                              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Key:</span>
+                              <span className="text-[11px] font-mono text-white/80">{getClientPassword(selectedCase.clientId) ? (showPassword ? getClientPassword(selectedCase.clientId) : '••••••••') : 'Not Set'}</span>
+                              <button onClick={() => setShowPassword(!showPassword)} className="text-amber-500 p-0.5 hover:text-white transition-all cursor-pointer">
+                                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button onClick={() => startEditing(selectedCase)} className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black text-xs rounded-xl transition-all cursor-pointer hover:opacity-90 active:scale-95">
+                            <Edit className="w-3.5 h-3.5" /> Edit Case
+                          </button>
+                          <button onClick={() => { setSelectedCaseId(null); setIsEditingCase(false); }} className="flex items-center gap-1.5 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 font-bold text-xs rounded-xl border border-zinc-700 transition-colors cursor-pointer">
+                            <ChevronLeft className="w-4 h-4" /> Back to List
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-8">
+                        <div className="bg-black/50 p-4 rounded-xl border border-zinc-850">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Sr. Number</p>
+                          <p className="text-sm font-bold text-white mt-0.5">{selectedCase.srNo || 'N/A'}</p>
+                        </div>
+                        <div className="bg-black/50 p-4 rounded-xl border border-zinc-850">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Last Hearing</p>
+                          <p className="text-sm font-bold text-white mt-0.5">{selectedCase.lastHearingDate}</p>
+                        </div>
+                        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 p-4 rounded-xl shadow-lg shadow-amber-500/5 text-black">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-black/50">Next Hearing</p>
+                          <p className="text-sm font-black mt-0.5">{selectedCase.nextHearingDate}</p>
+                        </div>
+                        <div className="bg-black/50 p-4 rounded-xl border border-zinc-850">
+                          <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Chronicle entries</p>
+                          <p className="text-sm font-black text-amber-500 mt-0.5">{selectedCase.hearings?.length || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                  <div className="p-6 lg:p-10 space-y-12">
+                    {/* Add hearing list for specific file */}
+                    <div className="bg-zinc-800/40 p-5 lg:p-8 rounded-[2rem] border border-dashed border-zinc-700">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-6 flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Add Chronology record Log
+                      </h4>
+
+                      <form onSubmit={handleAddHearing} className="grid md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-zinc-500">Hearing Date</label>
+                          <input required type="date" max={today} value={newHearing.date} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setNewHearing({...newHearing, date: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white [color-scheme:dark]" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-amber-500 font-bold">Next Date Draft</label>
+                          <input required type="date" min={today} value={newHearing.nextHearingDate} onClick={(e) => (e.target as any).showPicker?.()} onChange={(e) => setNewHearing({...newHearing, nextHearingDate: e.target.value})} className="w-full bg-black border border-amber-500/20 rounded-xl px-3 py-2.5 text-xs text-white [color-scheme:dark]" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-zinc-500">Purpose tag</label>
+                          <input type="text" placeholder="e.g. Evidence" value={newHearing.purpose} onChange={(e) => setNewHearing({...newHearing, purpose: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-zinc-500">Upload Order Sheet (PDF/JPG)</label>
+                          <input type="file" accept="image/*,application/pdf" id="hearing-file-spec" onChange={(e) => handleFileUpload(e, (url) => setNewHearing({...newHearing, orderSheetUrl: url}))} className="hidden" />
+                          <label htmlFor="hearing-file-spec" className={`w-full flex items-center justify-between bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-xs cursor-pointer hover:border-amber-500/30 transition-all ${newHearing.orderSheetUrl ? 'border-amber-500/50 bg-amber-500/5' : ''}`}>
+                            <span className="truncate text-zinc-400">
+                             {isUploading ? 'Uploading...' : newHearing.orderSheetUrl ? 'Sheet uploaded' : 'Select order attachment'}
+                            </span>
+                          </label>
+                        </div>
+                        <div className="space-y-1 md:col-span-2">
+                          <label className="text-[9px] font-black uppercase text-zinc-500">Hearing Transcript Summary</label>
+                          <input required type="text" placeholder="Record brief notes on today's court arguments..." value={newHearing.proceedings} onChange={(e) => setNewHearing({...newHearing, proceedings: e.target.value})} className="w-full bg-black border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white" />
+                        </div>
+                        <div className="md:col-span-3 flex justify-end">
+                           <button type="submit" disabled={isSaving || isUploading} className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-black rounded-lg hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1 cursor-pointer">
+                              <Save className="w-3.5 h-3.5" /> Commit Entry
+                           </button>
+                        </div>
+                      </form>
+                    </div>
+
+                    {/* Metadata Overviews */}
+                    <div className="grid md:grid-cols-2 gap-8 border-b border-zinc-850 pb-8">
+                      <div className="space-y-4">
+                         <div className="flex gap-3">
+                           <div className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-amber-500 shrink-0">
+                             <Building2 className="w-5 h-5" />
+                           </div>
+                           <div>
+                             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Presiding officer & Court</p>
+                             <p className="text-xs font-bold text-white uppercase">{selectedCase.judgeName}</p>
+                             <span className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest block mt-0.5">{selectedCase.courtName}</span>
+                           </div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-4 bg-black/40 rounded-xl border border-zinc-850">
+                           <img src={getCounselImage(selectedCase.counselName)} alt={selectedCase.counselName} className="w-10 h-10 rounded-full object-cover border border-zinc-800" referrerPolicy="no-referrer" />
+                           <div className="min-w-0">
+                             <p className="text-[8px] font-black text-zinc-500 uppercase tracking-wider">Lead Counsel in charge</p>
+                             <p className="text-xs font-bold text-white truncate uppercase">{selectedCase.counselName}</p>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hearings history log */}
+                    <div>
+                      <h3 className="text-base font-serif font-bold text-white mb-6">Historical Chronology Logs</h3>
+                      <div className="relative space-y-6">
+                        <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-zinc-805" />
+                        
+                        {selectedCase.hearings && selectedCase.hearings.length > 0 ? 
+                          [...selectedCase.hearings].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((h, idx) => (
+                            <div key={idx} className="relative flex gap-4 text-left">
+                              <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 shrink-0 flex items-center justify-center text-amber-500 shadow-sm relative z-10">
+                                <Clock className="w-3.5 h-3.5" />
+                              </div>
+                              <div className="bg-black/50 p-4 rounded-xl border border-zinc-850 flex-grow">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-[10px] font-black text-amber-500">{h.date}</span>
+                                  {h.orderSheetUrl && (
+                                    <a href={h.orderSheetUrl} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black uppercase text-amber-500 hover:underline flex items-center gap-1 cursor-pointer">
+                                      <FileText className="w-3 h-3" /> View Sheet
+                                    </a>
+                                  )}
+                                </div>
+                                <p className="text-white/60 text-xs leading-relaxed">{h.proceedings}</p>
+                              </div>
+                            </div>
+                          ))
+                        : (
+                          <p className="text-xs text-white/30 italic">No previous hearing records compiled.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )) : (
+                <motion.div 
+                  key="list-view"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="flex bg-zinc-900 border border-zinc-800 rounded-2xl items-center px-4 py-2.5 shadow-inner">
+                    <Search className="w-5 h-5 text-zinc-500 shrink-0 mr-3" />
+                    <input 
+                      type="text" 
+                      placeholder="Search legal files via Title, Client ID or Case Number..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-transparent text-sm focus:outline-none placeholder:text-zinc-650 text-white"
+                    />
+                  </div>
+
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+                    </div>
+                  ) : filteredCases.length === 0 ? (
+                    <div className="bg-zinc-900 p-12 text-center border border-zinc-800 rounded-3xl">
+                      <Gavel className="w-12 h-12 text-zinc-550 mx-auto mb-4" />
+                      <h4 className="text-base font-serif font-bold text-white mb-1">No Case Records Found</h4>
+                      <p className="text-xs text-white/30 max-w-xs mx-auto">Verify search filters or initialize the database with a first record entry.</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {filteredCases.map((c) => (
+                        <div 
+                          key={c.id} 
+                          onClick={() => { if(c.id) { setSelectedCaseId(c.id); setShowPassword(false); } }}
+                          className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 hover:border-amber-500/25 transition-all text-left flex flex-col md:flex-row justify-between items-start md:items-center gap-6 cursor-pointer group"
+                        >
+                          <div className="min-w-0">
+                            <span className="text-[10px] font-mono font-black text-amber-500/80 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded uppercase tracking-wider">{c.caseNo}</span>
+                            <h3 className="text-base font-bold text-white uppercase mt-2 group-hover:text-amber-500 transition-colors truncate max-w-sm md:max-w-md">{c.caseTitle}</h3>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-xs text-white/40 font-semibold select-all">
+                              <span>Client: <span className="text-white/60 font-medium">{c.clientId}</span></span>
+                              <span className="w-1 h-1 bg-zinc-700 rounded-full" />
+                              <span>Counsel: <span className="text-white/60 font-medium">{c.counselName}</span></span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 self-stretch md:self-auto justify-end border-t border-zinc-800/40 pt-4 md:border-0 md:pt-0">
+                            <div className="text-right hidden sm:block mr-2 select-none">
+                              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">Next Hearing</span>
+                              <span className="text-xs font-black text-white block mt-0.5">{c.nextHearingDate || 'Unscheduled'}</span>
+                            </div>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); if(c.id) handleDeleteCase(c.id, c.clientId); }}
+                              className="p-2 bg-black hover:bg-red-500 hover:text-white rounded-lg border border-zinc-850 text-white/40 transition-colors cursor-pointer"
+                              title="Delete file permanently"
+                            >
+                              <Plus className="w-4 h-4 rotate-45" />
+                            </button>
+                            <div className="p-2.5 bg-zinc-800 rounded-xl group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-yellow-500 group-hover:text-black text-zinc-500 transition-all">
+                              <ChevronRight className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      <footer className="bg-black border-t border-zinc-900 py-6 text-center text-white/30 text-xs">
+        <div className="max-w-7xl mx-auto px-4">
+          <p>© {new Date().getFullYear()} JUS & LAY Administration. Strictly confidential access key protocols active.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// Calendar Component
+function CalendarSection({ cases, currentMonth, setCurrentMonth, onDateClick }: { 
+  cases: Case[], 
+  currentMonth: Date, 
+  setCurrentMonth: (d: Date) => void,
+  onDateClick: (h: Hearing[]) => void
+}) {
+  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 0).getDay();
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  
+  const numDays = daysInMonth(year, month);
+  const startDay = firstDayOfMonth(year, month);
+
+  const hearingMap: Record<string, Hearing[]> = {};
+  
+  cases.forEach(c => {
+    if (c.nextHearingDate) {
+      if (!hearingMap[c.nextHearingDate]) hearingMap[c.nextHearingDate] = [];
+      hearingMap[c.nextHearingDate].push({
+        date: c.nextHearingDate,
+        proceedings: 'Scheduled Upcoming Court Session',
+        caseTitle: c.caseTitle,
+        caseNo: c.caseNo,
+        caseId: c.id
+      });
+    }
+    if (c.hearings) {
+      c.hearings.forEach(h => {
+        if (!hearingMap[h.date]) hearingMap[h.date] = [];
+        hearingMap[h.date].push({
+          ...h,
+          caseTitle: c.caseTitle,
+          caseNo: c.caseNo,
+          caseId: c.id
+        });
+      });
+    }
+  });
+
+  const prevMonth = () => setCurrentMonth(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentMonth(new Date(year, month + 1, 1));
+
+  const days = [];
+  for (let i = 0; i < startDay; i++) {
+    days.push(<div key={`empty-${i}`} className="h-24 sm:h-28 border-b border-r border-zinc-800 bg-zinc-900/10" />);
+  }
+  
+  for (let d = 1; d <= numDays; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayHearings = hearingMap[dateStr] || [];
+    const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
+
+    days.push(
+      <div 
+        key={d} 
+        onClick={() => dayHearings.length > 0 && onDateClick(dayHearings)}
+        className={`h-24 sm:h-28 border-b border-r border-zinc-800 p-2 sm:p-2.5 transition-all relative ${dayHearings.length > 0 ? 'cursor-pointer hover:bg-amber-500/5' : ''} ${isToday ? 'bg-amber-500/5' : ''}`}
+      >
+        <div className="flex justify-between items-start">
+          <span className={`text-xs font-bold ${isToday ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black w-4 h-4 rounded-full flex items-center justify-center' : 'text-zinc-500'}`}>
+            {d}
+          </span>
+          {dayHearings.length > 0 && (
+            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full shadow-sm" />
+          )}
+        </div>
+        
+        <div className="mt-1 space-y-0.5 overflow-hidden">
+          {dayHearings.slice(0, 1).map((h, i) => (
+            <div key={i} className="text-[8px] font-black text-black bg-gradient-to-r from-amber-500 to-yellow-500 border border-amber-500/20 rounded px-1.5 py-0.5 truncate shadow-sm uppercase">
+              {h.caseTitle}
+            </div>
+          ))}
+          {dayHearings.length > 1 && (
+            <div className="text-[7px] font-black text-amber-500 px-1">
+              + {dayHearings.length - 1} MORE
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="p-5 flex items-center justify-between border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-zinc-800 text-amber-500 rounded-xl flex items-center justify-center">
+            <CalendarDays className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-serif font-bold text-white m-0">{monthNames[month]} {year}</h2>
+            <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Record Calendar</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button onClick={prevMonth} className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors border border-zinc-800 text-zinc-400 hover:text-amber-500 cursor-pointer"><ChevronLeft className="w-4 h-4" /></button>
+          <button onClick={() => setCurrentMonth(new Date())} className="px-3 py-1.5 text-[10px] font-black text-white hover:text-amber-500 hover:bg-zinc-800 rounded-lg transition-colors uppercase tracking-widest cursor-pointer">Today</button>
+          <button onClick={nextMonth} className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors border border-zinc-800 text-zinc-400 hover:text-amber-500 cursor-pointer"><ChevronRight className="w-4 h-4" /></button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-7 bg-black border-b border-zinc-800">
+        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (
+          <div key={day} className="py-2.5 text-center text-[9px] font-black text-zinc-500 tracking-widest">{day}</div>
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-7 border-l border-zinc-800">
+        {days}
+      </div>
+    </div>
+  );
+}

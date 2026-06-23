@@ -5,9 +5,10 @@ interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
   consultationCount?: number;
   onServicesClick?: () => void;
+  onViewChange?: (view: 'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal') => void;
 }
 
-export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick }: NavbarProps) {
+export default function Navbar({ onOpenConsultationsHistory, consultationCount = 0, onServicesClick, onViewChange }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -87,6 +88,18 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
                 {link.label}
               </a>
             ))}
+            <button
+              onClick={() => onViewChange?.('client-login')}
+              className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
+            >
+              Client Portal
+            </button>
+            <button
+              onClick={() => onViewChange?.('admin-login')}
+              className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
+            >
+              Admin Portal
+            </button>
           </div>
 
           <div className="h-6 w-[1px] bg-navy-light/20" />
@@ -130,6 +143,18 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
                 {link.label}
               </a>
             ))}
+            <button
+              onClick={() => { onViewChange?.('client-login'); setIsMobileMenuOpen(false); }}
+              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer"
+            >
+              Client Portal
+            </button>
+            <button
+              onClick={() => { onViewChange?.('admin-login'); setIsMobileMenuOpen(false); }}
+              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer"
+            >
+              Admin Portal
+            </button>
           </div>
 
           <div className="flex flex-col gap-3 pt-2">

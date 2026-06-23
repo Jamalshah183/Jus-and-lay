@@ -1,0 +1,167 @@
+{
+  "entities": {
+    "user": {
+      "title": "User Profile",
+      "description": "User profile data for client and lawyer portal access.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "password": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "admin", "lawyer"] },
+        "fullName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role", "createdAt"]
+    },
+    "case": {
+      "title": "Legal Case",
+      "description": "Details of a legal case associated with a client.",
+      "type": "object",
+      "properties": {
+        "caseTitle": { "type": "string" },
+        "caseNo": { "type": "string" },
+        "srNo": { "type": "string" },
+        "judgeName": { "type": "string" },
+        "courtName": { "type": "string" },
+        "counselName": { "type": "string" },
+        "clientId": { "type": "string" },
+        "lastHearingDate": { "type": "string", "format": "date" },
+        "nextHearingDate": { "type": "string", "format": "date" },
+        "proceedings": { "type": "string" },
+        "hearings": { "type": "array" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["caseTitle", "caseNo", "clientId", "courtName"]
+    },
+    "lawyer": {
+      "title": "Lawyer Profile",
+      "description": "Information about lawyers in the firm.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "specialty": { "type": "string" },
+        "phone": { "type": "string" },
+        "barNumber": { "type": "string" }
+      },
+      "required": ["fullName", "email"]
+    },
+    "client": {
+      "title": "Client Details",
+      "description": "Detailed client information.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["fullName", "email"]
+    },
+    "hearing": {
+      "title": "Case Hearing",
+      "description": "Record of a specific hearing.",
+      "type": "object",
+      "properties": {
+        "caseId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "nextDate": { "type": "string", "format": "date" },
+        "proceedings": { "type": "string" },
+        "orderSheetUrl": { "type": "string" }
+      },
+      "required": ["caseId", "date"]
+    },
+    "caseUpdate": {
+      "title": "Case Update",
+      "description": "A progress update for a case.",
+      "type": "object",
+      "properties": {
+        "caseId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "description": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["caseId", "date", "description"]
+    },
+    "document": {
+      "title": "Legal Document",
+      "description": "Uploaded legal document metadata.",
+      "type": "object",
+      "properties": {
+        "fileName": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "fileType": { "type": "string" },
+        "caseId": { "type": "string" },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fileName", "fileUrl", "createdAt"]
+    },
+    "notification": {
+      "title": "Notification",
+      "description": "System notification for a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "read", "createdAt"]
+    },
+    "appointment": {
+      "title": "Appointment",
+      "description": "Scheduled legal consultation or meeting.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "lawyerId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "reason": { "type": "string" }
+      },
+      "required": ["clientId", "date", "status"]
+    },
+    "admin": {
+      "title": "Admin Configuration",
+      "description": "System settings and admin logs.",
+      "type": "object",
+      "properties": {
+        "configKey": { "type": "string" },
+        "configValue": { "type": "string" }
+      },
+      "required": ["configKey", "configValue"]
+    },
+    "consultation": {
+      "title": "Consultation Request",
+      "description": "Details of a legal consultation request submitted by a user.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "phone": { "type": "string" },
+        "cnic": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "practiceArea": { "type": "string" },
+        "preferredDate": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "phone", "email", "practiceArea", "preferredDate", "message", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "user", "description": "Collection of user profiles." },
+    "/cases/{caseId}": { "schema": "case", "description": "Collection of legal cases." },
+    "/lawyers/{lawyerId}": { "schema": "lawyer", "description": "Collection of lawyer profiles." },
+    "/clients/{clientId}": { "schema": "client", "description": "Collection of client details." },
+    "/hearings/{hearingId}": { "schema": "hearing", "description": "Collection of hearing records." },
+    "/caseUpdates/{updateId}": { "schema": "caseUpdate", "description": "Collection of case progress updates." },
+    "/documents/{docId}": { "schema": "document", "description": "Collection of legal documents metadata." },
+    "/notifications/{noteId}": { "schema": "notification", "description": "Collection of system notifications." },
+    "/appointments/{appId}": { "schema": "appointment", "description": "Collection of appointments." },
+    "/admin/{adminId}": { "schema": "admin", "description": "Administrative settings and logs." },
+    "/consultations/{consultationId}": { "schema": "consultation", "description": "Public consultation requests." }
+  }
+}
