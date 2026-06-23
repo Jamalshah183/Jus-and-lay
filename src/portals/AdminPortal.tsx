@@ -298,7 +298,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com'];
         const userEmail = u.email?.toLowerCase();
         
-        if (userEmail && admins.includes(userEmail) && u.providerData.some(p => p.providerId === 'google.com')) {
+        if (userEmail && admins.includes(userEmail)) {
           // Ensure admin user profile document exists in the 'users' collection
           const ensureAdminProfile = async () => {
             try {
@@ -490,9 +490,12 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
       
       // Remove the hearing from the array in the parent case document
       const caseRef = doc(db, 'cases', caseId);
-      const updatedHearings = (selectedCase.hearings || []).filter(h => 
-        !(h.date === hearingToDelete.date && h.proceedings === hearingToDelete.proceedings)
-      );
+      const updatedHearings = (selectedCase.hearings || []).filter(h => {
+        if (h.id && hearingToDelete.id) {
+          return h.id !== hearingToDelete.id;
+        }
+        return !(h.date === hearingToDelete.date && h.proceedings === hearingToDelete.proceedings);
+      });
       
       await updateDoc(caseRef, {
         hearings: updatedHearings,
