@@ -22,7 +22,7 @@ export default function AdminLogin({ setView }: AdminLoginProps) {
       const user = result.user;
 
       // Strict check for admin email and provider
-      const admins = ['juslay3@gmail.com'];
+      const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com'];
       const userEmail = user.email?.toLowerCase();
       
       if (userEmail && admins.includes(userEmail) && user.providerData.some(p => p.providerId === 'google.com')) {
