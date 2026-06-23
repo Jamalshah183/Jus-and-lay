@@ -238,9 +238,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
             </button>
           </div>
         </div>
-      </header>
-
-      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+      </header>      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         {/* Welcome Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 lg:mb-10">
           <div className="min-w-0">
@@ -252,7 +250,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
           <div className="flex flex-wrap items-center justify-start md:justify-end gap-5 border-t border-slate-200 pt-4 md:border-0 md:pt-0">
             <div className="flex items-center gap-3 pr-5 border-r border-slate-200">
                <div className="text-right hidden sm:block">
-                 <p className="text-[10px] font-black text-amber-650 uppercase tracking-widest">Lead Counsel</p>
+                 <p className="text-[10px] font-black text-emerald-605 uppercase tracking-widest">Lead Counsel</p>
                  <p className="text-xs font-bold text-slate-800">{selectedCase?.counselName || "Advocate Yasir Naqvi"}</p>
                </div>
                <div className="w-16 h-16 rounded-full border-2 border-slate-200/50 overflow-hidden shadow-lg select-none">
@@ -264,15 +262,17 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                  />
                </div>
             </div>
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleSignOut}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 hover:text-slate-950 transition-all shadow-sm shrink-0 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 hover:text-slate-950 transition-all shadow-sm shrink-0 cursor-pointer border-0"
             >
               <LogOut className="w-3.5 h-3.5" /> Sign Out
-            </button>
+            </motion.button>
             <div className="flex items-center gap-3 shrink-0">
               <span className="text-xs font-bold text-slate-400 hidden sm:block">{user.email}</span>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-zinc-800 to-zinc-950 flex items-center justify-center text-amber-500 font-extrabold text-sm border border-zinc-700">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-slate-800 to-slate-950 flex items-center justify-center text-emerald-500 font-extrabold text-sm border border-slate-700">
                 {user.email?.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -282,9 +282,9 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
         {/* Status Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-10">
           {[
-            { label: 'Active CRM Cases', value: displayCases.length.toString(), icon: Gavel, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Active CRM Cases', value: displayCases.length.toString(), icon: Gavel, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { label: 'Total Files', value: displayCases.reduce((acc, c) => acc + (c.orderSheetUrl ? 1 : 0) + (c.hearings?.filter(h => h.orderSheetUrl).length || 0), 0).toString(), icon: FileBox, color: 'text-zinc-700', bg: 'bg-zinc-100' },
-            { label: 'Next Hearing', value: displayCases[0]?.nextHearingDate || 'None', icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50/60' },
+            { label: 'Next Hearing', value: displayCases[0]?.nextHearingDate || 'None', icon: Clock, color: 'text-emerald-700', bg: 'bg-emerald-50/60' },
           ].map((stat, i) => (
             <motion.div 
               key={i}
@@ -308,23 +308,23 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
           {/* Mobile Case Selector */}
           <div className="lg:hidden space-y-3 mb-6 overflow-hidden">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
-              <Gavel className="w-3.5 h-3.5 text-amber-500" /> Case Navigation
+              <Gavel className="w-3.5 h-3.5 text-emerald-600" /> Case Navigation
             </h3>
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory px-1">
               {displayCases.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setSelectedCaseId(c.id)}
-                  className={`shrink-0 text-left p-3 rounded-xl border transition-all min-w-[150px] max-w-[190px] snap-start ${
+                  className={`shrink-0 text-left p-3 rounded-xl border transition-all min-w-[150px] max-w-[190px] snap-start cursor-pointer ${
                     selectedCaseId === c.id 
-                    ? 'bg-zinc-900 text-white border-zinc-950 shadow-md' 
-                    : 'bg-white border-slate-200'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-805 shadow-sm' 
+                    : 'bg-white border-slate-200 text-slate-650'
                   }`}
                 >
-                  <p className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${selectedCaseId === c.id ? 'text-white/70' : 'text-slate-450'}`}>
+                  <p className={`text-[8px] font-black uppercase tracking-wider mb-0.5 ${selectedCaseId === c.id ? 'text-emerald-700' : 'text-slate-450'}`}>
                     {c.caseNo}
                   </p>
-                  <p className={`text-[10px] font-bold line-clamp-1 ${selectedCaseId === c.id ? 'text-white' : 'text-slate-700'}`}>
+                  <p className={`text-[10px] font-bold line-clamp-1 ${selectedCaseId === c.id ? 'text-emerald-900' : 'text-slate-700'}`}>
                     {c.caseTitle}
                   </p>
                 </button>
@@ -336,34 +336,34 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
           <div className="lg:col-span-2 space-y-8 lg:space-y-12">
             {!selectedCase ? (
               <div className="bg-white rounded-3xl p-8 lg:p-12 text-center border border-slate-205 shadow-sm">
-                <div className="w-20 h-20 bg-amber-50 text-amber-650 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 bg-emerald-50 text-emerald-605 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Gavel className="w-10 h-10" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-slate-900">No Case Records Found</h3>
                 <p className="text-slate-500 mb-8 max-w-sm mx-auto">Access restricted to authorized clients. If you are a new client and require access, please contact the attorney office.</p>
-                <div className="mt-8 p-4 bg-amber-50 border border-amber-105 rounded-2xl flex items-start gap-4 text-left">
-                   <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                   <p className="text-xs text-amber-805 font-medium leading-relaxed">
+                <div className="mt-8 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start gap-4 text-left">
+                   <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                   <p className="text-xs text-emerald-805 font-medium leading-relaxed">
                      Once a lawyer adds your case using your email (<strong>{user.email}</strong>), it will automatically synchronize and show up here in real-time.
                    </p>
                 </div>
               </div>
             ) : (
-              <div key={selectedCase.id} className="bg-white rounded-2xl lg:rounded-[2.5rem] border border-slate-200/80 shadow-md overflow-hidden group hover:border-amber-400 transition-colors">
+              <div key={selectedCase.id} className="bg-white rounded-2xl lg:rounded-[2.5rem] border border-slate-200/80 shadow-md overflow-hidden group hover:border-emerald-500/20 transition-all duration-300">
                 <div className="p-4 lg:p-10 border-b border-slate-100 bg-slate-50/50">
                   <div className="flex flex-col gap-4 mb-6">
                     <div className="flex flex-wrap justify-between items-center gap-2">
-                      <span className="px-3 py-1 bg-amber-500 text-black text-[9px] font-black rounded-full uppercase tracking-[0.15em] shadow-sm whitespace-nowrap">Active Case</span>
-                      <p className="text-amber-700 text-[10px] font-black bg-amber-50 px-3 py-1 rounded-lg tracking-wider break-all">NO: {selectedCase.caseNo}</p>
+                      <span className="px-3 py-1 bg-emerald-600 text-white text-[9px] font-bold rounded-full uppercase tracking-[0.15em] shadow-sm whitespace-nowrap">Active Case</span>
+                      <p className="text-emerald-700 text-[10px] font-black bg-emerald-50 px-3 py-1 rounded-lg tracking-wider break-all">NO: {selectedCase.caseNo}</p>
                     </div>
                     <div className="min-w-0">
-                      <h2 className="text-lg lg:text-2xl font-serif font-bold text-slate-900 group-hover:text-amber-600 transition-colors uppercase leading-tight break-words">{selectedCase.caseTitle}</h2>
+                      <h2 className="text-lg lg:text-2xl font-serif font-bold text-slate-900 group-hover:text-emerald-600 transition-colors uppercase leading-tight break-words">{selectedCase.caseTitle}</h2>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 mb-1">
                         <p className="text-slate-500 text-[10px] sm:text-xs font-bold flex items-center gap-2 shrink-0">
-                          <UserIcon className="w-3.5 h-3.5 text-amber-650" /> {selectedCase.judgeName}
+                          <UserIcon className="w-3.5 h-3.5 text-emerald-600" /> {selectedCase.judgeName}
                         </p>
                         <p className="text-slate-500 text-[10px] sm:text-xs font-bold flex items-center gap-2 shrink-0">
-                          <Building2 className="w-3.5 h-3.5 text-amber-655" /> {selectedCase.courtName}
+                          <Building2 className="w-3.5 h-3.5 text-emerald-605" /> {selectedCase.courtName}
                         </p>
                       </div>
                     </div>
@@ -372,19 +372,19 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 lg:gap-6">
                     <div className="bg-white p-2 sm:p-3 lg:p-4 rounded-lg lg:rounded-2xl border border-slate-200 shadow-sm min-w-0">
                       <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Sr. No</p>
-                      <p className="text-slate-800 font-bold text-[11px] sm:text-xs lg:text-base truncate">{selectedCase.srNo}</p>
+                      <p className="text-slate-805 font-bold text-[11px] sm:text-xs lg:text-base truncate">{selectedCase.srNo}</p>
                     </div>
                     <div className="bg-white p-2 sm:p-3 lg:p-4 rounded-lg lg:rounded-2xl border border-slate-200 shadow-sm min-w-0">
                       <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Last Hearing</p>
                       <p className="text-slate-805 font-bold text-[11px] sm:text-xs lg:text-base truncate">{selectedCase.lastHearingDate}</p>
                     </div>
-                    <div className="bg-gradient-to-r from-amber-500 to-yellow-500 p-2 sm:p-3 lg:p-4 rounded-lg lg:rounded-2xl shadow-md min-w-0 text-black">
-                      <p className="text-[8px] lg:text-[10px] font-black text-black/50 uppercase tracking-widest truncate">Next Hearing</p>
-                      <p className="text-black font-extrabold text-[11px] sm:text-xs lg:text-base truncate">{selectedCase.nextHearingDate}</p>
+                    <div className="bg-emerald-50 p-2 sm:p-3 lg:p-4 rounded-lg lg:rounded-2xl border border-emerald-100 shadow-sm min-w-0 text-emerald-800">
+                      <p className="text-[8px] lg:text-[10px] font-bold text-emerald-605 uppercase tracking-widest truncate">Next Hearing</p>
+                      <p className="text-emerald-900 font-black text-[11px] sm:text-xs lg:text-base truncate">{selectedCase.nextHearingDate}</p>
                     </div>
                     <div className="bg-white p-2 sm:p-3 lg:p-4 rounded-lg lg:rounded-2xl border border-slate-200 shadow-sm min-w-0">
                       <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">Status</p>
-                      <p className="text-amber-600 font-bold text-[11px] sm:text-xs lg:text-base truncate">Ongoing</p>
+                      <p className="text-emerald-600 font-bold text-[11px] sm:text-xs lg:text-base truncate">Ongoing</p>
                     </div>
                   </div>
                 </div>
@@ -393,7 +393,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                   <div className="grid md:grid-cols-2 gap-8 lg:gap-10 border-b border-slate-100 pb-8 lg:pb-10 mb-8 lg:mb-10">
                     <div className="space-y-5 lg:space-y-6">
                       <div className="flex gap-4">
-                        <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 shrink-0 shadow-sm">
+                        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
                           <UserIcon className="w-5 h-5" />
                         </div>
                         <div>
@@ -415,7 +415,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Assigned Counsel</h4>
                           <p className="text-slate-800 font-bold text-xs lg:text-sm leading-relaxed truncate max-w-[200px]"> {selectedCase.counselName}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                             <span className="text-[9px] font-bold text-slate-400">Available for Consultation</span>
                           </div>
                         </div>
@@ -424,15 +424,15 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
  
                     <div className="space-y-5 lg:space-y-6">
                        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 shadow-inner">
-                         <Building2 className="w-5 h-5 text-amber-600 shrink-0" />
+                         <Building2 className="w-5 h-5 text-emerald-600 shrink-0" />
                          <div className="min-w-0">
                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Legal Forum</p>
-                           <span className="text-xs lg:text-sm font-bold text-amber-600 uppercase tracking-wider block truncate">{selectedCase.courtName}</span>
+                           <span className="text-xs lg:text-sm font-bold text-emerald-600 uppercase tracking-wider block truncate">{selectedCase.courtName}</span>
                          </div>
                        </div>
                       
                       <div className="bg-slate-50 border border-slate-200 p-5 lg:p-6 rounded-3xl">
-                        <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                           <FileText className="w-4 h-4" /> Official Order Sheets
                         </h4>
                         
@@ -440,10 +440,10 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                           <div className="space-y-3">
                             <button 
                               onClick={() => openOrDownloadFile(selectedCase.orderSheetUrl || '', selectedCase.caseTitle || 'order_sheet')}
-                              className="flex items-center justify-between w-full bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-205 group/link hover:border-amber-400 hover:shadow-md transition-all active:scale-[0.98] min-w-0 cursor-pointer"
+                              className="flex items-center justify-between w-full bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-205 group/link hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98] min-w-0 cursor-pointer bg-transparent border-slate-200"
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 h-8 bg-zinc-900 text-amber-500 rounded-xl flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 bg-slate-100 text-emerald-605 rounded-xl flex items-center justify-center shrink-0">
                                   <FileText className="w-4 h-4" />
                                 </div>
                                 <div className="text-left min-w-0">
@@ -451,7 +451,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest block truncate">Document Format</span>
                                 </div>
                               </div>
-                              <div className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-zinc-900 group-hover/link:text-amber-500 transition-colors shrink-0 text-slate-550">
+                              <div className="bg-slate-100 p-1.5 rounded-full group-hover/link:bg-emerald-50 group-hover/link:text-emerald-600 transition-colors shrink-0 text-slate-550">
                                 <FileText className="w-3.5 h-3.5" />
                               </div>
                             </button>
@@ -462,21 +462,21 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                           </div>
                         )}
                       </div>
-
+ 
                       <div className="bg-slate-50 border border-slate-200 p-5 lg:p-6 rounded-3xl" id="client-uploaded-docs-block">
-                        <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                           <FileBox className="w-4 h-4" /> Case Files & Uploads ({uploadedDocs.length})
                         </h4>
-
+ 
                         {uploadedDocs.length > 0 ? (
                           <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                             {uploadedDocs.map((doc) => (
                               <div 
                                 key={doc.id}
-                                className="flex items-center justify-between w-full bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all min-w-0"
+                                className="flex items-center justify-between w-full bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 transition-all min-w-0"
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <div className="w-7 h-7 bg-amber-500/10 text-amber-700 rounded-lg flex items-center justify-center shrink-0">
+                                  <div className="w-7 h-7 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
                                     <FileText className="w-3.5 h-3.5" />
                                   </div>
                                   <div className="text-left min-w-0 font-sans">
@@ -487,7 +487,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <button 
                                     onClick={() => openOrDownloadFile(doc.fileUrl, doc.fileName)}
-                                    className="text-[9px] font-black uppercase text-amber-600 font-extrabold hover:underline select-none bg-amber-50 hover:bg-amber-100 border border-amber-200 py-1.5 px-3 rounded-lg cursor-pointer transition-colors"
+                                    className="text-[9px] font-black uppercase text-emerald-605 bg-emerald-50 hover:bg-emerald-100 border border-emerald-150 py-1.5 px-3 rounded-lg cursor-pointer transition-colors"
                                   >
                                     View
                                   </button>
@@ -507,7 +507,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                             No uploaded documents found for this case.
                           </p>
                         )}
-
+ 
                         <div className="mt-5 border-t border-slate-200/60 pt-5">
                           <DocumentUploader caseId={selectedCase.id} />
                         </div>
@@ -518,7 +518,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                   {/* Hearing Timeline */}
                   <div className="px-0 py-2">
                     <h3 className="text-base lg:text-lg font-serif font-bold text-slate-900 mb-8 flex items-center gap-3">
-                      <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-amber-500" /> Case Hearing History
+                      <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-600" /> Case Hearing History
                     </h3>
                     
                     <div className="relative space-y-10 font-sans">
@@ -527,19 +527,19 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                       {selectedCase.hearings && selectedCase.hearings.length > 0 ? (
                         sortHearings(selectedCase.hearings).map((hearing, hIndex, array) => (
                           <div key={hIndex} className="relative flex gap-4 lg:gap-8">
-                            <div className={`w-9 h-9 lg:w-12 lg:h-12 rounded-full shrink-0 flex items-center justify-center shadow-md relative z-10 transition-colors ${hIndex === 0 ? 'bg-gradient-to-r from-amber-550 to-yellow-550 text-black font-extrabold' : 'bg-white text-zinc-800 border border-slate-205'}`}>
+                            <div className={`w-9 h-9 lg:w-12 lg:h-12 rounded-full shrink-0 flex items-center justify-center shadow-md relative z-10 transition-colors ${hIndex === 0 ? 'bg-emerald-600 text-white font-extrabold' : 'bg-white text-zinc-805 border border-slate-205'}`}>
                               <Gavel className="w-4 h-4 lg:w-5 h-5" />
                             </div>
                             <div className="bg-slate-50 p-5 lg:p-6 rounded-2xl border border-slate-200/50 flex-grow hover:border-slate-300 transition-colors group/item shadow-sm text-left">
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
-                                    <p className="text-[10px] lg:text-sm font-black text-amber-600 flex items-center gap-2">
+                                    <p className="text-[10px] lg:text-sm font-black text-emerald-600 flex items-center gap-2">
                                       <Calendar className="w-3.5 h-3.5" /> 
                                       <span className="uppercase tracking-wider">Hearing Date:</span> {hearing.date}
                                     </p>
                                     {hearing.purpose && (
-                                      <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[8px] font-black uppercase rounded tracking-wider border border-amber-200">
+                                      <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[8px] font-black uppercase rounded tracking-wider border border-emerald-150">
                                         {hearing.purpose}
                                       </span>
                                     )}
@@ -550,13 +550,13 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                     </p>
                                     {(hearing.judgeName || selectedCase.judgeName) && (
                                       <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" /> 
+                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> 
                                         Before: {hearing.judgeName || selectedCase.judgeName}
                                       </p>
                                     )}
                                     {hearing.nextHearingDate && (
-                                      <p className="text-[8px] font-black text-amber-700 uppercase tracking-widest flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-amber-600 rounded-full" /> 
+                                      <p className="text-[8px] font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full" /> 
                                         Next Scheduled: {hearing.nextHearingDate}
                                       </p>
                                     )}
@@ -573,11 +573,11 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                     onClick={() => openOrDownloadFile(hearing.orderSheetUrl || '', `${selectedCase.caseNo || 'case'}_order_${hearing.date}`)}
                                     className="text-[9px] font-black uppercase tracking-widest text-white bg-zinc-900 px-3 py-1.5 rounded-full shadow-sm hover:scale-[1.05] transition-all flex items-center gap-2 w-fit active:scale-95 cursor-pointer hover:bg-slate-800"
                                   >
-                                    <FileText className="w-3 h-3 text-amber-500" /> Get Order
+                                    <FileText className="w-3 h-3 text-emerald-500" /> Get Order
                                   </button>
                                 )}
                               </div>
-                              <p className="text-slate-605 text-xs lg:text-sm leading-relaxed">
+                              <p className="text-slate-600 text-xs lg:text-sm leading-relaxed">
                                 <span className="font-black text-slate-700 text-[10px] lg:text-xs block mb-1 uppercase tracking-wider">Detailed Proceedings</span>
                                 {hearing.proceedings}
                               </p>
@@ -586,12 +586,12 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                         ))
                       ) : (
                         <div className="relative flex gap-4 lg:gap-8">
-                           <div className="w-9 h-9 lg:w-12 lg:h-12 rounded-full shrink-0 flex items-center justify-center shadow-lg bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold relative z-10">
+                           <div className="w-9 h-9 lg:w-12 lg:h-12 rounded-full shrink-0 flex items-center justify-center shadow-lg bg-emerald-600 text-white font-extrabold relative z-10">
                               <Gavel className="w-4 h-4 lg:w-5 h-5" />
                             </div>
                             <div className="bg-slate-50 p-5 lg:p-6 rounded-2xl border border-slate-205 flex-grow shadow-md text-left">
                               <div className="flex items-center gap-3 mb-3">
-                                <p className="text-[10px] lg:text-sm font-black text-amber-600 flex items-center gap-2">
+                                <p className="text-[10px] lg:text-sm font-black text-emerald-650 flex items-center gap-2">
                                   <Calendar className="w-3.5 h-3.5" />
                                   <span className="uppercase tracking-wider">Hearing Date:</span> {selectedCase.lastHearingDate}
                                 </p>
@@ -607,25 +607,25 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
               </div>
             )}
           </div>
-
+ 
           {/* Sidebar - Desktop Only */}
           <div className="hidden lg:block space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-left font-sans">
               <h3 className="text-lg font-serif font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <Gavel className="w-5 h-5 text-amber-500" /> My Cases
+                <Gavel className="w-5 h-5 text-emerald-600" /> My Cases
               </h3>
-              <div className="space-y-3 font-sans font-sans">
+              <div className="space-y-3 font-sans">
                 {displayCases.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setSelectedCaseId(c.id)}
                     className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer ${
                       selectedCaseId === c.id 
-                      ? 'bg-amber-50/60 border-amber-400/40 shadow-sm' 
+                      ? 'bg-emerald-50/60 border-emerald-300 shadow-sm' 
                       : 'bg-slate-50/50 border-transparent hover:border-slate-200'
                     }`}
                   >
-                    <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${selectedCaseId === c.id ? 'text-amber-700' : 'text-slate-400'}`}>
+                    <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${selectedCaseId === c.id ? 'text-emerald-700' : 'text-slate-400'}`}>
                       {c.caseNo}
                     </p>
                     <p className={`text-sm font-bold line-clamp-2 ${selectedCaseId === c.id ? 'text-slate-800' : 'text-slate-600'}`}>
@@ -635,27 +635,27 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                 ))}
               </div>
             </div>
-
+ 
             <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-slate-950/20 text-left font-sans">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16" />
               <div className="relative z-10">
-                <Shield className="w-10 h-10 text-amber-500/50 mb-6" />
+                <Shield className="w-10 h-10 text-emerald-600/40 mb-6" />
                 <h3 className="text-xl font-serif font-bold mb-4">Direct Advocate Support</h3>
                 <p className="text-white/80 text-sm mb-8 leading-relaxed">Need help immediately? Contact your dedicated legal consultant directly through WhatsApp.</p>
                 <a 
                   href="https://wa.me/923218520085"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-all active:scale-[0.98] border border-slate-200 cursor-pointer text-center"
+                  className="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.25)] transition-all active:scale-[0.98] border border-transparent cursor-pointer text-center"
                 >
-                  <MessageSquare className="w-5 h-5 text-black" /> Chat on WhatsApp
+                  <MessageSquare className="w-5 h-5 text-white" /> Chat on WhatsApp
                 </a>
               </div>
             </div>
-
+ 
             <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-left font-sans">
               <div className="flex items-center gap-3 mb-6">
-                <AlertCircle className="w-6 h-6 text-amber-600" />
+                <AlertCircle className="w-6 h-6 text-emerald-600" />
                 <h3 className="text-lg font-serif font-bold text-slate-900 font-bold">Confidentiality</h3>
               </div>
               <p className="text-slate-500 text-xs leading-relaxed mb-4">

@@ -60,17 +60,17 @@ export default function ClientLogin({ setView }: ClientLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-amber-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between font-sans selection:bg-emerald-600 selection:text-white">
       {/* Mini Portal Header */}
       <header className="border-b border-slate-200 bg-white py-4 px-6 sticky top-0 z-50 shadow-sm shadow-slate-100/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <button onClick={() => setView('main')} className="flex items-center gap-2 text-slate-700 hover:text-amber-600 transition-colors">
-            <Scale className="w-5 h-5 text-amber-600" />
+          <button onClick={() => setView('main')} className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 transition-colors cursor-pointer bg-transparent border-0">
+            <Scale className="w-5 h-5 text-emerald-600" />
             <span className="font-serif font-bold text-lg text-slate-900">Jus & Lay Client Portal</span>
           </button>
           <button 
             onClick={() => setView('main')}
-            className="text-slate-600 hover:text-slate-950 text-xs font-bold uppercase tracking-wider transition-colors"
+            className="text-slate-600 hover:text-slate-950 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer bg-transparent border-0"
           >
             ← Return to Website
           </button>
@@ -79,17 +79,17 @@ export default function ClientLogin({ setView }: ClientLoginProps) {
 
       <div className="flex-grow flex items-center justify-center p-4 py-20 bg-radial-gradient">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="w-full max-w-md"
         >
-          <div className="bg-white rounded-3xl shadow-2xl shadow-slate-250/20 border border-slate-150 overflow-hidden">
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-zinc-900 to-black p-8 text-center text-white relative">
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle,rgba(255,255,255,0.05)_0%,transparent_70%)] animate-pulse" />
-              <Scale className="w-12 h-12 text-amber-500 mx-auto mb-4 relative z-10" />
-              <h1 className="text-2xl font-serif font-bold relative z-10 text-white">Client Portal</h1>
-              <p className="text-amber-500 text-sm mt-2 relative z-10 font-semibold tracking-wide">Secure Access for Law Firm Clients</p>
+            <div className="bg-slate-50 border-b border-slate-100 p-8 text-center text-slate-800 relative">
+              <Scale className="w-12 h-12 text-emerald-600 mx-auto mb-4 relative z-10" />
+              <h1 className="text-2xl font-serif font-bold relative z-10 text-slate-800">Client Portal</h1>
+              <p className="text-emerald-700 text-xs font-bold uppercase tracking-wider mt-2 relative z-10">Secure Access for Law Firm Clients</p>
             </div>
 
             {/* Form */}
@@ -116,7 +116,7 @@ export default function ClientLogin({ setView }: ClientLoginProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="client@email.com" 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-600 transition-all placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -131,29 +131,31 @@ export default function ClientLogin({ setView }: ClientLoginProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••" 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-12 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-12 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-600 transition-all placeholder:text-slate-400"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-slate-455 hover:text-slate-600 transition-colors"
+                      className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-0 cursor-pointer"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
 
-                <button 
+                <motion.button 
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-black py-4 rounded-xl hover:scale-[1.02] transition-all shadow-xl shadow-amber-500/10 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  whileHover={{ scale: 1.01, y: -0.5 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-md shadow-emerald-600/15 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer transition-all border-0"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>Sign In <ArrowRight className="w-4 h-4" /></>
                   )}
-                </button>
+                </motion.button>
               </form>
 
               <div className="mt-10 pt-8 border-t border-slate-200 text-center space-y-4">
@@ -165,7 +167,7 @@ export default function ClientLogin({ setView }: ClientLoginProps) {
                     href="https://wa.me/923218520085" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-2 text-amber-600 font-bold hover:text-amber-700 transition-colors underline underline-offset-4"
+                    className="inline-block mt-2 text-emerald-600 font-bold hover:text-emerald-750 transition-colors underline underline-offset-4"
                   >
                     Contact Your Advocate
                   </a>
