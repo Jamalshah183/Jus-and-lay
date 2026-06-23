@@ -83,7 +83,6 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     );
     return caseWithPassword?.clientPassword || null;
   };
-
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const today = new Date().toISOString().split('T')[0];
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -229,162 +228,10 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     }
   }, [fetchUsers]);
 
-  const [isSeeding, setIsSeeding] = useState(false);
-
-  const seedDatabaseRecords = React.useCallback(async (isAuto: boolean = false) => {
-    if (!isAuto) setIsSeeding(true);
-    try {
-      const defaultCases = [
-        {
-          caseTitle: "State vs John Doe",
-          caseNo: "CR-2026-904",
-          srNo: "12",
-          judgeName: "Justice Wajid Ali",
-          courtName: "LHC Bench 4",
-          counselName: LEGAL_TEAM[0]?.name || "AMMAR YASIR NAQVI",
-          lastHearingDate: "2026-06-15",
-          nextHearingDate: "2026-07-10",
-          clientId: "client@test.com",
-          clientPassword: "password123",
-          proceedings: "Arguments completed. Adjourned for files submission.",
-          hearings: [
-            {
-              date: "2026-06-15",
-              nextHearingDate: "2026-07-10",
-              proceedings: "Counsel for accused argued on interim bail motion. Records subpoenaed from local authorities.",
-              purpose: "Interim Bail",
-              judgeName: "Justice Wajid Ali",
-              courtName: "LHC Bench 4"
-            }
-          ],
-          createdAt: serverTimestamp()
-        },
-        {
-          caseTitle: "Habib Bank Limited vs Malik Industries",
-          caseNo: "COS-2026-118",
-          srNo: "03",
-          judgeName: "Justice Ayesha A. Malik",
-          courtName: "LHC Commercial Court 1",
-          counselName: "AMMAR YASIR NAQVI",
-          lastHearingDate: "2026-06-10",
-          nextHearingDate: "2026-07-15",
-          clientId: "finance@malikindustries.com",
-          clientPassword: "malikindustries123",
-          proceedings: "Financial restructuring proposal filed. Opposing counsel requested time to review proposal.",
-          hearings: [
-            {
-              date: "2026-06-10",
-              nextHearingDate: "2026-07-15",
-              proceedings: "Amended structural resolution petition submitted under Banking Companies Ordinance.",
-              purpose: "Restructuring Petition",
-              judgeName: "Justice Ayesha A. Malik",
-              courtName: "LHC Commercial Court 1"
-            }
-          ],
-          createdAt: serverTimestamp()
-        },
-        {
-          caseTitle: "Syed Ghaus Shah vs Federal Land Commission",
-          caseNo: "W.P-2026-8802",
-          srNo: "24",
-          judgeName: "Justice Syed Mansoor Ali Shah",
-          courtName: "Supreme Court of Pakistan, Bench II",
-          counselName: "SYED TAQI UL HASSAN",
-          lastHearingDate: "2026-06-05",
-          nextHearingDate: "2026-08-01",
-          clientId: "ghaus.shah@gmail.com",
-          clientPassword: "ghausshah123",
-          proceedings: "Constitutional writ on land tenure rights. Formal rejoinder filed by Attorney General. Case adjourned.",
-          hearings: [
-            {
-              date: "2026-06-05",
-              nextHearingDate: "2026-08-01",
-              proceedings: "Arguments heard on jurisdiction. Rebuttals slated for next scheduled hearing.",
-              purpose: "Jurisdictional Argument",
-              judgeName: "Justice Syed Mansoor Ali Shah",
-              courtName: "Supreme Court of Pakistan, Bench II"
-            }
-          ],
-          createdAt: serverTimestamp()
-        },
-        {
-          caseTitle: "ZTBL vs Abid Hussain Awan Agriculture Ltd",
-          caseNo: "B.O-2026-4411",
-          srNo: "08",
-          judgeName: "Justice Muhammad Ameer Bhatti",
-          courtName: "LHC Lahore Appellate Bench",
-          counselName: "MALIK ABID HUSSAIN AWAN",
-          lastHearingDate: "2026-06-18",
-          nextHearingDate: "2026-07-22",
-          clientId: "abid.awan@jusandlay.com",
-          clientPassword: "awanpassword123",
-          proceedings: "Agricultural loan collateral recovery defense. Secured dynamic stay order on execution proceedings.",
-          hearings: [
-            {
-              date: "2026-06-18",
-              nextHearingDate: "2026-07-22",
-              proceedings: "Stay order granted pending adjudication of final audit statement.",
-              purpose: "Stay Order Motion",
-              judgeName: "Justice Muhammad Ameer Bhatti",
-              courtName: "LHC Lahore Appellate Bench"
-            }
-          ],
-          createdAt: serverTimestamp()
-        }
-      ];
-
-      for (const c of defaultCases) {
-        await addDoc(collection(db, 'cases'), c);
-      }
-
-      const usersToCreate = [
-        { email: 'client@test.com', password: 'password123' },
-        { email: 'finance@malikindustries.com', password: 'malikindustries123' },
-        { email: 'ghaus.shah@gmail.com', password: 'ghausshah123' },
-        { email: 'abid.awan@jusandlay.com', password: 'awanpassword123' }
-      ];
-
-      const secondaryApp = initializeApp(firebaseConfig, `Bootstrap_${Date.now()}`);
-      const secondaryAuth = initializeAuth(secondaryApp, {
-        persistence: inMemoryPersistence
-      });
-
-      for (const userEntry of usersToCreate) {
-        try {
-          const uc = await createUserWithEmailAndPassword(secondaryAuth, userEntry.email, userEntry.password);
-          const uRef = doc(db, 'users', uc.user.uid);
-          await setDoc(uRef, {
-            email: userEntry.email,
-            password: userEntry.password,
-            role: 'client',
-            createdAt: serverTimestamp()
-          });
-        } catch (ec: any) {
-          if (ec.code !== 'auth/email-already-in-use') {
-            console.warn(`User error for ${userEntry.email}:`, ec);
-          }
-        }
-      }
-
-      await deleteApp(secondaryApp);
-      if (!isAuto) {
-        alert('Premium Legal Workspace Cases and corresponding Client Accounts successfully seeded in Firebase Firestore!');
-      }
-      fetchCases();
-    } catch (err: any) {
-      console.error('Seeding failed:', err);
-      if (!isAuto) {
-        alert(`Seeding failed: ${err.message || err}`);
-      }
-    } finally {
-      if (!isAuto) setIsSeeding(false);
-    }
-  }, [fetchCases]);
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
       if (u) {
-        const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com'];
+        const admins = ['juslay3@gmail.com'];
         const userEmail = u.email?.toLowerCase();
         
         if (userEmail && admins.includes(userEmail) && u.providerData.some(p => p.providerId === 'google.com')) {
@@ -396,7 +243,50 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
               const snap = await getDocs(collection(db, 'cases'));
               if (snap.empty) {
                 console.log('Database empty, auto-bootstrapping default items...');
-                await seedDatabaseRecords(true);
+                // Seed some default fields locally
+                const defaultCases = [
+                  {
+                    caseTitle: "State vs John Doe",
+                    caseNo: "CR-2026-904",
+                    srNo: "12",
+                    judgeName: "Justice Wajid Ali",
+                    courtName: "LHC Bench 4",
+                    counselName: LEGAL_TEAM[0]?.name || "AMMAR YASIR NAQVI",
+                    lastHearingDate: "2026-06-15",
+                    nextHearingDate: "2026-07-10",
+                    clientId: "client@test.com",
+                    clientPassword: "password123",
+                    proceedings: "Arguments completed. Adjourned for files submission.",
+                    hearings: [],
+                    createdAt: serverTimestamp()
+                  }
+                ];
+                
+                for (const c of defaultCases) {
+                  await addDoc(collection(db, 'cases'), c);
+                }
+
+                // Create user profile
+                const secondaryApp = initializeApp(firebaseConfig, `Bootstrap_${Date.now()}`);
+                const secondaryAuth = initializeAuth(secondaryApp, {
+                  persistence: inMemoryPersistence
+                });
+                try {
+                  const uc = await createUserWithEmailAndPassword(secondaryAuth, 'client@test.com', 'password123');
+                  const uRef = doc(db, 'users', uc.user.uid);
+                  await setDoc(uRef, {
+                    email: 'client@test.com',
+                    password: 'password123',
+                    role: 'client',
+                    createdAt: serverTimestamp()
+                  });
+                } catch (ec: any) {
+                  if (ec.code !== 'auth/email-already-in-use') console.warn(ec);
+                } finally {
+                  await deleteApp(secondaryApp);
+                }
+
+                fetchCases();
               }
             } catch (err: unknown) {
               console.error('Auto-bootstrap failed:', err);
@@ -819,30 +709,6 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                   </span>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 shadow-sm select-none text-left">
-              <h3 className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-3">Database Utilities</h3>
-              <p className="text-zinc-400 text-xs mb-4 leading-relaxed">
-                Add pristine mock cases with real active hearings & corresponding client logins for testing.
-              </p>
-              <button
-                disabled={isSeeding || isLoading}
-                onClick={() => seedDatabaseRecords(false)}
-                className="w-full py-3 bg-zinc-850 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-zinc-800 disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
-              >
-                {isSeeding ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
-                    Seeding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-3.5 h-3.5 text-amber-500" />
-                    Seed Premium Cases
-                  </>
-                )}
-              </button>
             </div>
           </div>
 

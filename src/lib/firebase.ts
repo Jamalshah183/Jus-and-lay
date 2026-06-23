@@ -19,7 +19,7 @@ export const config = {
 };
 
 const app = initializeApp(config);
-export const db = getFirestore(app);
+export const db = getFirestore(app, (firebaseConfig as { firestoreDatabaseId: string }).firestoreDatabaseId);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 

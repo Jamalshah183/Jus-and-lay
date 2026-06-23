@@ -1,9 +1,10 @@
 {
   "projectId": "jus-and-lay",
-  "appId": "1:471404998511:web:d029bb2243ed29ddc3829a",
+  "appId": "1:471404998511:web:74fe48cde2e0bd7bc3829a",
   "apiKey": "AIzaSyCJHiQr0sITVXHaAas7icCXjigDVufggLI",
   "authDomain": "jus-and-lay.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-b6444bd9-317f-43b7-b4ce-cd68bd5232da",
   "storageBucket": "jus-and-lay.firebasestorage.app",
   "messagingSenderId": "471404998511",
-  "measurementId": "G-T0JFQJBTC4"
+  "measurementId": ""
 }
