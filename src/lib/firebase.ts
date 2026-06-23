@@ -5,7 +5,19 @@ import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Support secure environment-level key injection & rotation
-const apiKey = import.meta.env.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey || "";
+const getFirebaseApiKey = () => {
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
+  }
+  try {
+    // @ts-ignore
+    return import.meta.env.VITE_FIREBASE_API_KEY;
+  } catch (e) {
+    return undefined;
+  }
+};
+
+const apiKey = getFirebaseApiKey() || firebaseConfig.apiKey || "";
 
 if (!apiKey && typeof window !== 'undefined') {
   console.warn(
