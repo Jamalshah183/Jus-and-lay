@@ -295,7 +295,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
       if (u) {
-        const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com'];
+        const admins = ['juslay3@gmail.com', 'jamalshah183@gmail.com', 'lawyer.ay26@gmail.com'];
         const userEmail = u.email?.toLowerCase();
         
         if (userEmail && admins.includes(userEmail)) {

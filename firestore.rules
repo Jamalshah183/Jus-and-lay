@@ -16,10 +16,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email != null && (
         request.auth.token.email.lower() == 'juslay3@gmail.com' ||
         request.auth.token.email.lower() == 'jamalshah183@gmail.com' ||
+        request.auth.token.email.lower() == 'lawyer.ay26@gmail.com' ||
         request.auth.token.email == 'juslay3@gmail.com' ||
         request.auth.token.email == 'jamalshah183@gmail.com' ||
+        request.auth.token.email == 'lawyer.ay26@gmail.com' ||
         request.auth.token.email == 'Juslay3@gmail.com' ||
-        request.auth.token.email == 'Jamalshah183@gmail.com'
+        request.auth.token.email == 'Jamalshah183@gmail.com' ||
+        request.auth.token.email == 'Lawyer.ay26@gmail.com'
       );
     }
 
