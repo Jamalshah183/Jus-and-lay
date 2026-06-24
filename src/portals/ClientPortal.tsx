@@ -14,15 +14,12 @@ import {
   Building2,
   Calendar,
   X,
-  Plus,
-  Trash2
+  Plus
 } from 'lucide-react';
-import { auth, db, storage } from '../lib/firebase';
-import { ref, deleteObject } from 'firebase/storage';
-import { collection, query, where, onSnapshot, or, doc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, or } from 'firebase/firestore';
 import { LEGAL_TEAM } from '../data';
 import { openOrDownloadFile } from '../lib/fileHelper';
-import { DocumentUploader } from '../components/DocumentUploader';
 import { safeConfirm, safeAlert } from '../lib/modalHelper';
 
 interface DocumentMetadata {
@@ -119,28 +116,6 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
   const sortHearings = (hearings?: Hearing[]) => {
     if (!hearings) return [];
     return [...hearings].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  };
-
-  const handleDeleteDocument = async (docId: string, fileUrl?: string) => {
-    if (!safeConfirm("Are you sure you want to permanently delete this document?")) {
-      return;
-    }
-    try {
-      await deleteDoc(doc(db, 'documents', docId));
-      
-      if (fileUrl && fileUrl.includes('firebasestorage.googleapis.com')) {
-        try {
-          const fileRef = ref(storage, fileUrl);
-          await deleteObject(fileRef);
-        } catch (storageErr) {
-          console.warn("Storage cleanup skipped or failed:", storageErr);
-        }
-      }
-      safeAlert("Document successfully deleted.");
-    } catch (err) {
-      console.error("Error deleting document:", err);
-      safeAlert("Failed to delete document.");
-    }
   };
 
   React.useEffect(() => {
@@ -479,13 +454,6 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                     >
                                       View
                                     </button>
-                                    <button 
-                                      onClick={() => handleDeleteDocument(doc.id, doc.fileUrl)}
-                                      className="text-[9px] font-black uppercase text-red-600 font-extrabold hover:bg-red-50 border border-red-100 py-1.5 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center justify-center"
-                                      title="Delete Document"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
                                   </div>
                                 </div>
                               ))}
@@ -497,10 +465,6 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                No files available yet.
                             </div>
                           )}
-                        </div>
-
-                        <div className="mt-5 border-t border-slate-200/60 pt-5">
-                          <DocumentUploader caseId={selectedCase.id} />
                         </div>
                       </div>
                     </div>
@@ -626,13 +590,12 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                 ))}
               </div>
             </div>
- 
-            <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-slate-950/20 text-left font-sans">
+             <div className="bg-white rounded-3xl p-8 text-slate-800 border border-slate-200 relative overflow-hidden shadow-xl text-left font-sans">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16" />
               <div className="relative z-10">
-                <Shield className="w-10 h-10 text-emerald-600/40 mb-6" />
-                <h3 className="text-xl font-serif font-bold mb-4">Direct Advocate Support</h3>
-                <p className="text-white/80 text-sm mb-8 leading-relaxed">Need help immediately? Contact your dedicated legal consultant directly through WhatsApp.</p>
+                <Shield className="w-10 h-10 text-emerald-600 mb-6" />
+                <h3 className="text-xl font-serif font-bold mb-4 text-slate-900">Direct Advocate Support</h3>
+                <p className="text-slate-600 text-sm mb-8 leading-relaxed">Need help immediately? Contact your dedicated legal consultant directly through WhatsApp.</p>
                 <a 
                   href="https://wa.me/923218520085"
                   target="_blank"

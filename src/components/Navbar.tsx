@@ -88,18 +88,20 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
                 {link.label}
               </a>
             ))}
-            <button
-              onClick={() => onViewChange?.('client-login')}
+            <a
+              href="#client-login"
+              onClick={(e) => { e.preventDefault(); onViewChange?.('client-login'); }}
               className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
             >
               Client Portal
-            </button>
-            <button
-              onClick={() => onViewChange?.('admin-login')}
+            </a>
+            <a
+              href="#admin-login"
+              onClick={(e) => { e.preventDefault(); onViewChange?.('admin-login'); }}
               className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
             >
               Admin Portal
-            </button>
+            </a>
           </div>
 
           <div className="h-6 w-[1px] bg-navy-light/20" />
@@ -143,18 +145,20 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
                 {link.label}
               </a>
             ))}
-            <button
-              onClick={() => { onViewChange?.('client-login'); setIsMobileMenuOpen(false); }}
-              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer"
+            <a
+              href="#client-login"
+              onClick={(e) => { e.preventDefault(); onViewChange?.('client-login'); setIsMobileMenuOpen(false); }}
+              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block"
             >
               Client Portal
-            </button>
-            <button
-              onClick={() => { onViewChange?.('admin-login'); setIsMobileMenuOpen(false); }}
-              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer"
+            </a>
+            <a
+              href="#admin-login"
+              onClick={(e) => { e.preventDefault(); onViewChange?.('admin-login'); setIsMobileMenuOpen(false); }}
+              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block"
             >
               Admin Portal
-            </button>
+            </a>
           </div>
 
           <div className="flex flex-col gap-3 pt-2">

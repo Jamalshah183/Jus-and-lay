@@ -29,9 +29,53 @@ import ClientLogin from "./portals/ClientLogin";
 import ClientPortal from "./portals/ClientPortal";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal'>('main');
+  // Set initial view based on URL hash if present
+  const getInitialView = () => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash === '#admin-login') return 'admin-login';
+      if (hash === '#admin-portal') return 'admin-portal';
+      if (hash === '#client-login') return 'client-login';
+      if (hash === '#client-portal') return 'client-portal';
+    }
+    return 'main';
+  };
+
+  const [currentView, setCurrentView] = useState<'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal'>(getInitialView);
   const [isLoading, setIsLoading] = useState(true);
   const [profileTab, setProfileTab] = useState<"about" | "philosophy" | "practices" | "banking">("about");
+
+  const handleSetView = (view: 'main' | 'admin-login' | 'admin-portal' | 'client-login' | 'client-portal') => {
+    setCurrentView(view);
+    if (typeof window !== 'undefined') {
+      if (view === 'main') {
+        window.history.pushState(null, '', ' ');
+      } else {
+        window.location.hash = view;
+      }
+    }
+  };
+
+  // Add hashchange listener to handle back/forward buttons or direct hash edits
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#admin-login') {
+        setCurrentView('admin-login');
+      } else if (hash === '#admin-portal') {
+        setCurrentView('admin-portal');
+      } else if (hash === '#client-login') {
+        setCurrentView('client-login');
+      } else if (hash === '#client-portal') {
+        setCurrentView('client-portal');
+      } else if (!hash || hash === '#') {
+        setCurrentView('main');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,7 +133,7 @@ export default function App() {
             </AnimatePresence>
 
             {/* 1. STICKY NAVBAR */}
-            <Navbar onServicesClick={() => setProfileTab("practices")} onViewChange={setCurrentView} />
+            <Navbar onServicesClick={() => setProfileTab("practices")} onViewChange={handleSetView} />
 
             {/* 2. HERO VIEW using the client's specified Introduction text */}
             <ParallaxSection
@@ -562,13 +606,13 @@ export default function App() {
 
           </>
         ) : currentView === 'admin-login' ? (
-          <AdminLogin setView={setCurrentView} />
+          <AdminLogin setView={handleSetView} />
         ) : currentView === 'admin-portal' ? (
-          <AdminPortal setView={setCurrentView} />
+          <AdminPortal setView={handleSetView} />
         ) : currentView === 'client-login' ? (
-          <ClientLogin setView={setCurrentView} />
+          <ClientLogin setView={handleSetView} />
         ) : (
-          <ClientPortal setView={setCurrentView} />
+          <ClientPortal setView={handleSetView} />
         )}
 
       </div>
