@@ -430,17 +430,16 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                            <span className="text-xs lg:text-sm font-bold text-emerald-600 uppercase tracking-wider block truncate">{selectedCase.courtName}</span>
                          </div>
                        </div>
-                      
-                      <div className="bg-slate-50 border border-slate-200 p-5 lg:p-6 rounded-3xl">
+                                           <div className="bg-slate-50 border border-slate-200 p-5 lg:p-6 rounded-3xl">
                         <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                          <FileText className="w-4 h-4" /> Official Order Sheets
+                          <FileText className="w-4 h-4" /> Official Order Sheets & Documents
                         </h4>
                         
-                        {selectedCase.orderSheetUrl ? (
-                          <div className="space-y-3">
+                        <div className="space-y-3">
+                          {selectedCase.orderSheetUrl && (
                             <button 
                               onClick={() => openOrDownloadFile(selectedCase.orderSheetUrl || '', selectedCase.caseTitle || 'order_sheet')}
-                              className="flex items-center justify-between w-full bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-205 group/link hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98] min-w-0 cursor-pointer bg-transparent border-slate-200"
+                              className="flex items-center justify-between w-full bg-white px-4 py-3 rounded-2xl shadow-sm border border-slate-200 group/link hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98] min-w-0 cursor-pointer bg-transparent"
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-8 h-8 bg-slate-100 text-emerald-605 rounded-xl flex items-center justify-center shrink-0">
@@ -455,66 +454,58 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                 <FileText className="w-3.5 h-3.5" />
                               </div>
                             </button>
-                          </div>
-                        ) : (
-                          <div className="text-slate-400 text-[10px] italic bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
-                             No files available yet.
-                          </div>
-                        )}
-                      </div>
- 
-                      <div className="bg-slate-50 border border-slate-200 p-5 lg:p-6 rounded-3xl" id="client-uploaded-docs-block">
-                        <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                          <FileBox className="w-4 h-4" /> Case Files & Uploads ({uploadedDocs.length})
-                        </h4>
- 
-                        {uploadedDocs.length > 0 ? (
-                          <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                            {uploadedDocs.map((doc) => (
-                              <div 
-                                key={doc.id}
-                                className="flex items-center justify-between w-full bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 transition-all min-w-0"
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <div className="w-7 h-7 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                                    <FileText className="w-3.5 h-3.5" />
+                          )}
+
+                          {uploadedDocs.length > 0 && (
+                            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                              {uploadedDocs.map((doc) => (
+                                <div 
+                                  key={doc.id}
+                                  className="flex items-center justify-between w-full bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-300 transition-all min-w-0"
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className="w-7 h-7 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+                                      <FileText className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className="text-left min-w-0 font-sans">
+                                      <span className="text-slate-800 font-bold text-xs block truncate max-w-[120px] sm:max-w-[160px]">{doc.fileName}</span>
+                                      <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Legal Record</span>
+                                    </div>
                                   </div>
-                                  <div className="text-left min-w-0 font-sans">
-                                    <span className="text-slate-800 font-bold text-xs block truncate max-w-[120px] sm:max-w-[160px]">{doc.fileName}</span>
-                                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Legal Record</span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button 
+                                      onClick={() => openOrDownloadFile(doc.fileUrl, doc.fileName)}
+                                      className="text-[9px] font-black uppercase text-emerald-605 bg-emerald-50 hover:bg-emerald-100 border border-emerald-150 py-1.5 px-3 rounded-lg cursor-pointer transition-colors"
+                                    >
+                                      View
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteDocument(doc.id, doc.fileUrl)}
+                                      className="text-[9px] font-black uppercase text-red-600 font-extrabold hover:bg-red-50 border border-red-100 py-1.5 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center justify-center"
+                                      title="Delete Document"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <button 
-                                    onClick={() => openOrDownloadFile(doc.fileUrl, doc.fileName)}
-                                    className="text-[9px] font-black uppercase text-emerald-605 bg-emerald-50 hover:bg-emerald-100 border border-emerald-150 py-1.5 px-3 rounded-lg cursor-pointer transition-colors"
-                                  >
-                                    View
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDeleteDocument(doc.id, doc.fileUrl)}
-                                    className="text-[9px] font-black uppercase text-red-600 font-extrabold hover:bg-red-50 border border-red-100 py-1.5 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center justify-center"
-                                    title="Delete Document"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-slate-400 text-[10px] italic bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
-                            No uploaded documents found for this case.
-                          </p>
-                        )}
- 
+                              ))}
+                            </div>
+                          )}
+
+                          {!selectedCase.orderSheetUrl && uploadedDocs.length === 0 && (
+                            <div className="text-slate-400 text-[10px] italic bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
+                               No files available yet.
+                            </div>
+                          )}
+                        </div>
+
                         <div className="mt-5 border-t border-slate-200/60 pt-5">
                           <DocumentUploader caseId={selectedCase.id} />
                         </div>
                       </div>
                     </div>
                   </div>
- 
+  
                   {/* Hearing Timeline */}
                   <div className="px-0 py-2">
                     <h3 className="text-base lg:text-lg font-serif font-bold text-slate-900 mb-8 flex items-center gap-3">
@@ -534,7 +525,7 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
-                                    <p className="text-[10px] lg:text-sm font-black text-emerald-600 flex items-center gap-2">
+                                    <p className="text-xs lg:text-sm font-black text-emerald-600 flex items-center gap-2">
                                       <Calendar className="w-3.5 h-3.5" /> 
                                       <span className="uppercase tracking-wider">Hearing Date:</span> {hearing.date}
                                     </p>
@@ -544,26 +535,26 @@ export default function ClientPortal({ setView }: ClientPortalProps) {
                                       </span>
                                     )}
                                   </div>
-                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-[sans-serif]">
-                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-[sans-serif]">
+                                    <p className="text-[10px] font-bold text-slate-400">
                                       Seq: {array.length - hIndex}
                                     </p>
                                     {(hearing.judgeName || selectedCase.judgeName) && (
-                                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                      <p className="text-[10px] font-medium text-slate-600 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> 
-                                        Before: {hearing.judgeName || selectedCase.judgeName}
+                                        <span className="font-bold text-slate-500">Judge:</span> {hearing.judgeName || selectedCase.judgeName}
                                       </p>
                                     )}
                                     {hearing.nextHearingDate && (
-                                      <p className="text-[8px] font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1">
+                                      <p className="text-[10px] font-medium text-emerald-700 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full" /> 
-                                        Next Scheduled: {hearing.nextHearingDate}
+                                        <span className="font-bold text-emerald-650">Next Date:</span> {hearing.nextHearingDate}
                                       </p>
                                     )}
                                     {(hearing.courtName || selectedCase.courtName) && (
-                                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                      <p className="text-[10px] font-medium text-slate-600 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 bg-slate-300 rounded-full" /> 
-                                        {hearing.courtName || selectedCase.courtName}
+                                        <span className="font-bold text-slate-500">Court:</span> {hearing.courtName || selectedCase.courtName}
                                       </p>
                                     )}
                                   </div>
