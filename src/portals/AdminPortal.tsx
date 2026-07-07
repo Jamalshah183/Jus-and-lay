@@ -590,10 +590,11 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     if (!selectedCase?.id) return;
     
     setIsSaving(true);
-    const userDocExists = users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase());
+    const userDocExists = users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim());
+    const existingUser = users.find(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim());
     
     try {
-      if (editFormData.clientPassword && editFormData.clientId.includes('@')) {
+      if (!userDocExists && editFormData.clientPassword && editFormData.clientId.includes('@')) {
         let secondaryApp;
         try {
           secondaryApp = initializeApp(firebaseConfig, `AuthSyncUpdate_${Date.now()}`);
@@ -662,8 +663,10 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         updatedAt: serverTimestamp()
       };
       
-      if (editFormData.clientPassword) {
+      if (!userDocExists && editFormData.clientPassword) {
         caseDataToUpdate.clientPassword = editFormData.clientPassword;
+      } else if (existingUser?.password) {
+        caseDataToUpdate.clientPassword = existingUser.password;
       }
       if (editFormData.orderSheetUrl) {
         caseDataToUpdate.orderSheetUrl = editFormData.orderSheetUrl;
@@ -706,8 +709,8 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
     const existingUser = users.find(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim());
 
     try {
-      if (formData.clientId.includes('@') && (formData.clientPassword || !userDocExists)) {
-        const passwordToUse = formData.clientPassword || existingUser?.password || 'password123';
+      if (formData.clientId.includes('@') && !userDocExists) {
+        const passwordToUse = formData.clientPassword || 'password123';
         let secondaryApp;
         try {
           secondaryApp = initializeApp(firebaseConfig, `AuthSync_${Date.now()}`);
@@ -777,7 +780,7 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
         proceedings: formData.proceedings || '',
       };
 
-      if (formData.clientPassword) {
+      if (!userDocExists && formData.clientPassword) {
         caseDataToInsert.clientPassword = formData.clientPassword;
       } else if (existingUser?.password) {
         caseDataToInsert.clientPassword = existingUser.password;
@@ -1026,22 +1029,23 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                       <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
                           {users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim()) ? (
-                            <span className="text-emerald-600 font-bold">Assign Portal Password (Optional - Existing Account)</span>
+                            <span className="text-amber-600 font-bold">Portal Password (Disabled - Existing Client)</span>
                           ) : (
                             <span>Assign Portal Password (6 Chars Min)</span>
                           )}
                         </label>
                         <input 
+                          disabled={users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim())}
                           required={!users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim())} 
                           type="text" 
-                          placeholder={users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim()) ? "Merged with existing account" : "password123"} 
-                          value={formData.clientPassword} 
+                          placeholder={users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim()) ? "Using client's existing password" : "password123"} 
+                          value={users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim()) ? "" : formData.clientPassword} 
                           onChange={(e) => setFormData({...formData, clientPassword: e.target.value})} 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white outline-none text-slate-900 transition-all placeholder:text-slate-400" 
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white outline-none text-slate-900 transition-all placeholder:text-slate-400 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200" 
                         />
                         <span className="text-[9px] text-slate-400 block ml-1 font-bold">
                           {users.some(u => u.email.toLowerCase() === formData.clientId.toLowerCase().trim()) ? (
-                            <span className="text-emerald-600 font-semibold">✓ Account exists. This new case will merge with their existing portal.</span>
+                            <span className="text-amber-600 font-semibold">✓ Existing account detected. Password cannot be updated or specified.</span>
                           ) : (
                             "Client will use this key and email to read case files."
                           )}
@@ -1192,22 +1196,23 @@ export default function AdminPortal({ setView }: AdminPortalProps) {
                         <div className="space-y-2">
                           <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
                             {users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim()) ? (
-                              <span className="text-emerald-600 font-bold">Update Portal Password (Optional - Existing Account)</span>
+                              <span className="text-amber-600 font-bold">Portal Password (Disabled - Existing Client)</span>
                             ) : (
                               <span>Update Portal Password (6 Chars Min)</span>
                             )}
                           </label>
                           <input 
+                            disabled={users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim())}
                             required={!users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim())} 
                             type="text" 
-                            placeholder={users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim()) ? "Leave blank to keep existing password" : "password123"} 
-                            value={editFormData.clientPassword} 
+                            placeholder={users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim()) ? "Using client's existing password" : "password123"} 
+                            value={users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim()) ? "" : editFormData.clientPassword} 
                             onChange={(e) => setEditFormData({...editFormData, clientPassword: e.target.value})} 
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white outline-none text-slate-900 transition-all placeholder:text-slate-400" 
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:bg-white outline-none text-slate-900 transition-all placeholder:text-slate-400 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200" 
                           />
                           <span className="text-[9px] text-slate-400 block ml-1 font-bold">
                             {users.some(u => u.email.toLowerCase() === editFormData.clientId.toLowerCase().trim()) ? (
-                              <span className="text-emerald-600 font-semibold">✓ Account exists. This case is merged with their existing portal access.</span>
+                              <span className="text-amber-600 font-semibold">✓ Existing account detected. Password cannot be updated or specified.</span>
                             ) : (
                               "Overwrites or creates the client's auth profile."
                             )}
