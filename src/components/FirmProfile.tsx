@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Scale, 
@@ -202,25 +203,25 @@ export default function FirmProfile({ activeTab: propActiveTab, onTabChange }: F
                       
                       {area.title === "Corporate & Commercial Law" && (
                         <div className="mt-5 pt-4 border-t border-white/5 text-left">
-                          <a 
-                            href="/practices/corporate-representation" 
+                          <Link 
+                            href="/practices/corporate-representation/" 
                             className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
                           >
                             <span>View Dedicated Corporate Desk</span>
                             <ChevronRight className="w-3.5 h-3.5 text-gold" />
-                          </a>
+                          </Link>
                         </div>
                       )}
                       
                       {area.title === "Banking & Finance" && (
                         <div className="mt-5 pt-4 border-t border-white/5 text-left">
-                          <a 
-                            href="/practices/banking-representation" 
+                          <Link 
+                            href="/practices/banking-representation/" 
                             className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
                           >
                             <span>View Dedicated Banking Desk</span>
                             <ChevronRight className="w-3.5 h-3.5 text-gold" />
-                          </a>
+                          </Link>
                         </div>
                       )}
                     </div>
