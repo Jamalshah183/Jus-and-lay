@@ -184,19 +184,45 @@ export default function FirmProfile({ activeTab: propActiveTab, onTabChange }: F
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {PRACTICE_AREAS.map((area, index) => (
-                    <div key={index} className="p-5 bg-[#070e1b] border border-white/5 hover:border-gold/30 rounded-lg transition-all duration-300">
-                      <h4 className="font-serif text-sm sm:text-base font-bold text-gold mb-3 uppercase tracking-wide border-b border-white/5 pb-2 flex items-center justify-between">
-                        <span>{area.title}</span>
-                        <div className="w-1.5 h-1.5 bg-gold rounded-full" />
-                      </h4>
-                      <ul className="space-y-2">
-                        {area.items.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2.5">
-                            <span className="text-gold/60 text-xs mt-0.5">•</span>
-                            <span className="text-white/75 text-xs sm:text-sm font-sans font-light leading-relaxed">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div key={index} className="p-5 bg-[#070e1b] border border-white/5 hover:border-gold/30 rounded-lg transition-all duration-300 flex flex-col justify-between">
+                      <div>
+                        <h4 className="font-serif text-sm sm:text-base font-bold text-gold mb-3 uppercase tracking-wide border-b border-white/5 pb-2 flex items-center justify-between">
+                          <span>{area.title}</span>
+                          <div className="w-1.5 h-1.5 bg-gold rounded-full" />
+                        </h4>
+                        <ul className="space-y-2">
+                          {area.items.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2.5">
+                              <span className="text-gold/60 text-xs mt-0.5">•</span>
+                              <span className="text-white/75 text-xs sm:text-sm font-sans font-light leading-relaxed">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      {area.title === "Corporate & Commercial Law" && (
+                        <div className="mt-5 pt-4 border-t border-white/5 text-left">
+                          <a 
+                            href="/practices/corporate-representation" 
+                            className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
+                          >
+                            <span>View Dedicated Corporate Desk</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-gold" />
+                          </a>
+                        </div>
+                      )}
+                      
+                      {area.title === "Banking & Finance" && (
+                        <div className="mt-5 pt-4 border-t border-white/5 text-left">
+                          <a 
+                            href="/practices/banking-representation" 
+                            className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
+                          >
+                            <span>View Dedicated Banking Desk</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-gold" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
