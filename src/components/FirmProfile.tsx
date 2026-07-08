@@ -201,29 +201,52 @@ export default function FirmProfile({ activeTab: propActiveTab, onTabChange }: F
                         </ul>
                       </div>
                       
-                      {area.title === "Corporate & Commercial Law" && (
-                        <div className="mt-5 pt-4 border-t border-white/5 text-left">
-                          <Link 
-                            href="/practices/corporate-representation/" 
-                            className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
-                          >
-                            <span>View Dedicated Corporate Desk</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-gold" />
-                          </Link>
-                        </div>
-                      )}
-                      
-                      {area.title === "Banking & Finance" && (
-                        <div className="mt-5 pt-4 border-t border-white/5 text-left">
-                          <Link 
-                            href="/practices/banking-representation/" 
-                            className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
-                          >
-                            <span>View Dedicated Banking Desk</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-gold" />
-                          </Link>
-                        </div>
-                      )}
+                      {(() => {
+                        let linkHref = "";
+                        let linkText = "";
+                        switch (area.title) {
+                          case "Corporate & Commercial Law":
+                            linkHref = "/practices/corporate-representation/";
+                            linkText = "View Dedicated Corporate Desk";
+                            break;
+                          case "Banking & Finance":
+                            linkHref = "/practices/banking-representation/";
+                            linkText = "View Dedicated Banking Desk";
+                            break;
+                          case "Litigation & Dispute Resolution":
+                            linkHref = "/practices/litigation-resolution/";
+                            linkText = "View Dedicated Litigation Desk";
+                            break;
+                          case "Employment & Labour Law":
+                            linkHref = "/practices/employment-labour/";
+                            linkText = "View Dedicated Employment Desk";
+                            break;
+                          case "Taxation":
+                            linkHref = "/practices/taxation/";
+                            linkText = "View Dedicated Taxation Desk";
+                            break;
+                          case "Criminal Law":
+                            linkHref = "/practices/criminal-law/";
+                            linkText = "View Dedicated Criminal Desk";
+                            break;
+                          case "Environmental & Regulatory Law":
+                            linkHref = "/practices/environmental-regulatory/";
+                            linkText = "View Dedicated Environmental Desk";
+                            break;
+                        }
+                        if (!linkHref) return null;
+                        return (
+                          <div className="mt-5 pt-4 border-t border-white/5 text-left">
+                            <Link 
+                              href={linkHref} 
+                              className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase font-bold text-gold hover:text-white transition-colors focus:outline-none"
+                            >
+                              <span>{linkText}</span>
+                              <ChevronRight className="w-3.5 h-3.5 text-gold" />
+                            </Link>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
