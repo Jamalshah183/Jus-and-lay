@@ -34,67 +34,68 @@ export const PRACTICE_AREAS = [
   {
     title: "Corporate & Commercial Law",
     items: [
-      "Corporate structuring and governance",
-      "Company incorporation and registration",
-      "Commercial contracts and agreements",
-      "Mergers, acquisitions, and restructuring",
-      "Regulatory and compliance advisory",
-      "Joint ventures and strategic alliances"
+      "Corporate structuring & governance under Pakistan Companies Act 2017",
+      "SECP company incorporation, registration, and statutory filings",
+      "Drafting commercial contracts, partnership deeds, and corporate agreements",
+      "Mergers, acquisitions, joint ventures, and business restructuring",
+      "Board of Investment (BOI) and regulatory compliance advisory",
+      "Public-private partnerships and strategic commercial alliances"
     ]
   },
   {
     title: "Banking & Finance",
     items: [
-      "Corporate and syndicated financing",
-      "Security documentation and perfection",
-      "Mortgage and charge creation",
-      "Banking litigation and recovery proceedings",
-      "Legal due diligence and verification",
-      "Financial and transactional advisory"
+      "Corporate finance, syndications, and Islamic banking facilities",
+      "Loan agreements, security documentation, and charge perfection",
+      "Mortgage creation, validation of title deeds, and registry search",
+      "Banking litigation and debt recovery defense under FIO 2001",
+      "Legal due diligence reports and security valuation verification",
+      "Financial structuring advisory for national and foreign institutions"
     ]
   },
   {
     title: "Litigation & Dispute Resolution",
     items: [
-      "Civil litigation",
-      "Commercial and corporate disputes",
-      "Banking and financial litigation",
-      "Arbitration and mediation",
-      "Regulatory proceedings",
-      "Enforcement and recovery actions"
+      "Civil trial advocacy and contractual enforcement proceedings",
+      "Commercial disputes, liquidations, and shareholder petitions",
+      "Banking recoveries and financial litigation before Banking Courts",
+      "Domestic and international commercial arbitration and mediation",
+      "High Court constitutional writ petitions and appellate practice",
+      "Execution of decrees and recovery actions nationwide"
     ]
   },
   {
     title: "Employment & Labour Law",
     items: [
-      "Employment contracts and policies",
-      "Workplace disputes",
-      "Disciplinary proceedings",
-      "Labour compliance advisory"
+      "Employment contracts, HR manuals, and executive severance policies",
+      "Workplace grievance redressal and wrongful termination disputes",
+      "EOBI registration, PESSI social security, and labor court defense",
+      "Labor law compliance advisory for industrial and service sectors"
     ]
   },
   {
     title: "Taxation",
     items: [
-      "Income Tax matters",
-      "Sales Tax matters",
-      "Tax litigation and advisory services"
+      "FBR Income Tax registration, filing, and audit representations",
+      "Provincial Sales Tax (PRA, SRB) audit appeals & tax compliance",
+      "Appellate Tribunal Inland Revenue (ATIR) appeal representations",
+      "High Court tax stay orders and reference applications"
     ]
   },
   {
     title: "Criminal Law",
     items: [
-      "Criminal litigation",
-      "White-collar crime matters",
-      "Regulatory investigations"
+      "NAB investigations, white-collar crime defense, and bail petitions",
+      "FIA corporate crime inquiries, cybercrime, and AML representations",
+      "Trial advocacy before Sessions Courts and criminal appeals in High Courts"
     ]
   },
   {
     title: "Environmental & Regulatory Law",
     items: [
-      "Regulatory compliance",
-      "Environmental advisory services",
-      "Administrative proceedings"
+      "EIA (Environmental Impact Assessment) and IEE reports compliance",
+      "EPA Punjab & federal environmental tribunal representations",
+      "Regulatory approvals, NOC acquisitions, and administrative hearings"
     ]
   }
 ];

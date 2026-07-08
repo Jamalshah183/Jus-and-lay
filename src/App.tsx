@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { IMAGES, INTRODUCTION, ABOUT_FIRM, OUR_CLIENTS, CLIENTS_BY_SECTOR } from "./data";
 import { motion, AnimatePresence } from "motion/react";
@@ -538,6 +540,11 @@ export default function App() {
                     Liaison & Location
                   </a>
                 </li>
+                <li>
+                  <a href="/sitemap" className="hover:text-gold transition-colors block font-semibold text-gold">
+                    Website Directory & Sitemap
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -595,10 +602,14 @@ export default function App() {
               © {new Date().getFullYear()} JUS & LAY. All corporate shields reserved.
             </span>
             
-            <div className="flex items-center gap-4 text-[10px] font-sans font-semibold text-white/30">
+            <div className="flex flex-wrap items-center gap-4 text-[10px] font-sans font-semibold text-white/30">
               <a href="#about" onClick={(e) => handleCTABookScroll(e, "#about")} className="hover:text-gold hover:underline">Privilege Standard</a>
               <span>•</span>
               <a href="#firm-profile" onClick={(e) => handleCTABookScroll(e, "#firm-profile", "practices")} className="hover:text-gold hover:underline">Regulatory ComplianceDesk</a>
+              <span>•</span>
+              <a href="/sitemap" className="hover:text-gold hover:underline">Sitemap Directory</a>
+              <span>•</span>
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-gold hover:underline">XML Index</a>
             </div>
           </div>
         </div>
