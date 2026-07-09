@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Corporate & Commercial Law Specialists | Jus & Lay Law Conglomerate",
   description: "Expert Corporate & Commercial lawyers in Pakistan specializing in SECP company registration, M&A, regulatory compliance, joint ventures, and High Court advocacy.",
   alternates: {
-    canonical: "https://juslay.com/practices/corporate-representation/",
+    canonical: "https://jusandlay.com/practices/corporate-representation/",
   },
   openGraph: {
     title: "Corporate & Commercial Law Specialists | Jus & Lay Law Conglomerate",
     description: "Expert Corporate & Commercial lawyers in Pakistan specializing in SECP company registration, M&A, regulatory compliance, joint ventures, and High Court advocacy.",
-    url: "https://juslay.com/practices/corporate-representation/",
+    url: "https://jusandlay.com/practices/corporate-representation/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Corporate & Commercial Law",
-        "item": "https://juslay.com/practices/corporate-representation/"
+        "item": "https://jusandlay.com/practices/corporate-representation/"
       }
     ]
   };

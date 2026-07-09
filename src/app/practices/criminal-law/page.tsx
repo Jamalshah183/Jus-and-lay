@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Criminal & White-Collar Defense | Jus & Lay Law Conglomerate",
   description: "Specialist white-collar crime defense lawyers in Pakistan. Experienced advocates representing clients in NAB, FIA cybercrime, pre-arrest bails, and conviction appeals.",
   alternates: {
-    canonical: "https://juslay.com/practices/criminal-law/",
+    canonical: "https://jusandlay.com/practices/criminal-law/",
   },
   openGraph: {
     title: "Criminal & White-Collar Defense | Jus & Lay Law Conglomerate",
     description: "Specialist white-collar crime defense lawyers in Pakistan. Experienced advocates representing clients in NAB, FIA cybercrime, pre-arrest bails, and conviction appeals.",
-    url: "https://juslay.com/practices/criminal-law/",
+    url: "https://jusandlay.com/practices/criminal-law/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Criminal & White-Collar Law",
-        "item": "https://juslay.com/practices/criminal-law/"
+        "item": "https://jusandlay.com/practices/criminal-law/"
       }
     ]
   };

@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Employment & Labour Law Advisory | Jus & Lay Law Conglomerate",
   description: "Premier labor compliance and employment defense lawyers in Pakistan. Specialized in EOBI audits, Social Security compliance, and Labour Court trials.",
   alternates: {
-    canonical: "https://juslay.com/practices/employment-labour/",
+    canonical: "https://jusandlay.com/practices/employment-labour/",
   },
   openGraph: {
     title: "Employment & Labour Law Advisory | Jus & Lay Law Conglomerate",
     description: "Premier labor compliance and employment defense lawyers in Pakistan. Specialized in EOBI audits, Social Security compliance, and Labour Court trials.",
-    url: "https://juslay.com/practices/employment-labour/",
+    url: "https://jusandlay.com/practices/employment-labour/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Employment & Labour Law",
-        "item": "https://juslay.com/practices/employment-labour/"
+        "item": "https://jusandlay.com/practices/employment-labour/"
       }
     ]
   };

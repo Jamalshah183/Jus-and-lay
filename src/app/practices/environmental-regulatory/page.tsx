@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Environmental & Regulatory Law Compliance | Jus & Lay Law Conglomerate",
   description: "Expert environmental and municipal zoning clearance lawyers in Pakistan. Guiding enterprises through EPA clearance, Initial Environmental Examinations, and Environmental Protection Tribunal appeals.",
   alternates: {
-    canonical: "https://juslay.com/practices/environmental-regulatory/",
+    canonical: "https://jusandlay.com/practices/environmental-regulatory/",
   },
   openGraph: {
     title: "Environmental & Regulatory Law Compliance | Jus & Lay Law Conglomerate",
     description: "Expert environmental and municipal zoning clearance lawyers in Pakistan. Guiding enterprises through EPA clearance, Initial Environmental Examinations, and Environmental Protection Tribunal appeals.",
-    url: "https://juslay.com/practices/environmental-regulatory/",
+    url: "https://jusandlay.com/practices/environmental-regulatory/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Environmental & Regulatory Law",
-        "item": "https://juslay.com/practices/environmental-regulatory/"
+        "item": "https://jusandlay.com/practices/environmental-regulatory/"
       }
     ]
   };

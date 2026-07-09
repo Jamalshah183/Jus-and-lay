@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Litigation & Alternative Dispute Resolution | Jus & Lay Law Conglomerate",
   description: "Formidable Supreme Court and High Court trial advocates in Pakistan. Specialized in commercial disputes, stay writs, stay orders, and international arbitration.",
   alternates: {
-    canonical: "https://juslay.com/practices/litigation-resolution/",
+    canonical: "https://jusandlay.com/practices/litigation-resolution/",
   },
   openGraph: {
     title: "Litigation & Alternative Dispute Resolution | Jus & Lay Law Conglomerate",
     description: "Formidable Supreme Court and High Court trial advocates in Pakistan. Specialized in commercial disputes, stay writs, stay orders, and international arbitration.",
-    url: "https://juslay.com/practices/litigation-resolution/",
+    url: "https://jusandlay.com/practices/litigation-resolution/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Litigation & Dispute Resolution",
-        "item": "https://juslay.com/practices/litigation-resolution/"
+        "item": "https://jusandlay.com/practices/litigation-resolution/"
       }
     ]
   };

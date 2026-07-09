@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Corporate Taxation & FBR Litigation | Jus & Lay Law Conglomerate",
   description: "Specialist tax lawyers in Pakistan. Expertise in corporate tax filing, provincial sales tax (PRA/SRB) audits, and High Court tax stay appeals.",
   alternates: {
-    canonical: "https://juslay.com/practices/taxation/",
+    canonical: "https://jusandlay.com/practices/taxation/",
   },
   openGraph: {
     title: "Corporate Taxation & FBR Litigation | Jus & Lay Law Conglomerate",
     description: "Specialist tax lawyers in Pakistan. Expertise in corporate tax filing, provincial sales tax (PRA/SRB) audits, and High Court tax stay appeals.",
-    url: "https://juslay.com/practices/taxation/",
+    url: "https://jusandlay.com/practices/taxation/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Taxation",
-        "item": "https://juslay.com/practices/taxation/"
+        "item": "https://jusandlay.com/practices/taxation/"
       }
     ]
   };

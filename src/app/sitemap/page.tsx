@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Website Directory & Sitemap | Jus & Lay Law Conglomerate",
   description: "Browse the complete architectural map of Jus & Lay Law Conglomerate, Pakistan. High Court and Supreme Court advocates specializing in corporate law, banking litigation, FBR tax appeals, white-collar NAB defense, and civil litigation.",
   alternates: {
-    canonical: "https://juslay.com/sitemap/",
+    canonical: "https://jusandlay.com/sitemap/",
   },
   openGraph: {
     title: "Website Directory & Sitemap | Jus & Lay Law Conglomerate",
     description: "Browse the complete architectural map of Jus & Lay Law Conglomerate, Pakistan. High Court and Supreme Court advocates specializing in corporate law, banking litigation, FBR tax appeals, white-collar NAB defense, and civil litigation.",
-    url: "https://juslay.com/sitemap/",
+    url: "https://jusandlay.com/sitemap/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -33,13 +33,13 @@ export default function Page() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://juslay.com/"
+        "item": "https://jusandlay.com/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Sitemap",
-        "item": "https://juslay.com/sitemap/"
+        "item": "https://jusandlay.com/sitemap/"
       }
     ]
   };

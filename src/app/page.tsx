@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Corporate & Banking Law Firm in Pakistan | Jus & Lay Law Conglomerate",
   description: "Jus & Lay is a premier law firm in Pakistan. High Court advocates specializing in Corporate Law, Banking Litigation Defense, SECP Compliance, FBR Tax Appeals, White-Collar NAB trials, and Civil Litigation.",
   alternates: {
-    canonical: "https://juslay.com/",
+    canonical: "https://jusandlay.com/",
   },
   keywords: [
     "Law firm in Pakistan",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Corporate & Banking Law Firm in Pakistan | Jus & Lay Law Conglomerate",
     description: "Jus & Lay is a premier law firm in Pakistan. High Court advocates specializing in Corporate Law, Banking Litigation Defense, SECP Compliance, FBR Tax Appeals, White-Collar NAB trials, and Civil Litigation.",
-    url: "https://juslay.com/",
+    url: "https://jusandlay.com/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
     images: [
@@ -46,8 +46,8 @@ export default function Page() {
     "@type": "LegalService",
     "name": "Jus & Lay Law Conglomerate",
     "image": "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
-    "@id": "https://juslay.com/#legalservice",
-    "url": "https://juslay.com/",
+    "@id": "https://jusandlay.com/#legalservice",
+    "url": "https://jusandlay.com/",
     "telephone": "+92-321-8520085",
     "priceRange": "$$$",
     "address": {
