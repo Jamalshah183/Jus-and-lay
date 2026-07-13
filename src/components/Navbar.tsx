@@ -58,13 +58,13 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
         </Link>
 
         {/* Desktop Links */}
-        <div className="hidden lg:flex items-center gap-8">
-          <div className="flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-10">
+          <div className="flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 whitespace-nowrap after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
               >
                 {link.label}
               </Link>
@@ -73,14 +73,14 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             {onViewChange ? (
               <button
                 onClick={() => onViewChange('client-login')}
-                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 whitespace-nowrap after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
               >
                 Client Portal
               </button>
             ) : (
               <Link
                 href="/#client-login"
-                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 whitespace-nowrap after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
               >
                 Client Portal
               </Link>
@@ -89,27 +89,27 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             {onViewChange ? (
               <button
                 onClick={() => onViewChange('admin-login')}
-                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 whitespace-nowrap after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
               >
                 Admin Portal
               </button>
             ) : (
               <Link
                 href="/#admin-login"
-                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 whitespace-nowrap after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
               >
                 Admin Portal
               </Link>
             )}
           </div>
 
-          <div className="h-6 w-[1px] bg-navy-light/20" />
+          <div className="h-6 w-[1px] bg-navy-light/20 shrink-0" />
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 shrink-0">
             <Link
               href="/contact"
-              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.35)] transition-all duration-300 flex items-center gap-2"
+              className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.35)] transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <MessageCircle className="w-3.5 h-3.5 text-white shrink-0" />
               <span>WhatsApp Liaison</span>
