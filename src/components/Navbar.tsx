@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, Phone, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 interface NavbarProps {
   onOpenConsultationsHistory?: () => void;
@@ -26,31 +27,13 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
   }, []);
 
   const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "About Chambers", href: "#about" },
-    { label: "Our Services", href: "#firm-profile" },
-    { label: "Of Counsel", href: "#team" },
-    { label: "Contact", href: "#contact" },
+    { label: "Home", href: "/" },
+    { label: "About Chambers", href: "/about" },
+    { label: "Our Services", href: "/practices" },
+    { label: "Of Counsel", href: "/team" },
+    { label: "Our Clients", href: "/clients" },
+    { label: "Contact", href: "/contact" },
   ];
-
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    if (href === "#firm-profile" && onServicesClick) {
-      onServicesClick();
-    }
-    const element = document.querySelector(href);
-    if (element) {
-      const offset = 80; // height of navbar
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-      setIsMobileMenuOpen(false);
-    }
-  };
 
   return (
     <nav
@@ -62,9 +45,8 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 xl:px-12 flex items-center justify-between">
         {/* Brand Logo - Pakistani Corporate Chambers */}
-        <a
-          href="#home"
-          onClick={(e) => handleLinkClick(e, "#home")}
+        <Link
+          href="/"
           className="relative h-12 w-52 sm:w-56 md:w-56 flex items-center group focus:outline-none"
         >
           <img
@@ -73,49 +55,65 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
             className="absolute left-0 top-1/2 -translate-y-1/2 mt-[-2px] h-[88px] sm:h-[98px] md:h-[94px] max-w-none w-auto object-contain transition-transform group-hover:scale-[1.03]"
             referrerPolicy="no-referrer"
           />
-        </a>
+        </Link>
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-8">
           <div className="flex items-center gap-6">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
                 className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="#client-login"
-              onClick={(e) => { e.preventDefault(); onViewChange?.('client-login'); }}
-              className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
-            >
-              Client Portal
-            </a>
-            <a
-              href="#admin-login"
-              onClick={(e) => { e.preventDefault(); onViewChange?.('admin-login'); }}
-              className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer"
-            >
-              Admin Portal
-            </a>
+            
+            {onViewChange ? (
+              <button
+                onClick={() => onViewChange('client-login')}
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
+              >
+                Client Portal
+              </button>
+            ) : (
+              <Link
+                href="/#client-login"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+              >
+                Client Portal
+              </Link>
+            )}
+
+            {onViewChange ? (
+              <button
+                onClick={() => onViewChange('admin-login')}
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 cursor-pointer bg-transparent border-none"
+              >
+                Admin Portal
+              </button>
+            ) : (
+              <Link
+                href="/#admin-login"
+                className="text-xs font-sans tracking-wider font-bold text-navy-dark/90 hover:text-gold transition-colors relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-gold after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+              >
+                Admin Portal
+              </Link>
+            )}
           </div>
 
           <div className="h-6 w-[1px] bg-navy-light/20" />
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
-            <a
-              href="#consultation"
-              onClick={(e) => handleLinkClick(e, "#consultation")}
+            <Link
+              href="/contact"
               className="px-5 py-2.5 text-[10px] tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] hover:shadow-[0_0_15px_rgba(37,211,102,0.35)] transition-all duration-300 flex items-center gap-2"
             >
               <MessageCircle className="w-3.5 h-3.5 text-white shrink-0" />
               <span>WhatsApp Liaison</span>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -136,40 +134,60 @@ export default function Navbar({ onOpenConsultationsHistory, consultationCount =
         <div className="lg:hidden absolute top-[100%] inset-x-0 bg-[#fdfbf7]/98 backdrop-blur-lg border-b border-gold/30 py-6 px-6 shadow-2xl flex flex-col gap-6 animate-fade-in">
           <div className="flex flex-col gap-4 text-left">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-1 border-b border-gold/10"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="#client-login"
-              onClick={(e) => { e.preventDefault(); onViewChange?.('client-login'); setIsMobileMenuOpen(false); }}
-              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block"
-            >
-              Client Portal
-            </a>
-            <a
-              href="#admin-login"
-              onClick={(e) => { e.preventDefault(); onViewChange?.('admin-login'); setIsMobileMenuOpen(false); }}
-              className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block"
-            >
-              Admin Portal
-            </a>
+
+            {onViewChange ? (
+              <button
+                onClick={() => { onViewChange('client-login'); setIsMobileMenuOpen(false); }}
+                className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block w-full bg-transparent border-none"
+              >
+                Client Portal
+              </button>
+            ) : (
+              <Link
+                href="/#client-login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 block"
+              >
+                Client Portal
+              </Link>
+            )}
+
+            {onViewChange ? (
+              <button
+                onClick={() => { onViewChange('admin-login'); setIsMobileMenuOpen(false); }}
+                className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 cursor-pointer block w-full bg-transparent border-none"
+              >
+                Admin Portal
+              </button>
+            ) : (
+              <Link
+                href="/#admin-login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-base font-sans tracking-wide font-semibold text-navy-dark/95 hover:text-gold py-2 text-left border-b border-gold/10 block"
+              >
+                Admin Portal
+              </Link>
+            )}
           </div>
 
           <div className="flex flex-col gap-3 pt-2">
-            <a
-              href="#consultation"
-              onClick={(e) => handleLinkClick(e, "#consultation")}
+            <Link
+              href="/contact"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="w-full text-center px-5 py-3 text-xs tracking-widest uppercase font-bold font-sans bg-[#25D366] text-white rounded-xs hover:bg-[#20ba5a] transition-all duration-300 flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4 text-white shrink-0" />
               <span>WhatsApp Liaison</span>
-            </a>
+            </Link>
             <a
               href="tel:03218520085"
               className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs tracking-widest uppercase font-medium font-sans border border-navy/20 text-navy rounded-xs hover:bg-navy/5 transition-all duration-300"

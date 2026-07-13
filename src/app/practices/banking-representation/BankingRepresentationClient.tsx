@@ -118,7 +118,7 @@ export default function BankingRepresentationPage() {
             "@type": "LegalService",
             "name": "Jus & Lay Law Conglomerate - Banking Desk",
             "description": "Supreme banking defense lawyers and loan recovery panel advocates in Pakistan. Serving Bank of Punjab, HBL, Bank Alfalah under Recovery of Finances Act 2001.",
-            "url": "https://juslay.com/practices/banking-representation",
+            "url": "https://jusandlay.com/practices/banking-representation",
             "logo": "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
             "telephone": "+923218520085",
             "areaServed": "Pakistan",

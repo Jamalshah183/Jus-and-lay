@@ -68,9 +68,11 @@ export default function SitemapClient() {
 
   const mainPages = [
     { name: "Chambers Main Gateway (Home)", hash: "/", desc: "The primary digital portal of Jus & Lay, detailing legal achievements, leadership profiles, and client representation records." },
-    { name: "Chambers History & Core Leadership", hash: "/#about", desc: "Our firm’s history, core philosophy, executive leadership details, and high-standard legacy in the legal sector." },
-    { name: "Partners & Of Counsel Directory", hash: "/#team", desc: "A detailed registry of senior advocates, High Court practitioners, and specialized legal advisors." },
-    { name: "Contact, Liaison & Global Offices", hash: "/#contact", desc: "Physical locations of Lahore headquarters, correspondence protocols, secure contact channels, and maps." }
+    { name: "Chambers History & Core Leadership", hash: "/about", desc: "Our firm’s history, core philosophy, executive leadership details, and high-standard legacy in the legal sector." },
+    { name: "Practice Spectrum & Specializations", hash: "/practices", desc: "Our full advisory matrix including corporate advisory, taxation appeal desks, and high court litigation." },
+    { name: "Partners & Of Counsel Directory", hash: "/team", desc: "A detailed registry of senior advocates, High Court practitioners, and specialized legal advisors." },
+    { name: "Sector Coverage & Key Clients", hash: "/clients", desc: "Review our institutional clientele, corporate partnerships, and banking panel credentials." },
+    { name: "Contact, Liaison & Global Offices", hash: "/contact", desc: "Physical locations of Lahore headquarters, correspondence protocols, secure contact channels, and maps." }
   ];
 
   const securePortals = [
@@ -207,7 +209,7 @@ export default function SitemapClient() {
                     href={page.hash} 
                     className="text-xs text-[#ffbc57] font-semibold hover:underline shrink-0 flex items-center gap-1"
                   >
-                    <span>Visit Section</span>
+                    <span>Visit Page</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>

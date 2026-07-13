@@ -2,12 +2,30 @@ import type { Metadata } from "next";
 import App from "../App";
 
 export const metadata: Metadata = {
-  title: "Corporate & Banking Law Firm in Pakistan | Jus & Lay Law Conglomerate",
-  description: "Jus & Lay is a premier law firm in Pakistan. High Court advocates specializing in Corporate Law, Banking Litigation Defense, SECP Compliance, FBR Tax Appeals, White-Collar NAB trials, and Civil Litigation.",
+  title: "Jus and Lay Law Conglomerate | Corporate & Banking Law Firm Pakistan",
+  description: "Jus and Lay Law Conglomerate (Jus & Lay) is Pakistan's premier corporate and banking law chambers. Led by esteemed trials advocates of High Courts & Supreme Court.",
   alternates: {
     canonical: "https://jusandlay.com/",
   },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   keywords: [
+    "Jus and Lay",
+    "Jus and Lay Law",
+    "Jus and Lay Law Conglomerate",
+    "Jus & Lay Law Conglomerate",
+    "Jus & Lay",
     "Law firm in Pakistan",
     "Best law firm in Pakistan",
     "Corporate law firm Lahore",
@@ -24,8 +42,8 @@ export const metadata: Metadata = {
     "Environmental law EPA approvals Pakistan"
   ],
   openGraph: {
-    title: "Corporate & Banking Law Firm in Pakistan | Jus & Lay Law Conglomerate",
-    description: "Jus & Lay is a premier law firm in Pakistan. High Court advocates specializing in Corporate Law, Banking Litigation Defense, SECP Compliance, FBR Tax Appeals, White-Collar NAB trials, and Civil Litigation.",
+    title: "Jus and Lay Law Conglomerate | Corporate & Banking Law Firm Pakistan",
+    description: "Jus and Lay Law Conglomerate (Jus & Lay) is Pakistan's premier corporate and banking law chambers. Led by esteemed trials advocates of High Courts & Supreme Court.",
     url: "https://jusandlay.com/",
     siteName: "Jus & Lay Law Conglomerate",
     type: "website",
@@ -45,6 +63,7 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "LegalService",
     "name": "Jus & Lay Law Conglomerate",
+    "alternateName": ["Jus and Lay", "Jus and Lay Law Conglomerate", "Jus and Lay Law", "Jus & Lay"],
     "image": "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
     "@id": "https://jusandlay.com/#legalservice",
     "url": "https://jusandlay.com/",

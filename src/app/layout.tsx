@@ -2,8 +2,32 @@ import type { Metadata } from "next";
 import "../index.css";
 
 export const metadata: Metadata = {
-  title: "Jus & Lay Law Conglomerate | Premium Legal Advisory & Elite Counsel",
-  description: "Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.",
+  title: "Jus and Lay Law Conglomerate | Jus & Lay Law",
+  description: "Jus and Lay Law Conglomerate (Jus & Lay) is Pakistan's premier law firm, specializing in corporate advisory, banking litigation, and trials before the High Courts & Supreme Court.",
+  keywords: [
+    "Jus and Lay",
+    "Jus and Lay Law",
+    "Jus and Lay Law Conglomerate",
+    "Jus & Lay",
+    "Jus & Lay Law Conglomerate",
+    "Law firm in Pakistan",
+    "Corporate advocates Lahore",
+    "Best banking lawyers Pakistan",
+    "Supreme Court trial advocates"
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       {
@@ -27,9 +51,9 @@ export const metadata: Metadata = {
     shortcut: "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
   },
   openGraph: {
-    title: "Jus & Lay Law Conglomerate | Premium Legal Advisory & Elite Counsel",
-    description: "Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.",
-    url: "https://juslay.com",
+    title: "Jus and Lay Law Conglomerate | Jus & Lay Law",
+    description: "Jus and Lay Law Conglomerate (Jus & Lay) is Pakistan's premier law firm, specializing in corporate advisory, banking litigation, and trials before the High Courts & Supreme Court.",
+    url: "https://jusandlay.com",
     siteName: "Jus & Lay Law Conglomerate",
     images: [
       {
@@ -44,8 +68,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jus & Lay Law Conglomerate | Premium Legal Advisory & Elite Counsel",
-    description: "Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.",
+    title: "Jus and Lay Law Conglomerate | Jus & Lay Law",
+    description: "Jus and Lay Law Conglomerate (Jus & Lay) is Pakistan's premier law firm, specializing in corporate advisory, banking litigation, and trials before the High Courts & Supreme Court.",
     images: ["https://images.pexels.com/photos/38052959/pexels-photo-38052959.png"],
   }
 };
@@ -73,10 +97,10 @@ export default function RootLayout({
                 "@type": "WebSite",
                 "name": "Jus & Lay Law Conglomerate",
                 "alternateName": ["Jus & Lay", "Jus & Lay Law"],
-                "url": "https://juslay.com",
+                "url": "https://jusandlay.com",
                 "potentialAction": {
                   "@type": "SearchAction",
-                  "target": "https://juslay.com/?q={search_term_string}",
+                  "target": "https://jusandlay.com/?q={search_term_string}",
                   "query-input": "required name=search_term_string"
                 }
               },
@@ -84,7 +108,7 @@ export default function RootLayout({
                 "@context": "https://schema.org",
                 "@type": "Organization",
                 "name": "Jus & Lay Law Conglomerate",
-                "url": "https://juslay.com",
+                "url": "https://jusandlay.com",
                 "logo": "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
                 "description": "Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.",
                 "sameAs": [
@@ -101,42 +125,42 @@ export default function RootLayout({
                     "@type": "ListItem",
                     "position": 1,
                     "name": "About Chambers",
-                    "url": "https://juslay.com/#about",
+                    "url": "https://jusandlay.com/about",
                     "description": "Learn about our prestigious law chambers, high court advocates, and our dedication to elite counsel."
                   },
                   {
                     "@type": "ListItem",
                     "position": 2,
                     "name": "Our Services & Practices",
-                    "url": "https://juslay.com/#firm-profile",
+                    "url": "https://jusandlay.com/practices",
                     "description": "Explore our specialized legal fields, including corporate advisory, civil trials, and banking litigation defense."
                   },
                   {
                     "@type": "ListItem",
                     "position": 3,
                     "name": "Of Counsel Team",
-                    "url": "https://juslay.com/#team",
+                    "url": "https://jusandlay.com/team",
                     "description": "Meet our esteemed legal team and nationwide trial advocates representing clients in high courts."
                   },
                   {
                     "@type": "ListItem",
                     "position": 4,
                     "name": "Contact Counsel",
-                    "url": "https://juslay.com/#contact",
+                    "url": "https://jusandlay.com/contact",
                     "description": "Get in touch directly with our direct support, scheduled consultations, and primary legal consultants."
                   },
                   {
                     "@type": "ListItem",
                     "position": 5,
                     "name": "Client Portal",
-                    "url": "https://juslay.com/#client-login",
+                    "url": "https://jusandlay.com/#client-login",
                     "description": "Access the secure Client Case Vault, read legal documents, and track court hearings of your active cases."
                   },
                   {
                     "@type": "ListItem",
                     "position": 6,
                     "name": "Admin Portal",
-                    "url": "https://juslay.com/#admin-login",
+                    "url": "https://jusandlay.com/#admin-login",
                     "description": "Advocate administration portal for case registrations, document archiving, and schedule management."
                   }
                 ]
@@ -149,27 +173,37 @@ export default function RootLayout({
                   {
                     "@type": "WebPage",
                     "name": "About Chambers",
-                    "url": "https://juslay.com/#about"
+                    "url": "https://jusandlay.com/about"
                   },
                   {
                     "@type": "WebPage",
                     "name": "Our Services",
-                    "url": "https://juslay.com/#firm-profile"
+                    "url": "https://jusandlay.com/practices"
                   },
                   {
                     "@type": "WebPage",
                     "name": "Of Counsel Team",
-                    "url": "https://juslay.com/#team"
+                    "url": "https://jusandlay.com/team"
+                  },
+                  {
+                    "@type": "WebPage",
+                    "name": "Our Clients",
+                    "url": "https://jusandlay.com/clients"
+                  },
+                  {
+                    "@type": "WebPage",
+                    "name": "Contact",
+                    "url": "https://jusandlay.com/contact"
                   },
                   {
                     "@type": "WebPage",
                     "name": "Client Portal",
-                    "url": "https://juslay.com/#client-login"
+                    "url": "https://jusandlay.com/#client-login"
                   },
                   {
                     "@type": "WebPage",
                     "name": "Admin Portal",
-                    "url": "https://juslay.com/#admin-login"
+                    "url": "https://jusandlay.com/#admin-login"
                   }
                 ]
               }

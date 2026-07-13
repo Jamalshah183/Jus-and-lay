@@ -118,7 +118,7 @@ export default function CorporateRepresentationPage() {
             "@type": "LegalService",
             "name": "Jus & Lay Law Conglomerate - Corporate Representation Desk",
             "description": "Expert Corporate & Commercial lawyers in Pakistan specializing in SECP company registration, M&A, regulatory compliance, and joint ventures.",
-            "url": "https://juslay.com/practices/corporate-representation",
+            "url": "https://jusandlay.com/practices/corporate-representation",
             "logo": "https://images.pexels.com/photos/38052959/pexels-photo-38052959.png",
             "telephone": "+923218520085",
             "areaServed": "Pakistan",
