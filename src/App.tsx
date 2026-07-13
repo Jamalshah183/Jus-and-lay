@@ -11,7 +11,9 @@ import {
   Phone, 
   Mail, 
   MessageCircle, 
-  CalendarCheck 
+  CalendarCheck,
+  Facebook,
+  Instagram
 } from "lucide-react";
 
 // Import custom components
@@ -426,10 +428,15 @@ export default function App() {
                     <span className="block text-[9px] uppercase tracking-widest text-[#ffbc57] font-bold">
                       Central Secretariat Location
                     </span>
-                    <span className="block text-white/95 text-xs sm:text-sm leading-relaxed mt-1 font-medium">
+                    <a 
+                      href="https://www.google.com/maps/place/Jus+and+Lay/@31.5602366,74.3043217,17z/data=!4m14!1m7!3m6!1s0x39191dd7ba1899a7:0x4b888ec740724623!2sJus+and+Lay!8m2!3d31.5602366!4d74.3043217!16s%2Fg%2F11zcs61zms!3m5!1s0x39191dd7ba1899a7:0x4b888ec740724623!8m2!3d31.5602366!4d74.3043217!16s%2Fg%2F11zcs61zms?entry=ttu&g_ep=EgoyMDI2MDcwOC4wIKXMDSoASAFQAw%3D%3D"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-white/95 text-xs sm:text-sm leading-relaxed mt-1 font-medium hover:text-gold transition-colors hover:underline"
+                    >
                       Suite No.1, 236-Riwaz Garden<br />
                       Lahore, Pakistan
-                    </span>
+                    </a>
                   </div>
                 </div>
 
@@ -512,6 +519,26 @@ export default function App() {
               <p className="text-white/40 text-xs font-sans leading-relaxed max-w-sm">
                 Supreme corporate counsel, banking litigation defense, commercial advice, and nationwide trials before the High Courts & Supreme Court of Pakistan.
               </p>
+              <div className="flex items-center gap-3 pt-2">
+                <a 
+                  href="https://www.facebook.com/profile.php?id=61591562501090#" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 rounded-full border border-white/10 hover:border-gold text-white/50 hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a 
+                  href="https://www.instagram.com/jus.and.lay/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="p-2 rounded-full border border-white/10 hover:border-gold text-white/50 hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+              </div>
             </div>
 
             {/* Column 2: Quick Links */}

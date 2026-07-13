@@ -15,7 +15,9 @@ import {
   MapPin,
   Lock,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  Facebook,
+  Instagram
 } from "lucide-react";
 
 export default function SitemapClient() {
@@ -293,7 +295,17 @@ export default function SitemapClient() {
       <footer className="border-t border-white/5 py-8 bg-[#050a14]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-white/40">
           <span>© {new Date().getFullYear()} JUS & LAY Law Conglomerate. All rights reserved.</span>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="https://www.facebook.com/profile.php?id=61591562501090#" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffbc57] transition-colors flex items-center gap-1.5">
+              <Facebook className="w-3.5 h-3.5" />
+              <span>Facebook</span>
+            </a>
+            <span>•</span>
+            <a href="https://www.instagram.com/jus.and.lay/" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffbc57] transition-colors flex items-center gap-1.5">
+              <Instagram className="w-3.5 h-3.5" />
+              <span>Instagram</span>
+            </a>
+            <span>•</span>
             <Link href="/" className="hover:text-[#ffbc57] hover:underline">Chambers Home</Link>
             <span>•</span>
             <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffbc57] hover:underline">XML Index</a>
